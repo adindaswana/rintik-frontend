@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RINTIK - Prediksi Kelembapan Udara</title>
+<meta name="description" content="Ubah data sensor Anda jadi prediksi kelembapan udara yang mudah dipahami.">
+<link rel="icon" href="assets/img/logo.png">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<header class="navbar">
+  <div class="container navbar-inner">
+    <a href="index.html" class="brand">
+      <img src="assets/img/logo.png" alt="Logo RINTIK" class="brand-mark">
+      <span class="brand-text">
+        <span class="brand-title">RINTIK</span>
+        <span class="brand-sub">Prediksi kelembapan udara</span>
+      </span>
+    </a>
+    <nav class="nav-links">
+      <a href="index.html" class="active">Beranda</a>
+      <a href="predict.html">Prediksi</a>
+      <a href="hasil.html">Hasil</a>
+    </nav>
+    <div class="nav-right">
+      <a href="predict.html" class="btn btn-primary btn-sm">Coba Sekarang</a>
+      <button class="nav-toggle" aria-label="Buka menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="mobile-menu">
+    <div class="mobile-menu-panel">
+      <a href="predict.html" class="btn btn-primary btn-block" style="margin-bottom:12px;">Coba Sekarang</a>
+      <a href="index.html" class="active">Beranda</a>
+      <a href="predict.html">Prediksi</a>
+      <a href="hasil.html">Hasil</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <span class="eyebrow"><span class="dot"></span>Prediksi Kelembapan Udara</span>
+        <h1>Ubah sinyal sensor jadi prediksi <span class="accent">kelembapan udara</span> yang presisi.</h1>
+        <p class="hero-lede">Pantau kondisi lingkungan Anda dan dapatkan perkiraan kelembapan udara harian hanya dengan mengunggah data sensor.</p>
+        <div class="hero-actions">
+          <a href="predict.html" class="btn btn-primary btn-lg">Buat Prediksi Sekarang</a>
+          <a href="hasil.html" class="btn btn-secondary btn-lg">Lihat Contoh Hasil</a>
+        </div>
+      </div>
+      <div class="preview-card">
+        <div class="preview-head">
+          <div class="preview-title">
+            <span class="ic"><img src="assets/img/icon-droplet.png" alt=""></span>
+            <div>
+              <strong>Prediksi Kelembapan</strong>
+              <span>Ringkasan hari ini</span>
+            </div>
+          </div>
+          <span class="badge badge-sky"><span class="badge-dot"></span>Terbaru</span>
+        </div>
+        <div class="preview-kpis">
+          <div class="preview-kpi"><span>Kelembapan sekarang</span><strong>87%</strong></div>
+          <div class="preview-kpi"><span>Prediksi besok</span><strong>89%</strong></div>
+        </div>
+        <div class="preview-chart-lbl"><span>Tren 24 jam terakhir</span><span>%RH</span></div>
+        <div id="previewChart"></div>
+        <div class="preview-chips">
+          <span class="badge badge-teal">Mudah digunakan</span>
+          <span class="badge badge-violet">Hasil cepat</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="cara-kerja">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow"><span class="dot"></span>Cara Kerja</span>
+      <h2>Tiga langkah sederhana</h2>
+      <p>Cukup ikuti langkah berikut untuk mendapatkan prediksi kelembapan udara Anda.</p>
+    </div>
+    <div class="grid-3">
+      <div class="card step-card">
+        <span class="step-no">01</span>
+        <div class="step-icon sky">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1269E2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M12 4l-4.5 4.5M12 4l4.5 4.5"/><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+        </div>
+        <h3>Unggah Data Sensor</h3>
+        <p>Unggah file data sensor Anda, atau isi form manual jika Anda hanya punya beberapa data.</p>
+      </div>
+      <div class="card step-card">
+        <span class="step-no">02</span>
+        <div class="step-icon violet">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7C5CE0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a1.7 1.7 0 00.34 1.87l.06.06a2.06 2.06 0 11-2.92 2.92l-.06-.06a1.7 1.7 0 00-1.87-.34 1.7 1.7 0 00-1.03 1.56V20a2.06 2.06 0 11-4.12 0v-.1a1.7 1.7 0 00-1.11-1.56 1.7 1.7 0 00-1.87.34l-.06.06a2.06 2.06 0 11-2.92-2.92l.06-.06a1.7 1.7 0 00.34-1.87 1.7 1.7 0 00-1.56-1.03H4a2.06 2.06 0 110-4.12h.1a1.7 1.7 0 001.56-1.11 1.7 1.7 0 00-.34-1.87l-.06-.06a2.06 2.06 0 112.92-2.92l.06.06a1.7 1.7 0 001.87.34H10a1.7 1.7 0 001.03-1.56V4a2.06 2.06 0 114.12 0v.1a1.7 1.7 0 001.03 1.56 1.7 1.7 0 001.87-.34l.06-.06a2.06 2.06 0 112.92 2.92l-.06.06a1.7 1.7 0 00-.34 1.87V10a1.7 1.7 0 001.56 1.03H20a2.06 2.06 0 110 4.12h-.1a1.7 1.7 0 00-1.56 1.03z"/></svg>
+        </div>
+        <h3>Diproses Otomatis</h3>
+        <p>Sistem membaca dan memproses data Anda secara otomatis, biasanya hanya dalam hitungan detik.</p>
+      </div>
+      <div class="card step-card">
+        <span class="step-no">03</span>
+        <div class="step-icon amber">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E89A2C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19h16"/><path d="M7 19v-6M12 19V9M17 19v-3"/></svg>
+        </div>
+        <h3>Lihat &amp; Unduh Hasil</h3>
+        <p>Lihat grafik dan ringkasan hasil, lalu unduh prediksi kelembapan udara dalam format CSV.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow"><span class="dot"></span>Contoh Tampilan</span>
+      <h2>Tren kelembapan yang mudah dibaca</h2>
+      <p>Ringkasan singkat dari data kelembapan udara, disajikan dalam grafik dan angka yang mudah dipahami.</p>
+    </div>
+    <div class="split-135-95">
+      <div class="card mini-chart-card">
+        <div class="mini-chart-top">
+          <h3>Contoh Tren Kelembapan (2 Hari Terakhir)</h3>
+          <span class="badge badge-sky">%RH</span>
+        </div>
+        <div id="miniChart"></div>
+      </div>
+      <div class="kpi-stack">
+        <div class="card kpi-card">
+          <div class="kpi-ring" data-pct="87" data-color="#1269E2" data-label="87%"></div>
+          <div class="kpi-info"><span>Rata-rata Kelembapan</span><strong>87.2%</strong></div>
+        </div>
+        <div class="card kpi-card">
+          <div class="kpi-ring" data-pct="65" data-color="#2F9AA6" data-label="&plusmn;6%"></div>
+          <div class="kpi-info"><span>Rentang Harian</span><strong>82% - 94%</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="cta-strip">
+      <div>
+        <h3>Siap coba prediksinya sendiri?</h3>
+        <p>Unggah data sensor Anda dan dapatkan prediksi kelembapan udara hanya dalam beberapa langkah mudah.</p>
+      </div>
+      <a href="predict.html" class="btn btn-on-cta btn-lg">Buat Prediksi Sekarang</a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">
+          <img src="assets/img/logo.png" alt="Logo RINTIK" style="width:36px;height:36px;border-radius:10px;object-fit:contain;">
+          <span class="footer-brand-title">RINTIK</span>
+        </div>
+        <p>Bantu Anda memantau dan memperkirakan kelembapan udara dari data sensor secara sederhana dan cepat.</p>
+      </div>
+      <div>
+        <h4>Jelajahi</h4>
+        <ul>
+          <li><a href="index.html">Beranda</a></li>
+          <li><a href="predict.html">Buat Prediksi</a></li>
+          <li><a href="hasil.html">Contoh Hasil</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Bantuan</h4>
+        <ul>
+          <li><a href="predict.html">Cara mengunggah data</a></li>
+          <li><a href="mailto:halo@smartfarm.id">Hubungi kami</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 RINTIK. Prototipe tampilan untuk NSC 2026.</span>
+      <span>RINTIK: Regresi Intrahari dengan Navigasi Temporal untuk Identifikasi Kelembapan.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/app.js"></script>
+</body>
+</html>

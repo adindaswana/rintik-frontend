@@ -1,0 +1,9 @@
+{
+  "name": "smartfarm-humidity",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Prediksi kelembapan udara dari data sensor. Situs statis + Vercel Functions (stub dulu).",
+  "scripts": {
+    "stub:test": "node scripts/stub_smoke.js"
+  }
+}

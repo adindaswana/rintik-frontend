@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Status Layanan - RINTIK</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="assets/img/logo.png">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<section class="section" style="padding-top:48px;">
+  <div class="container" style="max-width:560px;">
+    <div class="card panel-card">
+      <h3>Status Layanan Prediksi</h3>
+      <p>Halaman internal untuk pemanasan sebelum demo. Tidak ditautkan di navigasi.</p>
+      <div class="alert" id="stAlert" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>
+        <span class="alert-text"></span>
+      </div>
+      <p><strong>Status: <span id="stState">memeriksa...</span></strong></p>
+      <button type="button" class="btn btn-primary btn-block" id="stBtn">Periksa Sekarang</button>
+      <p class="hint">Jika belum terjangkau, tunggu sekitar satu menit lalu periksa lagi. Layanan gratis akan bangun otomatis saat menerima permintaan.</p>
+    </div>
+  </div>
+</section>
+
+<script>
+(function(){
+  var state = document.getElementById('stState');
+  var alertBox = document.getElementById('stAlert');
+  function show(ok){
+    state.textContent = ok ? 'terjangkau, siap dipakai' : 'belum terjangkau, coba lagi sebentar lagi';
+    alertBox.hidden = false;
+    alertBox.className = 'alert ' + (ok ? 'alert-success' : 'alert-error');
+    alertBox.querySelector('.alert-text').textContent = ok ?
+      'Layanan menjawab. Demo bisa dimulai.' :
+      'Layanan belum menjawab. Tunggu sekitar satu menit lalu periksa lagi.';
+  }
+  function check(){
+    state.textContent = 'memeriksa...';
+    alertBox.hidden = true;
+    fetch('/api/backend-status').then(function(r){ return r.json(); }).then(function(d){
+      show(!!d.reachable);
+    }).catch(function(){ show(false); });
+  }
+  document.getElementById('stBtn').addEventListener('click', check);
+  check();
+})();
+</script>
+</body>
+</html>
