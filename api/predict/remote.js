@@ -1,5 +1,4 @@
-// Integrasi model asli (FastAPI terpisah, lihat MODEL_TODO.md).
-// Gagal/timeout di sini ditangani pemanggil dengan fallback ke stub.
+// Legacy full-horizon integration. Errors propagate; callers must fail closed.
 'use strict';
 async function predictRemote(rows) {
   var base = process.env.MODEL_API_URL || '';

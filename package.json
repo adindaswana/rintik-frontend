@@ -2,8 +2,10 @@
   "name": "smartfarm-humidity",
   "version": "0.1.0",
   "private": true,
-  "description": "Prediksi kelembapan udara dari data sensor. Situs statis + Vercel Functions (stub dulu).",
+  "description": "RINTIK static frontend with fail-closed frozen-model integration.",
   "scripts": {
-    "stub:test": "node scripts/stub_smoke.js"
+    "stub:test": "node scripts/stub_smoke.js",
+    "contract:test": "node scripts/rintik_api_contract.js",
+    "integration:test": "node scripts/integration_smoke.js"
   }
 }

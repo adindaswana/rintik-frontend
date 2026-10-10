@@ -57,7 +57,10 @@ function predictStub(rows) {
   });
   var mean = smoothed.reduce(function (a, b) { return a + b; }, 0) / smoothed.length;
   return {
-    mode: 'stub',
+    mode: 'explicit_demo_stub',
+    source: 'explicit_demo_stub',
+    simulation: true,
+    warning: 'SIMULASI DEMO - bukan keluaran checkpoint RINTIK.',
     count: predictions.length,
     predictions: predictions,
     stats: {

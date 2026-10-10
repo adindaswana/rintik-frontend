@@ -316,13 +316,20 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ rows: rows })
       }).then(function(res){
-        if(!res.ok) throw new Error('bad');
-        return res.json();
+        return res.json().then(function(body){
+          if(!res.ok){
+            throw new Error(body && body.error && body.error.message ? body.error.message : 'Layanan model gagal.');
+          }
+          return body;
+        });
       }).then(function(data){
+        if(data.source !== 'real_original_pth' || data.simulation !== false || !Array.isArray(data.predictions)){
+          throw new Error('Respons bukan hasil checkpoint RINTIK yang terverifikasi.');
+        }
         try { localStorage.setItem('sfh_last_result', JSON.stringify({ savedAt: Date.now(), payload: data })); } catch(e){}
         window.location.href = 'hasil.html';
-      }).catch(function(){
-        fail('Terjadi kendala saat memproses. Periksa data Anda lalu coba lagi.');
+      }).catch(function(error){
+        fail(error && error.message ? error.message : 'Terjadi kendala saat memproses. Periksa data Anda lalu coba lagi.');
       });
     }
     if(!overlay){ go(); return; }
@@ -430,25 +437,27 @@
     previewChartEl.innerHTML = '<svg width="100%" height="'+H+'" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none"><path d="'+d+'" fill="none" stroke="#1269E2" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   }
 
-  /* Hasil nyata dari API (localStorage). Fallback ke contoh statis bila dibuka langsung. */
+  /* Hasil nyata dari API. Missing/invalid data fails closed without sample output. */
   function toDateObj(s){
     var d = new Date(String(s).replace(' ', 'T'));
-    return isNaN(d.getTime()) ? new Date() : d;
+    return isNaN(d.getTime()) ? null : d;
   }
   function loadStoredSeries(){
     try {
       var raw = localStorage.getItem('sfh_last_result');
       if(raw){
         var data = JSON.parse(raw).payload || JSON.parse(raw);
+        if(data.source !== 'real_original_pth' || data.simulation !== false) return [];
         var preds = data.predictions || [];
         if(preds.length){
-          return preds.map(function(p){
+          var normalized = preds.map(function(p){
             return { datetime: toDateObj(p.datetime), value: Number(p.air_humidity) };
-          });
+          }).filter(function(p){ return p.datetime && Number.isFinite(p.value); });
+          return normalized.length === preds.length ? normalized : [];
         }
       }
     } catch(e){}
-    return generateSampleSeries(96, new Date('2023-08-29T15:00:00'), 20260226);
+    return [];
   }
 
   /* =========================================================
@@ -457,6 +466,10 @@
   var hasilRoot = document.getElementById('hasilRoot');
   if(hasilRoot){
     var FULL_SERIES = loadStoredSeries();
+    if(!FULL_SERIES.length){
+      hasilRoot.innerHTML = '<div class="alert alert-error"><div class="alert-text">Belum ada hasil model RINTIK yang valid. Jalankan backend dan proses data kembali; halaman ini tidak membuat prediksi contoh.</div></div>';
+      return;
+    }
     var values = FULL_SERIES.map(function(r){ return r.value; });
     var avg = values.reduce(function(a,b){return a+b;},0)/values.length;
     var min = Math.min.apply(null, values);

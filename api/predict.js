@@ -1,5 +1,4 @@
-// Adapter POST /api/predict. Pilih stub vs layanan model asli berdasar ENV.
-// Default: stub. Frontend tidak menampilkan field mode ke pengguna.
+// Legacy compatibility adapter. REAL mode fails closed; demo stub is explicit.
 'use strict';
 var stubLib = require('./predict/stub');
 var remoteLib = require('./predict/remote');
@@ -44,16 +43,34 @@ module.exports = async function handler(req, res) {
       res.status(400).json({ error: check.message });
       return;
     }
-    var useRemote = process.env.MODEL_MODE === 'remote' && process.env.MODEL_API_URL;
+    var mode = process.env.MODEL_MODE || 'unconfigured';
     var result;
-    if (useRemote) {
+    if (mode === 'remote' && process.env.MODEL_API_URL) {
       try {
         result = await remoteLib.predictRemote(rows);
       } catch (e) {
-        result = stubLib.predictStub(rows);
+        res.status(502).json({
+          error: {
+            code: 'MODEL_UNAVAILABLE',
+            message: 'Layanan model RINTIK tidak tersedia; tidak ada prediksi pengganti yang dibuat.'
+          },
+          source: null,
+          simulation: false
+        });
+        return;
       }
-    } else {
+    } else if (mode === 'demo_stub') {
       result = stubLib.predictStub(rows);
+    } else {
+      res.status(503).json({
+        error: {
+          code: 'MODEL_MODE_NOT_CONFIGURED',
+          message: 'MODEL_MODE harus remote untuk hasil model atau demo_stub untuk simulasi eksplisit.'
+        },
+        source: null,
+        simulation: false
+      });
+      return;
     }
     res.status(200).json(result);
   } catch (e) {
