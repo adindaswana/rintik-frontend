@@ -46,7 +46,9 @@
   }
   function formatTime(timestamp){ return String(timestamp || '').slice(11,16); }
   function mean(values){
-    var numbers = values.filter(function(value){ return Number.isFinite(Number(value)); }).map(Number);
+    var numbers = values.filter(function(value){
+      return value !== null && value !== undefined && value !== '' && Number.isFinite(Number(value));
+    }).map(Number);
     return numbers.length ? numbers.reduce(function(sum, value){ return sum + value; }, 0) / numbers.length : null;
   }
   function restoreFeatures(){

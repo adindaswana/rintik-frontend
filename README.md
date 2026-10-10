@@ -21,7 +21,25 @@ closed.
 
 ## Run the dashboard locally
 
-Start the backend, then serve this directory over HTTP:
+For the final local Windows demo, use the ownership-safe launcher. It verifies
+the frozen artifacts, dependencies, fixtures, database schema, and live
+readiness before reporting success:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\start_m5_demo.ps1 -ResetState
+```
+
+Open the URL printed by the script (defaults to
+`http://127.0.0.1:4174/dashboard.html?api=http://127.0.0.1:8140`). Stop only
+the processes started by that launcher with:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\stop_m5_demo.ps1
+```
+
+The reset flag deletes only the isolated ignored database under
+`Prototipe/qa/runtime`; it never touches official inputs or the checkpoint.
+For a manual development server, start the backend, then serve this directory:
 
 ```powershell
 python -m http.server 4173
@@ -46,6 +64,13 @@ npm run contract:test
 npm run dashboard:test
 ```
 
+The complete browser-operated 16-day rehearsal (clean demo database, frozen
+model, screenshots, trace, exports, and local-network assertion) is:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\run_m5_rehearsal.ps1
+```
+
 For a real cross-repository smoke test, start the backend with a clean runtime
 database, then run:
 
@@ -62,9 +87,8 @@ provenance, and the 48-row outage CSV export.
 ## QA status and scope
 
 The existing public pages remain legacy UI and link to the operator dashboard.
-Static accessibility/contract tests, full cross-repository HTTP replay, and
-backend regressions pass. Browser screenshot, responsive visual, and live
-keyboard QA are still required on a browser-capable host before M4 can be
-declared fully accepted. See [`docs/MILESTONE_4_DASHBOARD.md`](docs/MILESTONE_4_DASHBOARD.md)
-and the exact Windows evidence procedure in
-[`docs/MILESTONE_4_MANUAL_VISUAL_QA.md`](docs/MILESTONE_4_MANUAL_VISUAL_QA.md).
+M4 browser acceptance and the tested-host M5 rehearsal pass. See
+[`docs/MILESTONE_4_BROWSER_QA_20261010.md`](docs/MILESTONE_4_BROWSER_QA_20261010.md)
+and [`docs/MILESTONE_5_FINAL_READINESS.md`](docs/MILESTONE_5_FINAL_READINESS.md).
+Independent clean-machine portability is still explicitly unverified; local
+prototype readiness is not a production-readiness claim.
