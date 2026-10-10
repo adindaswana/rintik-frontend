@@ -41,22 +41,22 @@ honors `prefers-reduced-motion`.
 | `npm run dashboard:test` | PASS | CSV parsing, null-gap segmentation, unit grouping, formula safety, bundle provenance/alignment, unique IDs, valid `for`/`aria-controls`, named buttons, reduced motion, and no sample generator |
 | `npm run integration:test` against a clean real backend | PASS | 16 days; 734 rows; 23 features; stuck/outage/repaired; 48 estimated recovery rows; 48 export rows |
 | Backend restart and read-back | PASS | persisted 16 completed/monitored days; series and export still available |
-| Computer Use browser inventory | BLOCKED | no browser/app surface was available |
-| Local Chrome/Edge headless screenshots | BLOCKED | host sandbox denied browser Mojo/Crashpad startup; no screenshot evidence was produced |
+| Computer Use browser inventory | NOT USED | native surface remained unavailable; host Chrome was controlled safely through launcher-owned localhost CDP |
+| Autonomous Chrome browser suite | PASS | 15 checks; exact desktop/tablet/mobile screenshots, keyboard trace, error/empty/restricted/loading/motion/console/accessibility evidence |
 
 ## Acceptance decision
 
-Implementation, data integrity, accessibility-static checks, and real HTTP
-integration pass. M4 as a whole is **BLOCKED, not PASS**, because responsive
-visual review at 1440/1366/tablet/mobile widths and live keyboard interaction
-could not be executed in this environment. Those checks must be run on a
-browser-capable host before proceeding on the assumption that M4 is fully
-accepted.
+The original browser blocker is closed. M4 is **PASS** after autonomous Chrome
+QA produced exact desktop/tablet/mobile captures, a live keyboard trace,
+failure/empty/restricted/loading/reduced-motion evidence, responsive geometry,
+console logs, Chromium accessibility-tree output, and axe-core results across
+all three product tabs. Accessibility findings discovered during this run were
+fixed and the full browser suite passed again.
 
-This blocker does not indicate a known functional failure, but it is a missing
-required evidence class. No screenshot or accessibility result is fabricated.
-The Windows execution and evidence protocol is maintained in
-[`MILESTONE_4_MANUAL_VISUAL_QA.md`](MILESTONE_4_MANUAL_VISUAL_QA.md).
+See
+[`MILESTONE_4_BROWSER_QA_20261010.md`](MILESTONE_4_BROWSER_QA_20261010.md)
+for the final evidence, corrections, regression results, tooling substitution,
+and remaining M5 boundaries.
 
 ## Browser evidence continuation — 10 October 2026
 
@@ -69,6 +69,7 @@ corrected, together with tighter provenance labels and safer next-day workflow.
 All automated frontend checks, the 21-test backend suite, sidecar verification,
 and a fresh 16-day real-HTTP integration replay pass after the corrections.
 The screenshot predates the fixes and is 1918×826 rather than a required exact
-viewport. Responsive and live-keyboard acceptance therefore remain BLOCKED.
+viewport. It was superseded by the exact after-fix automated browser evidence.
 See [`MILESTONE_4_VISUAL_REVIEW_20261010.md`](MILESTONE_4_VISUAL_REVIEW_20261010.md)
-for the evidence, findings, corrections, and remaining retest matrix.
+for the first review and the browser-closure document above for the final
+decision.

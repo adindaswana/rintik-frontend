@@ -370,15 +370,15 @@
     var pad = {left: 45,right: 14,top: 14,bottom: 31};
     var x = function(index){ return pad.left + ((index - start) / Math.max(1,end - start)) * (width - pad.left - pad.right); };
     var y = function(value){ return pad.top + (1 - Number(value) / 100) * (height - pad.top - pad.bottom); };
-    var svg = svgNode('svg',{viewBox:'0 0 '+width+' '+height,'aria-hidden':'true',focusable:'false'});
+    var svg = svgNode('svg',{viewBox:'0 0 '+width+' '+height,focusable:'false'});
     [0,25,50,75,100].forEach(function(value){
       svg.appendChild(svgNode('line',{x1:pad.left,y1:y(value),x2:width-pad.right,y2:y(value),stroke:'#dce5e1','stroke-width':'1'}));
-      svg.appendChild(svgNode('text',{x:pad.left-8,y:y(value)+4,fill:'#73827c','font-size':'10','text-anchor':'end'},String(value)));
+      svg.appendChild(svgNode('text',{x:pad.left-8,y:y(value)+4,fill:'#60716a','font-size':'10','text-anchor':'end'},String(value)));
     });
     var tickCount = Math.min(6,visible.length);
     for(var tick=0;tick<tickCount;tick++){
       var relative = Math.round(tick * (visible.length - 1) / Math.max(1,tickCount - 1));
-      svg.appendChild(svgNode('text',{x:x(start+relative),y:height-8,fill:'#73827c','font-size':'10','text-anchor':'middle'},formatTime(visible[relative])));
+      svg.appendChild(svgNode('text',{x:x(start+relative),y:height-8,fill:'#60716a','font-size':'10','text-anchor':'middle'},formatTime(visible[relative])));
     }
     var series = [
       {color:'#146b4a',dash:'',width:2.7,values:monitoring.rintik.values.map(function(row){ return {timestamp:row.timestamp,value:row.p3}; })},
@@ -390,7 +390,7 @@
         svg.appendChild(svgNode('path',{d:pathForSegment(segment,timestamps,x,y),fill:'none',stroke:item.color,'stroke-width':item.width,'stroke-dasharray':item.dash,'stroke-linecap':'round','stroke-linejoin':'round'}));
       });
     });
-    var hit = svgNode('rect',{class:'plot-hit',x:pad.left,y:pad.top,width:width-pad.left-pad.right,height:height-pad.top-pad.bottom,fill:'transparent',tabindex:'0'});
+    var hit = svgNode('rect',{class:'plot-hit',x:pad.left,y:pad.top,width:width-pad.left-pad.right,height:height-pad.top-pad.bottom,fill:'transparent',tabindex:'0',role:'slider','aria-label':'Titik waktu grafik kelembapan','aria-valuemin':String(start),'aria-valuemax':String(end),'aria-valuenow':String(start),'aria-valuetext':formatTime(timestamps[start])});
     function showAt(index,event){
       index = Math.max(start,Math.min(end,index));
       var model = monitoring.rintik.values[index];
@@ -398,6 +398,8 @@
       var recovery = monitoring.recovery.values.find(function(row){ return row.timestamp === model.timestamp; });
       var lines = [formatTime(model.timestamp),'RINTIK: '+Number(model.p3).toFixed(2)+' %RH','Sensor simulasi: '+(physical.physical_rh === null ? 'gap' : Number(physical.physical_rh).toFixed(2)+' %RH')];
       if(recovery) lines.push('Recovery estimated: '+Number(recovery.recovery_rh).toFixed(2)+' %RH');
+      hit.setAttribute('aria-valuenow',String(index));
+      hit.setAttribute('aria-valuetext',lines.join('. '));
       var tooltip = $('rhTooltip'); clear(tooltip);
       tooltip.appendChild(node('strong','',lines[0]));
       lines.slice(1).forEach(function(line){ tooltip.appendChild(node('div','',line)); });
@@ -490,7 +492,7 @@
     var x=function(index){return pad.left+((index-start)/Math.max(1,end-start))*(width-pad.left-pad.right);};
     var y=function(value){return pad.top+(1-(Number(value)-min)/(max-min))*(height-pad.top-pad.bottom);};
     var svg=svgNode('svg',{viewBox:'0 0 '+width+' '+height,role:'img','aria-label':'Grafik '+features.map(function(feature){return feature.label;}).join(', ')+' dalam '+unit});
-    for(var line=0;line<4;line++){ var value=min+(max-min)*line/3,yy=y(value); svg.appendChild(svgNode('line',{x1:pad.left,y1:yy,x2:width-pad.right,y2:yy,stroke:'#dce5e1'})); svg.appendChild(svgNode('text',{x:pad.left-7,y:yy+4,fill:'#73827c','font-size':'9','text-anchor':'end'},value.toFixed(Math.abs(value)<10?1:0))); }
+    for(var line=0;line<4;line++){ var value=min+(max-min)*line/3,yy=y(value); svg.appendChild(svgNode('line',{x1:pad.left,y1:yy,x2:width-pad.right,y2:yy,stroke:'#dce5e1'})); svg.appendChild(svgNode('text',{x:pad.left-7,y:yy+4,fill:'#60716a','font-size':'9','text-anchor':'end'},value.toFixed(Math.abs(value)<10?1:0))); }
     var timestamps=points.map(function(point){return point.timestamp;});
     features.forEach(function(feature,index){
       var values=points.map(function(point){return {timestamp:point.timestamp,value:point.values[feature.key]};});

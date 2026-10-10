@@ -70,3 +70,10 @@ keyboard-only recording, error/empty/restricted states, console review, loading
 and reduced-motion review, and Lighthouse accessibility artifacts.
 
 M4 status after this review: **BLOCKED pending browser retest evidence**.
+
+## Closure update
+
+This historical decision was superseded later on 10 October 2026. Chrome
+`154.0.8037.98` became available through a launcher-owned localhost CDP
+endpoint, and the complete after-fix matrix passed. See
+[`MILESTONE_4_BROWSER_QA_20261010.md`](MILESTONE_4_BROWSER_QA_20261010.md).

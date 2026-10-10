@@ -44,7 +44,8 @@
         <div class="section-kicker">Daily batch</div>
         <h2 id="runConsoleTitle">Proses tanggal berikutnya</h2>
         <p>Gunakan satu file fixture resmi untuk satu tanggal kalender.</p>
-        <input id="dayFile" class="visually-hidden" type="file" accept=".csv,text/csv">
+        <label class="visually-hidden" for="dayFile">File CSV harian</label>
+        <input id="dayFile" class="visually-hidden" type="file" accept=".csv,text/csv" tabindex="-1">
         <button class="button button-secondary button-block" id="chooseFileButton" type="button">Pilih CSV harian</button>
         <div class="file-summary" id="fileSummary">Belum ada file dipilih.</div>
         <button class="button button-primary button-block" id="processDayButton" type="button" disabled>Jalankan batch</button>
@@ -99,7 +100,7 @@
           <span class="verdict-badge verdict-neutral" id="verdictBadge">Belum ada data</span>
         </div>
 
-        <div class="metric-grid" aria-label="Ringkasan operasional">
+        <div class="metric-grid" role="group" aria-label="Ringkasan operasional">
           <article class="metric-card">
             <span>Kelengkapan batch</span><strong id="metricRows">—</strong><small id="metricRowsNote">timestamp tersimpan</small>
           </article>
@@ -125,14 +126,14 @@
               <div><div class="section-kicker">30 menit · %RH</div><h2 id="rhChartTitle">RINTIK vs sensor fisik simulasi</h2></div>
               <button class="text-button" id="toggleRhTable" type="button" aria-expanded="false" aria-controls="rhDataTable">Tampilkan tabel</button>
             </div>
-            <div class="chart-legend" aria-label="Legenda grafik">
+            <div class="chart-legend" role="group" aria-label="Legenda grafik">
               <span><i class="legend-line legend-model"></i>RINTIK P3 · model original</span>
               <span><i class="legend-line legend-synthetic"></i>Sensor fisik · simulasi</span>
               <span id="recoveryLegend" hidden><i class="legend-line legend-recovery"></i>Recovery · estimated</span>
             </div>
-            <div class="chart-frame" id="rhChart" role="img" aria-label="Grafik kelembapan belum tersedia"></div>
+            <div class="chart-frame" id="rhChart" role="group" aria-label="Grafik kelembapan belum tersedia"></div>
             <div class="chart-tooltip" id="rhTooltip" role="status" aria-live="polite" hidden></div>
-            <div class="range-control" aria-label="Rentang waktu grafik kelembapan">
+            <div class="range-control" role="group" aria-label="Rentang waktu grafik kelembapan">
               <label>Mulai <input id="rangeStart" type="range" min="0" max="1" value="0"></label>
               <label>Akhir <input id="rangeEnd" type="range" min="0" max="1" value="1"></label>
               <span id="rangeLabel">—</span>

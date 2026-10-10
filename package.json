@@ -7,6 +7,7 @@
     "stub:test": "node scripts/stub_smoke.js",
     "contract:test": "node scripts/rintik_api_contract.js",
     "dashboard:test": "node scripts/dashboard_contract.js",
-    "integration:test": "node scripts/integration_smoke.js"
+    "integration:test": "node scripts/integration_smoke.js",
+    "browser:test": "node scripts/m4_browser_qa.js"
   }
 }
