@@ -57,3 +57,18 @@ This blocker does not indicate a known functional failure, but it is a missing
 required evidence class. No screenshot or accessibility result is fabricated.
 The Windows execution and evidence protocol is maintained in
 [`MILESTONE_4_MANUAL_VISUAL_QA.md`](MILESTONE_4_MANUAL_VISUAL_QA.md).
+
+## Browser evidence continuation — 10 October 2026
+
+One real Windows-browser screenshot of the first partial day was received and
+corroborated against the live API. It exposed a major chart-width defect caused
+by rendering while the Overview panel was hidden, plus an operator-language
+defect where a no-incident day displayed a restricted recovery gate. Both were
+corrected, together with tighter provenance labels and safer next-day workflow.
+
+All automated frontend checks, the 21-test backend suite, sidecar verification,
+and a fresh 16-day real-HTTP integration replay pass after the corrections.
+The screenshot predates the fixes and is 1918×826 rather than a required exact
+viewport. Responsive and live-keyboard acceptance therefore remain BLOCKED.
+See [`MILESTONE_4_VISUAL_REVIEW_20261010.md`](MILESTONE_4_VISUAL_REVIEW_20261010.md)
+for the evidence, findings, corrections, and remaining retest matrix.

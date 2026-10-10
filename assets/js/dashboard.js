@@ -87,7 +87,7 @@
     return 'Terjadi kegagalan yang tidak dikenali.';
   }
 
-  function activateView(view, focus){
+  function activateView(view, focus, renderVisible){
     var tabs = Array.prototype.slice.call(document.querySelectorAll('.nav-tab'));
     var selectedButton = tabs.find(function(tab){ return tab.dataset.view === view; }) || tabs[0];
     tabs.forEach(function(tab){
@@ -98,6 +98,13 @@
         var panel = $('panel' + tab.dataset.view.charAt(0).toUpperCase() + tab.dataset.view.slice(1));
         panel.hidden = !selected || !state.bundle;
     });
+    if(renderVisible !== false && state.bundle){
+      if(selectedButton.dataset.view === 'overview'){
+        renderRhChart();
+        renderRhTable();
+      }
+      if(selectedButton.dataset.view === 'sensors') renderSensorCharts();
+    }
     if(focus !== false) selectedButton.focus();
   }
 
@@ -129,6 +136,7 @@
       state.incidents = responses[3].incidents || [];
       sessionStorage.setItem('rintik_api_url', baseUrl);
       setService(state.health.status === 'degraded' ? 'degraded' : 'online', state.health.status === 'degraded' ? 'Model siap · monitoring terganggu' : 'Model dan monitoring siap');
+      renderRunConsoleState();
       renderFeatureSelector();
       renderDaySelector();
       var completed = state.days.filter(function(day){ return day.status === 'completed'; });
@@ -176,6 +184,20 @@
     $('exportAuditButton').disabled = show;
   }
 
+  function renderRunConsoleState(){
+    var nextDate = state.health && state.health.next_expected_date;
+    $('runConsoleTitle').textContent = nextDate ? 'Batch berikutnya · ' + formatDate(nextDate) : 'Replay test selesai';
+    $('chooseFileButton').disabled = !nextDate;
+  }
+
+  function clearSelectedFile(message){
+    state.fileText = null;
+    state.fileDate = null;
+    $('dayFile').value = '';
+    $('processDayButton').disabled = true;
+    $('fileSummary').textContent = message || 'Belum ada file dipilih.';
+  }
+
   async function loadDay(date, showLoader){
     if(showLoader !== false) setLoading(true, 'Memuat ' + formatDate(date), 'Menyelaraskan hasil model, monitoring, dan input sensor…');
     hideAlert();
@@ -195,8 +217,8 @@
       state.rangeEnd = result.predictions.length - 1;
       showEmpty(false);
       renderDaySelector();
+      activateView(params.get('view') || 'overview', false, false);
       renderAll();
-      activateView(params.get('view') || 'overview', false);
     } catch(error){
       state.bundle = null;
       showEmpty(true);
@@ -238,12 +260,17 @@
       $('loadingDetail').textContent = 'Menyimpan monitoring simulasi secara terpisah…';
       $('processSteps').innerHTML = '<strong>3/3</strong> Monitoring dan provenance…';
       await client.monitorDay(state.fileDate);
-      var responses = await Promise.all([client.listDays(), client.listIncidents()]);
-      state.days = responses[0].days || [];
-      state.incidents = responses[1].incidents || [];
-      await loadDay(state.fileDate, false);
-      $('processSteps').textContent = 'Selesai · hasil model dan monitoring tersimpan.';
-      toast('Batch ' + formatDate(state.fileDate) + ' selesai dan dapat diaudit.');
+      var completedDate = state.fileDate;
+      var responses = await Promise.all([client.health(), client.listDays(), client.listIncidents()]);
+      state.health = responses[0];
+      state.days = responses[1].days || [];
+      state.incidents = responses[2].incidents || [];
+      renderRunConsoleState();
+      await loadDay(completedDate, false);
+      var nextDate = state.health.next_expected_date;
+      clearSelectedFile(nextDate ? 'Siap memilih fixture ' + formatDate(nextDate) + '.' : 'Seluruh 16 tanggal telah diproses.');
+      $('processSteps').textContent = nextDate ? 'Selesai · lanjutkan dengan ' + formatDate(nextDate) + '.' : 'Selesai · replay test lengkap.';
+      toast('Batch ' + formatDate(completedDate) + ' selesai dan dapat diaudit.');
     } catch(error){
       showAlert('Daily batch gagal', errorMessage(error) + ' Tidak ada hasil pengganti yang dibuat.');
       $('processSteps').textContent = 'Gagal · periksa pesan di area utama.';
@@ -261,16 +288,14 @@
 
   function verdictPresentation(verdict){
     var map = {
-      monitoring: ['Operasional normal','verdict-good'],
+      monitoring: ['Normal · simulasi','verdict-good'],
       monitoring_repaired_simulation: ['Sensor pulih · simulasi','verdict-good'],
-      suspected_sensor_malfunction: ['Dugaan malfungsi','verdict-warning'],
-      suspected_sensor_outage: ['Dugaan sensor terputus','verdict-danger']
+      suspected_sensor_malfunction: ['Dugaan malfungsi · simulasi','verdict-warning'],
+      suspected_sensor_outage: ['Dugaan sensor terputus · simulasi','verdict-danger']
     };
     return map[verdict] || ['Status belum dikenali','verdict-neutral'];
   }
-  function readableReason(reason){
-    return String(reason || '').replace(/_/g,' ').replace(/^./, function(letter){ return letter.toUpperCase(); });
-  }
+  function readableReason(reason){ return dataLib.readableReason(reason); }
 
   function renderOverview(){
     var result = state.bundle.result;
@@ -281,14 +306,17 @@
     var presentation = verdictPresentation(monitoring.assessment.verdict);
     $('verdictBadge').textContent = presentation[0];
     $('verdictBadge').className = 'verdict-badge ' + presentation[1];
-    $('overviewLead').textContent = formatDate(result.date) + ' · ' + result.window.mode.replace(/_/g,' ') + ' · run ' + result.run_id.slice(-8);
+    $('overviewLead').textContent = formatDate(result.date) + ' · estimasi RINTIK dan sensor fisik simulasi ditampilkan terpisah.';
     $('metricRows').textContent = predictions.length + '/48';
     $('metricRowsNote').textContent = predictions.length === 48 ? 'batch harian lengkap' : 'potongan parsial dataset resmi';
     $('metricMean').textContent = mean(modelValues).toFixed(1) + '%';
     var physicalMean = mean(physical);
     $('metricSensor').textContent = physicalMean === null ? 'Tidak tersedia' : physicalMean.toFixed(1) + '%';
-    $('metricSensorNote').textContent = monitoring.sensor.state.replace(/_/g,' ') + ' · bukan ground truth';
-    $('metricRecovery').textContent = monitoring.recovery.status === 'active_estimated' ? 'Aktif' : monitoring.recovery.status === 'historical_estimate_restricted' ? 'Dibatasi' : 'Tidak aktif';
+    $('metricSensorNote').textContent = dataLib.sensorStateLabel(monitoring.sensor.state) + ' · bukan ground truth';
+    var recovery = dataLib.recoveryPresentation(monitoring);
+    $('metricRecovery').textContent = recovery.status;
+    $('metricRecoveryNote').textContent = recovery.note;
+    $('recoveryLegend').hidden = !recovery.showSeries;
 
     $('diagnosisState').textContent = presentation[0];
     $('diagnosisCopy').textContent = monitoring.assessment.verdict.indexOf('suspected_') === 0 ?
@@ -298,8 +326,8 @@
     var reasons = monitoring.assessment.reasons || [];
     if(!reasons.length) reasons = ['Tidak ada sinyal konflik pada aturan demo'];
     reasons.forEach(function(reason){ $('reasonList').appendChild(node('li','',readableReason(reason))); });
-    $('gateStatus').textContent = monitoring.recovery_gate.allowed ? 'Diizinkan untuk demo' : 'Restricted';
-    $('gateReason').textContent = monitoring.recovery_gate.reasons.length ? monitoring.recovery_gate.reasons.map(readableReason).join(' · ') : 'Health dan audit memenuhi gate demonstrasi.';
+    $('gateStatus').textContent = recovery.gate;
+    $('gateReason').textContent = recovery.gateReason;
     var incident = monitoring.incident;
     $('confirmIncidentButton').hidden = !incident || incident.status !== 'suspected';
 
@@ -307,8 +335,8 @@
     var completeCount = state.days.filter(function(day){ return day.status === 'completed'; }).length;
     [
       ['Replay', completeCount + '/16 tanggal selesai'],
-      ['Window', result.window.mode.replace(/_/g,' ') + ' · ' + result.window.date_count + ' hari'],
-      ['Incident', incident ? readableReason(incident.status) : 'Tidak ada incident'],
+      ['Konteks', result.window.date_count + ' hari kalender tersedia'],
+      ['Insiden', incident ? readableReason(incident.status) : 'Tidak ada kejadian sensor'],
       ['Audit', readableReason(monitoring.audit.outcome) + ' · simulasi']
     ].forEach(function(item){ var li=node('li'); li.appendChild(node('strong','',item[0])); li.appendChild(node('span','',item[1])); timeline.appendChild(li); });
     $('exportCsvButton').disabled = false;

@@ -27,6 +27,18 @@ function main(){
   assert.strictEqual(grouped.hPa.length,1);
   assert.strictEqual(data.csvCell('=cmd'), "'=cmd");
   assert.strictEqual(data.csvCell('a,b'), '"a,b"');
+  assert.strictEqual(data.readableReason('physical_rh_all_missing'),'Seluruh nilai RH sensor simulasi hilang');
+  assert.strictEqual(data.readableReason('suspected'),'Menunggu konfirmasi');
+  assert.strictEqual(data.sensorStateLabel('available_simulated'),'tersedia · simulasi');
+  assert.deepStrictEqual(data.recoveryPresentation({
+    recovery:{status:'inactive',values:[]}, recovery_gate:{allowed:false,reasons:['independent_audit_or_explicit_demo_override_required']}, incident:null
+  }),{
+    status:'Tidak aktif', note:'tidak ada incident yang memerlukan recovery', gate:'Tidak diperlukan',
+    gateReason:'Tidak ada incident sensor pada tanggal ini.', showSeries:false
+  });
+  assert.strictEqual(data.recoveryPresentation({
+    recovery:{status:'active_estimated',values:[{recovery_rh:70}]}, recovery_gate:{allowed:true,reasons:[]}, incident:{status:'confirmed'}
+  }).showSeries,true);
 
   var result = {
     date:'2023-08-29', source:'real_original_pth', simulation:false,
@@ -77,8 +89,10 @@ function main(){
       assert(textContent || /\baria-label="[^"]+"/.test(attrs),'button must have an accessible name');
     });
   assert(css.indexOf('@media (prefers-reduced-motion: reduce)')>=0);
+  assert.strictEqual(css.indexOf('@keyframes panel-in'),-1);
   assert.strictEqual(js.indexOf('generateSampleSeries'),-1);
   assert(js.indexOf('validateDayBundle')>=0);
+  assert(js.indexOf("activateView(params.get('view') || 'overview', false, false)") < js.indexOf('renderAll();'));
   assert(js.indexOf('real_original_pth')===-1 || html.indexOf('model original')>=0);
 
   console.log('RINTIK_DASHBOARD_CONTRACT_OK gaps=true unitSafe=true provenance=true a11yStatic=true references=true');

@@ -93,7 +93,7 @@
         <div class="page-heading">
           <div>
             <div class="section-kicker">Monitoring kelembapan harian</div>
-            <h1>Situasi hari ini, tanpa menyamarkan sumber data</h1>
+            <h1>Ringkasan kelembapan harian</h1>
             <p id="overviewLead">Pilih hasil batch untuk melihat estimasi RINTIK dan sensor RH simulasi pada waktu yang sama.</p>
           </div>
           <span class="verdict-badge verdict-neutral" id="verdictBadge">Belum ada data</span>
@@ -110,7 +110,7 @@
             <span>Sensor fisik demo</span><strong id="metricSensor">—</strong><small id="metricSensorNote">simulasi, bukan ground truth</small>
           </article>
           <article class="metric-card">
-            <span>Status recovery</span><strong id="metricRecovery">—</strong><small>sumber selalu ditandai</small>
+            <span>Status recovery</span><strong id="metricRecovery">—</strong><small id="metricRecoveryNote">sumber selalu ditandai</small>
           </article>
         </div>
 
@@ -128,7 +128,7 @@
             <div class="chart-legend" aria-label="Legenda grafik">
               <span><i class="legend-line legend-model"></i>RINTIK P3 · model original</span>
               <span><i class="legend-line legend-synthetic"></i>Sensor fisik · simulasi</span>
-              <span><i class="legend-line legend-recovery"></i>Recovery · estimated</span>
+              <span id="recoveryLegend" hidden><i class="legend-line legend-recovery"></i>Recovery · estimated</span>
             </div>
             <div class="chart-frame" id="rhChart" role="img" aria-label="Grafik kelembapan belum tersedia"></div>
             <div class="chart-tooltip" id="rhTooltip" role="status" aria-live="polite" hidden></div>

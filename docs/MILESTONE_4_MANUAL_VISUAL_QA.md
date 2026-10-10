@@ -36,6 +36,11 @@ Use browser zoom 100%. Do not open `dashboard.html` as a `file://` URL.
 
 ## 2. Evidence location and capture rules
 
+> Retest note (10 October): the first submitted 1918×826 screenshot exposed a
+> hidden-panel chart sizing defect and predates its correction. Refresh the
+> frontend with `Ctrl+F5` before capture. Do not reuse that image as after-fix
+> evidence; capture every viewport below at the exact declared dimensions.
+
 Save evidence under:
 
 ```text
