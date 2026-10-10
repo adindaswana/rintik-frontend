@@ -19,6 +19,11 @@ async function main(){
   assert.strictEqual(health.ready, true);
   assert.strictEqual(health.source, 'real_original_pth');
   assert.strictEqual(health.monitoring_ready, true);
+  var featureCatalog = await client.listFeatures();
+  assert.strictEqual(
+    featureCatalog.groups.reduce(function(total, group){ return total + group.features.length; }, 0),
+    23
+  );
 
   var monitored = {};
   for(var i = 0; i < manifest.calendar_dates.length; i++){
@@ -35,6 +40,10 @@ async function main(){
     assert.strictEqual(monitored[item.date].simulation, true);
     assert.strictEqual(monitored[item.date].provenance.model_input, false);
     assert.strictEqual(monitored[item.date].provenance.accuracy_ground_truth, false);
+    var sensorSeries = await client.getDaySeries(item.date);
+    assert.strictEqual(sensorSeries.row_count, item.rows);
+    assert.strictEqual(sensorSeries.source, 'official_test_input');
+    assert.strictEqual(sensorSeries.simulation, false);
   }
 
   assert.strictEqual(monitored['2023-09-04'].assessment.verdict, 'suspected_sensor_malfunction');
@@ -57,6 +66,16 @@ async function main(){
   assert(recovered.recovery.values.every(function(row){ return row.raw_physical_rh === null; }));
   assert.strictEqual(JSON.stringify(recovered).toLowerCase().indexOf('rmse'), -1);
 
+  var exported = await fetch(client.exportDayUrl('2023-09-06'));
+  assert.strictEqual(exported.status, 200);
+  assert.strictEqual(exported.headers.get('x-content-type-options'), 'nosniff');
+  var csv = await exported.text();
+  var exportLines = csv.trimEnd().split(/\r?\n/);
+  assert.strictEqual(exportLines.length, 49);
+  assert(exportLines[0].indexOf('prediction_source') >= 0);
+  assert(exportLines[0].indexOf('recovery_source') >= 0);
+  assert(exportLines.slice(1).every(function(line){ return line.indexOf('real_original_pth') >= 0; }));
+
   console.log(JSON.stringify({
     status: 'PASS',
     baseUrl: baseUrl,
@@ -66,7 +85,9 @@ async function main(){
     outage: monitored['2023-09-06'].assessment.verdict,
     repaired: monitored['2023-09-07'].sensor.state,
     recoveryRows: recovered.recovery.values.length,
-    recoverySource: recovered.recovery.source
+    recoverySource: recovered.recovery.source,
+    featureCount: 23,
+    exportRows: exportLines.length - 1
   }, null, 2));
 }
 

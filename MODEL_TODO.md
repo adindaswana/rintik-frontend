@@ -13,9 +13,14 @@ dan backend `../rintik-backend`.
 - [x] Stub hanya tersedia sebagai `MODEL_MODE=demo_stub` dan selalu berlabel simulasi.
 - [x] Cross-repository HTTP replay seluruh 734 timestamp teruji lokal.
 
-## Pekerjaan M4 atau lebih lanjut
+## Selesai secara fungsional pada M4
 
-- [ ] Hubungkan `lib/rintik-api.js` ke dashboard operator final.
-- [ ] Implementasikan pemilih tanggal, grafik RH, incident workflow, dan technical details sesuai kontrak.
-- [ ] Jalankan visual/accessibility QA dan uji clean-machine sebelum klaim siap demo.
+- [x] Hubungkan `lib/rintik-api.js` ke dashboard operator tanpa fallback prediksi.
+- [x] Implementasikan pemilih tanggal, grafik RH, incident workflow, Sensor Explorer, export, dan technical details sesuai kontrak.
+- [x] Jalankan accessibility-static, contract, dan real-HTTP integration QA.
+
+## Bukti yang masih wajib sebelum status M4 PASS
+
+- [ ] Jalankan responsive visual QA 1440/1366/tablet/mobile dan interaksi keyboard langsung pada host yang menyediakan browser. Environment audit ini tidak memiliki browser Computer Use dan renderer lokal ditolak sandbox.
+- [ ] Uji clean-machine Windows dan rekam demo sebelum klaim siap Grand Final.
 - [ ] Tentukan deployment hanya setelah review terpisah; jangan unggah checkpoint atau melakukan deployment otomatis.

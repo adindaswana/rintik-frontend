@@ -31,17 +31,22 @@ async function main(){
   };
   var client = apiLib.createClient({baseUrl: 'http://127.0.0.1:8000/', fetchImpl: fakeFetch});
   await client.health();
+  await client.listFeatures();
   await client.ingestDay('2023-08-29', {csv: 'fixture'}, 'day-key');
   await client.runDay('2023-08-29');
+  await client.getDaySeries('2023-08-29');
   await client.monitorDay('2023-08-29');
   await client.createDemoAudit('pass', 'audit-key');
   await client.confirmIncident('incident-1', {demo_override: true}, 'confirm-key');
 
   assert.strictEqual(calls[0].url, 'http://127.0.0.1:8000/health');
-  assert.strictEqual(calls[1].url, 'http://127.0.0.1:8000/v1/days/2023-08-29/ingest');
-  assert.strictEqual(calls[1].init.headers['Idempotency-Key'], 'day-key');
-  assert.strictEqual(calls[3].url, 'http://127.0.0.1:8000/v1/demo/days/2023-08-29/monitor');
-  assert.strictEqual(calls[5].init.headers['Idempotency-Key'], 'confirm-key');
+  assert.strictEqual(calls[1].url, 'http://127.0.0.1:8000/v1/features');
+  assert.strictEqual(calls[2].url, 'http://127.0.0.1:8000/v1/days/2023-08-29/ingest');
+  assert.strictEqual(calls[2].init.headers['Idempotency-Key'], 'day-key');
+  assert.strictEqual(calls[4].url, 'http://127.0.0.1:8000/v1/days/2023-08-29/series');
+  assert.strictEqual(calls[5].url, 'http://127.0.0.1:8000/v1/demo/days/2023-08-29/monitor');
+  assert.strictEqual(calls[7].init.headers['Idempotency-Key'], 'confirm-key');
+  assert.strictEqual(client.exportDayUrl('2023-08-29'), 'http://127.0.0.1:8000/v1/days/2023-08-29/export.csv');
 
   var serverFailure = apiLib.createClient({
     baseUrl: 'http://backend',
