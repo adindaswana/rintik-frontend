@@ -55,3 +55,5 @@ accepted.
 
 This blocker does not indicate a known functional failure, but it is a missing
 required evidence class. No screenshot or accessibility result is fabricated.
+The Windows execution and evidence protocol is maintained in
+[`MILESTONE_4_MANUAL_VISUAL_QA.md`](MILESTONE_4_MANUAL_VISUAL_QA.md).

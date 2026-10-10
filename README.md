@@ -65,4 +65,6 @@ The existing public pages remain legacy UI and link to the operator dashboard.
 Static accessibility/contract tests, full cross-repository HTTP replay, and
 backend regressions pass. Browser screenshot, responsive visual, and live
 keyboard QA are still required on a browser-capable host before M4 can be
-declared fully accepted. See [`docs/MILESTONE_4_DASHBOARD.md`](docs/MILESTONE_4_DASHBOARD.md).
+declared fully accepted. See [`docs/MILESTONE_4_DASHBOARD.md`](docs/MILESTONE_4_DASHBOARD.md)
+and the exact Windows evidence procedure in
+[`docs/MILESTONE_4_MANUAL_VISUAL_QA.md`](docs/MILESTONE_4_MANUAL_VISUAL_QA.md).
