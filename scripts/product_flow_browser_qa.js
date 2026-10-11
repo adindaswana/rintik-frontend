@@ -46,6 +46,8 @@ async function run(){
   page.on('console',message=>{if(['error','warning'].includes(message.type()))consoleEvents.push({type:message.type(),text:message.text(),url:page.url()});});
   page.on('pageerror',error=>consoleEvents.push({type:'pageerror',text:error.message,url:page.url()}));
 
+  const resetResponse=await fetch(`${API_URL}/v1/demo/reset`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({confirmation:'RESET_DEMO_STATE'})});
+  assert.strictEqual(resetResponse.status,200,await resetResponse.text());
   const initial=await(await fetch(`${API_URL}/health`)).json();
   assert.strictEqual(initial.ready,true);assert.strictEqual(initial.completed_days,0);assert.strictEqual(initial.model_sha256,MODEL_SHA);
   pass('isolated frozen baseline',{completedDays:0,modelSha256:initial.model_sha256});
@@ -53,10 +55,22 @@ async function run(){
   await page.goto(appUrl('predict.html'),{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>!document.getElementById('processButton').disabled,{timeout:30000});
   assert.strictEqual(await page.locator('input[type=file]').count(),0);
-  assert.strictEqual(await page.getByText('Form Manual',{exact:false}).count(),0);
+  assert.strictEqual(await page.getByText('Form Manual',{exact:true}).count(),1);
   assert.strictEqual(await text(page,'#replayCount'),'0 / 16 hari');
   layouts.push(await noOverflow(page,'predict-empty-1440x900'));
-  pass('prediction workspace replaces file/manual input',{dailyMode:true,batchMode:true,fileInputs:0});
+  pass('prediction workspace starts from explicit clean state',{dailyMode:true,batchMode:true,manualMode:true,fileInputs:0});
+
+  await page.focus('#modeManual');await page.keyboard.press('Enter');
+  await page.waitForFunction(()=>document.querySelectorAll('[data-manual-feature]').length===23);
+  assert.strictEqual(await page.locator('#processButton').isHidden(),true);
+  await page.click('#loadManualExample');
+  await page.waitForFunction(()=>document.getElementById('manualResult').textContent.includes('Snapshot sensor resmi'));
+  await page.click('#validateManualButton');
+  assert.match(await text(page,'#manualResult'),/23\/23 fitur.*draft inspeksi/i);
+  assert.strictEqual((await(await fetch(`${API_URL}/health`)).json()).completed_days,0);
+  await shot('00-manual-inspection-no-inference');
+  pass('manual form is complete and honest',{features:23,persisted:false,inference:false});
+  await page.click('#modeDaily');
 
   await page.click('#processButton');
   await page.waitForFunction(()=>document.getElementById('replayCount').textContent.trim()==='1 / 16 hari'&&document.getElementById('processingPanel').hidden,{timeout:120000});
@@ -96,6 +110,10 @@ async function run(){
   assert.match(await text(page,'#latestVerdict'),/outage/i);
   await shot('04-outage-estimated-recovery');
   pass('explicit simulated recovery',{date:'2023-09-06',rawSensorPreserved:true,recoverySource:'estimated'});
+  assert.match(await text(page,'#recoveryAction'),/Lihat recovery pada 6 Sep/i);
+  await page.click('#recoveryAction');
+  await page.waitForFunction(()=>document.getElementById('latestDate').textContent.trim()==='6 September 2023'&&document.querySelector('#latestLegend .recovery'));
+  pass('confirmed recovery can be reopened',{date:'2023-09-06',repeatClick:true});
 
   await page.click('#resultLink');
   await page.waitForFunction(()=>!document.getElementById('resultContent').hidden);
@@ -116,14 +134,36 @@ async function run(){
   await page.waitForFunction(()=>document.getElementById('loadingLayer').hidden&&!document.getElementById('panelOverview').hidden,{timeout:30000});
   assert.strictEqual(await page.locator('#dayFile').count(),0);assert.strictEqual(await page.locator('#processDayButton').count(),0);
   assert.strictEqual(await page.locator('#daySelect option').count(),16);
+  assert.strictEqual(await page.locator('.nav-links a.active').innerText(),'Dashboard');
   assert.match(await text(page,'#runConsoleTitle'),/Replay test selesai/);
   await page.setViewportSize({width:1366,height:768});layouts.push(await noOverflow(page,'dashboard-input-free-1366x768'));await shot('08-dashboard-history-not-input');
   pass('dashboard responsibility is history/exploration',{dateOptions:16,primaryInputControls:0});
+  await page.setViewportSize({width:390,height:844});
+  layouts.push(await noOverflow(page,'dashboard-navbar-mobile-390x844'));
+  await page.click('.nav-toggle');
+  assert.strictEqual(await page.locator('.mobile-menu').evaluate(element=>element.classList.contains('open')),true);
+  await shot('08b-dashboard-unified-navbar-mobile');
+  pass('dashboard product navigation is responsive',{viewport:'390x844',menuExpanded:true,horizontalOverflow:false});
+
+  await page.goto(appUrl('predict.html'),{waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>document.getElementById('replayCount').textContent.trim()==='16 / 16 hari');
+  await page.click('#openResetButton');
+  assert.strictEqual(await page.locator('#resetConfirmation').isHidden(),false);
+  await page.click('#confirmResetButton');
+  await page.waitForFunction(()=>document.getElementById('replayCount').textContent.trim()==='0 / 16 hari'&&document.getElementById('latestContent').hidden,{timeout:30000});
+  assert.strictEqual((await(await fetch(`${API_URL}/health`)).json()).completed_days,0);
+  await shot('09-explicit-reset-to-clean-state');
+  pass('explicit demo reset',{completedDays:0,resultVisible:false,frozenArtifactsUntouched:true});
+
+  await page.click('#processButton');
+  await page.waitForFunction(()=>document.getElementById('replayCount').textContent.trim()==='1 / 16 hari'&&document.getElementById('processingPanel').hidden,{timeout:120000});
+  assert.strictEqual(await text(page,'#latestDate'),'29 Agustus 2023');
+  pass('replay remains usable after reset',{completedDays:1,date:'2023-08-29'});
 
   await page.goto(`${FRONTEND_URL}/predict.html?api=${encodeURIComponent('http://127.0.0.1:8999')}`,{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>!document.getElementById('flowAlert').hidden,{timeout:30000});
   assert.match(await text(page,'#flowAlert'),/tidak dapat dijangkau/i);assert.strictEqual(await page.locator('#latestContent').isHidden(),true);
-  await shot('09-backend-failure-no-fallback');
+  await shot('10-backend-failure-no-fallback');
   pass('backend failure remains fail-closed',{fakeResult:false,actionableMessage:true});
 
   const unexpected=consoleEvents.filter(item=>!(/Failed to load resource/.test(item.text)&&item.url.includes('8999')));

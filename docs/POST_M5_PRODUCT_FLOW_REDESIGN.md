@@ -19,7 +19,11 @@ the verified rolling 15 calendar-day internal context.
 
 ## Product and integrity decisions
 
-- No file picker or arbitrary manual feature form remains in the active flow.
+- No file picker remains. The restored 23-field Form Manual is an explicit
+  inspection/validation surface only: it does not persist or infer one-row
+  input, and it preserves official missing values as labeled gaps.
+- A confirmed reset clears only runtime demo state and returns replay to the
+  first official date; frozen artifacts remain unchanged.
 - Official fixtures come only from `GET /v1/demo/official-input/next` and are
   classified before ingest/run.
 - Real model P3, synthetic physical RH, and recovery-estimated values remain
@@ -36,17 +40,18 @@ the verified rolling 15 calendar-day internal context.
 
 ## Browser evidence
 
-Final evidence: `qa/evidence/post-m5-product-flow/20261011125729/`
+Latest repair evidence: `qa/evidence/post-m5-product-flow/20261011133615/`
 
-- 10/10 browser checks PASS.
-- 9 real Chromium screenshots: daily result, Hasil continuity, 15-day batch,
-  outage/recovery, mobile Hasil, tablet/mobile Prediksi, input-free Dashboard,
-  and fail-closed backend outage.
+- 15/15 browser checks PASS.
+- 12 real Chromium screenshots include the complete manual inspection form,
+  daily result, Hasil continuity, 15-day batch, outage/recovery and repeat-open,
+  mobile Hasil, tablet/mobile Prediksi, unified Dashboard navigation, explicit
+  reset, and fail-closed backend outage.
 - 16 completed dates and 734 archived `pred_internal` rows.
 - Desktop 1440×900, tablet 768×1024, and mobile 390×844 have no horizontal
   overflow or duplicate IDs.
 - Trace SHA256:
-  `2b41fd98d96bd97ec883fc47d806eadc52fdf5c97b1e3aa4589b3c1f1095629f`.
+  `02aaba16be4b251f56b410dbf7d1f8a1176bdebe5e75e48aa3f78b648854ca6b`.
 - The only console network errors are the deliberately unreachable port 8999
   failure scenario; no fake result appears.
 
@@ -60,7 +65,7 @@ Final M5 rehearsal regression:
 
 ## Regression evidence
 
-- Backend unit/regression: 24/24 PASS in 119.041 seconds.
+- Backend unit/regression: 25/25 PASS in 107.976 seconds.
 - M1 verifier: PASS; official 734-row parity max/mean absolute difference 0.
 - M2 verifier: PASS; chronology, no-lookahead, window parity, snapshot
   immutability, restart, and idempotency.

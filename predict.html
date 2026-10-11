@@ -54,6 +54,11 @@
       <div class="flow-progress-copy"><strong>Progres data resmi</strong><span id="nextDate">Mencari tanggal berikutnya…</span></div>
       <div class="flow-progress-track" aria-hidden="true"><div class="flow-progress-fill" id="replayProgress"></div></div>
       <div class="flow-progress-count" id="replayCount">0 / 16 hari</div>
+      <button class="flow-reset-button" id="openResetButton" type="button">Mulai ulang demo</button>
+    </section>
+    <section class="reset-confirmation" id="resetConfirmation" aria-labelledby="resetTitle" hidden>
+      <div><strong id="resetTitle">Reset replay ke hari pertama?</strong><span>Hanya hasil, monitoring, audit, dan recovery pada database demo yang dihapus. Model frozen serta fixture resmi tetap utuh.</span></div>
+      <div class="reset-actions"><button class="btn btn-secondary btn-sm" id="cancelResetButton" type="button">Batal</button><button class="btn btn-danger btn-sm" id="confirmResetButton" type="button">Ya, reset data demo</button></div>
     </section>
 
     <div class="flow-grid">
@@ -66,11 +71,21 @@
         <div class="mode-switch" role="tablist" aria-label="Mode pengambilan data">
           <button class="mode-card" id="modeDaily" type="button" role="tab" aria-selected="true" aria-controls="modeExplanation" data-mode="daily"><b>1×</b><strong>Satu hari berikutnya</strong><span>Ambil fitur, prediksi, simpan, lalu bandingkan RH untuk satu tanggal.</span></button>
           <button class="mode-card" id="modeBatch" type="button" role="tab" aria-selected="false" aria-controls="modeExplanation" data-mode="batch"><b>15×</b><strong>Batch hingga 15 hari</strong><span>Menjalankan daily batch berurutan tanpa klik berulang.</span></button>
+          <button class="mode-card" id="modeManual" type="button" role="tab" aria-selected="false" aria-controls="modeExplanation manualPanel" data-mode="manual"><b>23</b><strong>Form Manual</strong><span>Periksa dan validasi nilai fitur sensor tanpa mengubah state model.</span></button>
         </div>
 
         <div class="mode-explainer" id="modeExplanation" role="tabpanel" aria-live="polite"><strong>Mode harian.</strong> Satu klik mengambil fitur lingkungan tanggal berikutnya, menjalankan model dan P1 → P2 → P3, lalu menyimpan hasil bersama seri RH simulasi yang terpisah.</div>
 
-        <div class="simulation-control">
+        <section class="manual-panel" id="manualPanel" aria-labelledby="manualTitle" hidden>
+          <div class="manual-heading"><div><span class="flow-step">Form sensor</span><h3 id="manualTitle">Isi dan validasi 23 fitur</h3></div><span class="flow-real-label">TIDAK DISIMPAN</span></div>
+          <p>Form ini dipertahankan untuk inspeksi input. Inferensi final memerlukan seluruh batch harian resmi beserta timestamp dan hash yang cocok, jadi satu baris manual tidak akan dibuat seolah-olah prediksi model.</p>
+          <label class="manual-timestamp">Timestamp observasi<input id="manualTimestamp" type="datetime-local" step="1800"></label>
+          <div class="manual-groups" id="manualGroups" aria-live="polite"><div class="manual-loading">Memuat katalog fitur…</div></div>
+          <div class="manual-actions"><button class="btn btn-secondary btn-sm" id="loadManualExample" type="button">Isi dari sensor hari berikutnya</button><button class="btn btn-primary btn-sm" id="validateManualButton" type="button">Validasi isian</button><button class="flow-text-button" id="clearManualButton" type="button">Kosongkan</button></div>
+          <div class="manual-result" id="manualResult" role="status" aria-live="polite" hidden></div>
+        </section>
+
+        <div class="simulation-control" id="simulationControl">
           <label class="switch-row" for="faultSimulation">
             <input id="faultSimulation" type="checkbox" checked><span class="switch-ui" aria-hidden="true"></span>
             <span class="switch-copy"><strong>Sertakan pembanding RH dan simulasi gangguan</strong><span>Setiap batch juga membaca RH fisik sintetis pada timestamp yang sama. Seri ini bukan input model, pengukuran lapangan, atau ground truth.</span></span>

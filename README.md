@@ -26,7 +26,11 @@ switch is active—records the separate synthetic physical-RH comparison for the
 same timestamps. Batch mode automates at most 15 of those same sequential daily
 cycles; it does not turn the model into one 15-day request or alter its rolling
 window. `hasil.html` reads the authoritative stored day directly from the
-backend. There is no file picker, arbitrary manual input, or silent fallback.
+backend. There is no file picker or silent fallback. A 23-field Form Manual is
+available for sensor-value inspection and schema validation only; it is
+explicitly non-persistent and does not pretend that one observation satisfies
+the frozen daily temporal contract. The progress card also exposes an explicit,
+confirmed local demo reset.
 
 ## Run the dashboard locally
 

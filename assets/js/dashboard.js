@@ -87,6 +87,20 @@
     return 'Terjadi kegagalan yang tidak dikenali.';
   }
 
+  function setupProductNavigation(){
+    document.querySelectorAll('[data-api-link]').forEach(function(link){
+      var url = new URL(link.getAttribute('href'),window.location.href);
+      url.searchParams.set('api',baseUrl);
+      link.href = url.pathname.split('/').pop() + '?' + url.searchParams.toString();
+    });
+    var toggle=document.querySelector('.nav-toggle'),menu=document.querySelector('.mobile-menu');
+    if(toggle && menu) toggle.addEventListener('click',function(){
+      var open=!menu.classList.contains('open');
+      menu.classList.toggle('open',open);
+      toggle.setAttribute('aria-expanded',String(open));
+    });
+  }
+
   function activateView(view, focus, renderVisible){
     var tabs = Array.prototype.slice.call(document.querySelectorAll('.nav-tab'));
     var selectedButton = tabs.find(function(tab){ return tab.dataset.view === view; }) || tabs[0];
@@ -511,5 +525,5 @@
     state.rangeStart=start; state.rangeEnd=end; renderRhChart(); renderRhTable(); renderSensorCharts();
   }
 
-  setupTabs(); bindControls(); refresh();
+  setupProductNavigation(); setupTabs(); bindControls(); refresh();
 })();

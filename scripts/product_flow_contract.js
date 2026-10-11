@@ -30,9 +30,9 @@ assertUniqueIds(predict,'predict.html');
 assertUniqueIds(result,'hasil.html');
 assertUniqueIds(dashboard,'dashboard.html');
 
-['data-mode="daily"','data-mode="batch"','faultSimulation','processButton','latestContent','recoveryAction','prediction-flow.js'].forEach(token=>assert(predict.includes(token),`predict.html missing ${token}`));
+['data-mode="daily"','data-mode="batch"','data-mode="manual"','manualGroups','validateManualButton','openResetButton','faultSimulation','processButton','latestContent','recoveryAction','prediction-flow.js'].forEach(token=>assert(predict.includes(token),`predict.html missing ${token}`));
 assert(!predict.includes('type="file"'),'Prediction must not require File Explorer');
-assert(!predict.includes('Form Manual'),'Unsupported manual form must be removed');
+assert(predict.includes('Form Manual') && predict.includes('TIDAK DISIMPAN'),'Manual inspection form must remain explicit and non-persistent');
 assert(!predict.includes('assets/js/app.js'),'Prediction must not mutate or depend on shared home behavior');
 assert(!result.includes('assets/js/app.js'),'Result must not mutate or depend on shared home behavior');
 assert(!predict.includes('assets/css/style.css') && !result.includes('assets/css/style.css'),'Product flow must stay isolated from protected home styling and its external font import');
@@ -41,6 +41,8 @@ assert(!dashboard.includes('dayFile') && !dashboard.includes('processDayButton')
 assert(dashboard.includes('Buka alur Prediksi'));
 
 assert(flowJs.includes('getNextOfficialDemoInput'));
+assert(flowJs.includes("resetDemoState('RESET_DEMO_STATE')"));
+assert(flowJs.includes('23/23 fitur'));
 assert(flowJs.includes("Math.min(15,16-completed)"));
 assert(flowJs.includes('monitoringEnabled:simulationEnabled'));
 assert(flowJs.includes("createDemoAudit('pass'"));
@@ -49,4 +51,4 @@ assert(!flowJs.includes('predictFull('),'Product replay must use daily persisten
 assert(flowCss.includes('@media (prefers-reduced-motion: reduce)'));
 assert(flowCss.includes('@media (max-width: 700px)'));
 
-console.log('RINTIK_PRODUCT_FLOW_OK home=byte-identical daily=true batch15=sequential simulation=explicit dashboard=input-free');
+console.log('RINTIK_PRODUCT_FLOW_OK home=byte-identical daily=true batch15=sequential manual=inspection-only reset=explicit simulation=explicit dashboard=input-free');

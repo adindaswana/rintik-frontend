@@ -36,6 +36,7 @@ async function main(){
   await client.runDay('2023-08-29');
   await client.getDaySeries('2023-08-29');
   await client.getNextOfficialDemoInput();
+  await client.resetDemoState('RESET_DEMO_STATE');
   await client.predictFull({rows: []});
   await client.monitorDay('2023-08-29');
   await client.createDemoAudit('pass', 'audit-key');
@@ -47,9 +48,11 @@ async function main(){
   assert.strictEqual(calls[2].init.headers['Idempotency-Key'], 'day-key');
   assert.strictEqual(calls[4].url, 'http://127.0.0.1:8000/v1/days/2023-08-29/series');
   assert.strictEqual(calls[5].url, 'http://127.0.0.1:8000/v1/demo/official-input/next');
-  assert.strictEqual(calls[6].url, 'http://127.0.0.1:8000/predict');
-  assert.strictEqual(calls[7].url, 'http://127.0.0.1:8000/v1/demo/days/2023-08-29/monitor');
-  assert.strictEqual(calls[9].init.headers['Idempotency-Key'], 'confirm-key');
+  assert.strictEqual(calls[6].url, 'http://127.0.0.1:8000/v1/demo/reset');
+  assert.deepStrictEqual(JSON.parse(calls[6].init.body), {confirmation: 'RESET_DEMO_STATE'});
+  assert.strictEqual(calls[7].url, 'http://127.0.0.1:8000/predict');
+  assert.strictEqual(calls[8].url, 'http://127.0.0.1:8000/v1/demo/days/2023-08-29/monitor');
+  assert.strictEqual(calls[10].init.headers['Idempotency-Key'], 'confirm-key');
   assert.strictEqual(client.exportDayUrl('2023-08-29'), 'http://127.0.0.1:8000/v1/days/2023-08-29/export.csv');
 
   var serverFailure = apiLib.createClient({

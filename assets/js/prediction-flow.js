@@ -10,7 +10,7 @@
   sessionStorage.setItem('rintik_api_url', baseUrl);
   var client = apiLib.createClient({baseUrl: baseUrl, timeoutMs: 120000});
   var pageKind = document.body.getAttribute('data-flow-page');
-  var state = {mode:'daily',busy:false,health:null,days:[],incidents:[],result:null,monitoring:null,outageIncident:null};
+  var state = {mode:'daily',busy:false,health:null,days:[],incidents:[],result:null,monitoring:null,outageIncident:null,catalog:null};
 
   function $(id){ return document.getElementById(id); }
   function mean(values){ return values.length ? values.reduce(function(sum,value){ return sum + value; },0) / values.length : null; }
@@ -155,6 +155,11 @@
 
   function updateProcessButton(){
     if(!$('processButton')) return;
+    if(state.mode === 'manual'){
+      $('processButton').hidden = true;
+      return;
+    }
+    $('processButton').hidden = false;
     var complete = !state.health || !state.health.next_expected_date;
     $('processButton').disabled = state.busy || complete;
     if(complete){
@@ -206,6 +211,16 @@
     }
   }
 
+  function renderEmptyState(){
+    state.result = null;
+    state.monitoring = null;
+    state.incidents = [];
+    state.outageIncident = null;
+    if($('latestContent')) $('latestContent').hidden = true;
+    if($('latestEmpty')) $('latestEmpty').hidden = false;
+    renderIncidents();
+  }
+
   function renderLatest(result,monitoring){
     if(!$('latestContent')) return;
     state.result = result; state.monitoring = monitoring;
@@ -249,6 +264,7 @@
       var completed = state.days.filter(function(day){ return day.status === 'completed'; });
       var target = preferredDate || localStorage.getItem('rintik_latest_daily_date') || (completed.length ? completed[completed.length-1].date : null);
       if(target && completed.some(function(day){ return day.date === target; })) await loadDate(target);
+      else if(!completed.length) renderEmptyState();
       else renderIncidents();
       return true;
     } catch(error){
@@ -297,33 +313,179 @@
 
   async function applyRecovery(){
     if(!state.outageIncident || state.busy) return;
+    var incident = Object.assign({},state.outageIncident);
     hideAlert();
-    setBusy(true,1,1,state.outageIncident.date);
+    setBusy(true,1,1,incident.date);
     try {
-      if(state.outageIncident.status !== 'confirmed_simulation'){
-        await client.createDemoAudit('pass','prediction-audit-pass-' + state.outageIncident.incident_id);
-        await client.confirmIncident(state.outageIncident.incident_id,{demo_override:true,note:'Explicit simulated technician action from prediction workspace.'},'prediction-confirm-' + state.outageIncident.incident_id);
+      if(incident.status !== 'confirmed_simulation'){
+        await client.createDemoAudit('pass','prediction-audit-pass-' + incident.incident_id);
+        await client.confirmIncident(incident.incident_id,{demo_override:true,note:'Explicit simulated technician action from prediction workspace.'},'prediction-confirm-' + incident.incident_id);
       }
-      await refreshStatus(state.outageIncident.date);
+      await refreshStatus(incident.date);
+      if($('latestContent')) $('latestContent').scrollIntoView({behavior:'smooth',block:'start'});
       setAlert('Recovery simulasi ditampilkan','Sensor fisik yang hilang tetap kosong. Garis biru adalah estimasi RINTIK dan tidak menggantikan raw sensor secara diam-diam.','info');
     } catch(error){ setAlert('Recovery simulasi ditolak',errorMessage(error)); }
-    finally { setBusy(false,1,1,state.outageIncident && state.outageIncident.date); }
+    finally { setBusy(false,1,1,incident.date); }
+  }
+
+  function manualFeatureInputs(){
+    return Array.prototype.slice.call(document.querySelectorAll('[data-manual-feature]'));
+  }
+
+  function renderManualCatalog(catalog){
+    state.catalog = catalog;
+    var container = $('manualGroups');
+    container.innerHTML = '';
+    catalog.groups.forEach(function(group,index){
+      var details = document.createElement('details');
+      details.className = 'manual-group'; details.open = index === 0;
+      var summary = document.createElement('summary'); summary.textContent = group.label + ' ';
+      var count = document.createElement('span'); count.textContent = '· ' + group.features.length + ' fitur';
+      summary.appendChild(count); details.appendChild(summary);
+      var grid = document.createElement('div'); grid.className = 'manual-field-grid';
+      group.features.forEach(function(feature){
+        var field = document.createElement('div'); field.className = 'manual-field';
+        var label = document.createElement('label'); label.htmlFor = 'manual-' + feature.key; label.textContent = feature.label;
+        var input = document.createElement('input'); input.id = 'manual-' + feature.key; input.type = 'number'; input.step = 'any'; input.inputMode = 'decimal'; input.dataset.manualFeature = feature.key; input.autocomplete = 'off';
+        var unit = document.createElement('small'); unit.textContent = feature.unit || '';
+        field.appendChild(label); field.appendChild(input); field.appendChild(unit); grid.appendChild(field);
+      });
+      details.appendChild(grid); container.appendChild(details);
+    });
+  }
+
+  function setManualResult(message,isError){
+    var result = $('manualResult');
+    result.textContent = message;
+    result.classList.toggle('is-error',Boolean(isError));
+    result.hidden = false;
+  }
+
+  async function loadManualExample(){
+    if(state.busy) return;
+    hideAlert();
+    $('loadManualExample').disabled = true;
+    $('validateManualButton').disabled = true;
+    try {
+      var row;
+      if(state.health && state.health.next_expected_date){
+        var fixture = await client.getNextOfficialDemoInput();
+        var rows = predictionLib.parseCsvText(fixture.csv);
+        var keys = manualFeatureInputs().map(function(input){ return input.dataset.manualFeature; });
+        row = rows.find(function(candidate){
+          return keys.every(function(key){ return candidate[key] !== '' && Number.isFinite(Number(candidate[key])); });
+        }) || rows[0];
+      } else {
+        var completed = state.days.filter(function(day){ return day.status === 'completed'; });
+        if(!completed.length) throw new Error('Belum ada fixture sensor yang dapat dibaca.');
+        var series = await client.getDaySeries(completed[completed.length-1].date);
+        var point = series.points.find(function(candidate){
+          return Object.keys(candidate.values).every(function(key){
+            return candidate.values[key] !== null && Number.isFinite(Number(candidate.values[key]));
+          });
+        }) || series.points[0];
+        row = Object.assign({datetime:point.timestamp},point.values);
+      }
+      $('manualTimestamp').value = String(row.datetime || row.timestamp || '').replace(' ','T').slice(0,16);
+      manualFeatureInputs().forEach(function(input){
+        var value = row[input.dataset.manualFeature];
+        input.value = value === null || value === undefined || value === '' ? '' : value;
+        input.dataset.officialMissing = input.value === '' ? 'true' : 'false';
+      });
+      setManualResult('Snapshot sensor resmi dimuat ke form. Nilai ini belum disimpan dan belum menjalankan inferensi.',false);
+    } catch(error){ setManualResult(errorMessage(error),true); }
+    finally {
+      $('loadManualExample').disabled = false;
+      $('validateManualButton').disabled = false;
+    }
+  }
+
+  function validateManual(){
+    var missing = [];
+    var officialGaps = [];
+    if(!$('manualTimestamp').value) missing.push('timestamp');
+    manualFeatureInputs().forEach(function(input){
+      if(input.value === '' && input.dataset.officialMissing === 'true') officialGaps.push(input.dataset.manualFeature);
+      else if(input.value === '' || !Number.isFinite(Number(input.value))) missing.push(input.dataset.manualFeature);
+    });
+    if(missing.length){
+      setManualResult('Isian belum valid. Lengkapi nilai numerik untuk: ' + missing.join(', ') + '.',true);
+      return;
+    }
+    var gapText = officialGaps.length ? ' ' + officialGaps.length + ' gap resmi dipertahankan: ' + officialGaps.join(', ') + '.' : '';
+    setManualResult('Validasi form PASS: 23/23 fitur diperiksa.' + gapText + ' Isian tetap berupa draft inspeksi; inferensi daily membutuhkan batch resmi lengkap dan terverifikasi hash.',false);
+  }
+
+  function clearManual(){
+    $('manualTimestamp').value = '';
+    manualFeatureInputs().forEach(function(input){ input.value = ''; delete input.dataset.officialMissing; });
+    $('manualResult').hidden = true;
+  }
+
+  function selectMode(mode){
+    state.mode = mode;
+    document.querySelectorAll('[data-mode]').forEach(function(item){
+      item.setAttribute('aria-selected',String(item.dataset.mode === mode));
+    });
+    var manual = mode === 'manual';
+    document.querySelector('.flow-grid').classList.toggle('is-manual',manual);
+    $('manualPanel').hidden = !manual;
+    $('simulationControl').hidden = manual;
+    if(manual){
+      $('modeExplanation').innerHTML = '<strong>Form Manual.</strong> Gunakan untuk melihat dan memeriksa 23 fitur sensor. Satu observasi tidak memenuhi kontrak batch temporal, sehingga tidak disimpan atau diinferensikan.';
+    } else if(mode === 'batch'){
+      $('modeExplanation').innerHTML = '<strong>Mode batch.</strong> Sistem tetap menjalankan siklus akuisisi tanggal satu per satu secara kronologis, maksimal 15 hari. Ini bukan perubahan rolling window model.';
+    } else {
+      $('modeExplanation').innerHTML = '<strong>Mode harian.</strong> Satu klik mengambil fitur lingkungan, menjalankan model dan P1 → P2 → P3, lalu menyimpan prediksi bersama RH simulasi yang tetap terpisah.';
+    }
+    updateProcessButton();
+  }
+
+  async function resetDemo(){
+    if(state.busy) return;
+    state.busy = true;
+    updateProcessButton();
+    $('confirmResetButton').disabled = true;
+    try {
+      await client.resetDemoState('RESET_DEMO_STATE');
+      localStorage.removeItem('rintik_latest_daily_date');
+      $('resetConfirmation').hidden = true;
+      renderEmptyState();
+      await refreshStatus();
+      setAlert('Data demo direset','Replay kembali ke tanggal pertama. Model frozen, sidecar, dan fixture resmi tidak berubah.','info');
+    } catch(error){ setAlert('Reset demo gagal',errorMessage(error)); }
+    finally {
+      state.busy = false;
+      $('confirmResetButton').disabled = false;
+      updateProcessButton();
+    }
   }
 
   function bindPredict(){
     document.querySelectorAll('[data-mode]').forEach(function(button){
       button.addEventListener('click',function(){
-        state.mode = button.dataset.mode;
-        document.querySelectorAll('[data-mode]').forEach(function(item){ item.setAttribute('aria-selected',String(item === button)); });
-        $('modeExplanation').innerHTML = state.mode === 'batch' ? '<strong>Mode batch.</strong> Sistem tetap menjalankan siklus akuisisi tanggal satu per satu secara kronologis, maksimal 15 hari. Ini bukan perubahan rolling window model.' : '<strong>Mode harian.</strong> Satu klik mengambil fitur lingkungan, menjalankan model dan P1 → P2 → P3, lalu menyimpan prediksi bersama RH simulasi yang tetap terpisah.';
-        updateProcessButton();
+        selectMode(button.dataset.mode);
       });
     });
     $('faultSimulation').addEventListener('change',function(){ $('scenarioSchedule').hidden = !this.checked; });
     $('processButton').addEventListener('click',runProcessing);
     $('refreshButton').addEventListener('click',function(){ refreshStatus(); });
     $('recoveryAction').addEventListener('click',applyRecovery);
+    $('openResetButton').addEventListener('click',function(){
+      $('resetConfirmation').hidden = false;
+      $('cancelResetButton').focus();
+    });
+    $('cancelResetButton').addEventListener('click',function(){
+      $('resetConfirmation').hidden = true;
+      $('openResetButton').focus();
+    });
+    $('confirmResetButton').addEventListener('click',resetDemo);
+    $('loadManualExample').addEventListener('click',loadManualExample);
+    $('validateManualButton').addEventListener('click',validateManual);
+    $('clearManualButton').addEventListener('click',clearManual);
     window.addEventListener('resize',function(){ if(state.result) renderChart($('latestChart'),state.result,state.monitoring); });
+    client.listFeatures().then(renderManualCatalog).catch(function(error){ $('manualGroups').textContent = errorMessage(error); });
+    selectMode('daily');
     refreshStatus();
   }
 
