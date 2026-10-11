@@ -52,6 +52,12 @@ async function main(){
   assert.strictEqual(daily.payload.predictions[0].datetime, oneDay[0].datetime);
   assert.deepStrictEqual(calls.map(function(call){ return call[0]; }), ['ingest', 'run', 'monitor']);
 
+  calls.length = 0;
+  var withoutMonitoring = await publicLib.processRows(oneDay, dailyClient, {monitoringEnabled:false});
+  assert.strictEqual(withoutMonitoring.meta.monitoringStatus, 'not_requested');
+  assert.strictEqual(withoutMonitoring.monitoring, null);
+  assert.deepStrictEqual(calls.map(function(call){ return call[0]; }), ['ingest', 'run']);
+
   var fullClient = {
     predictFull: async function(payload){
       return {

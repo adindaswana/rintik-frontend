@@ -19,9 +19,7 @@
     selectedDate: null,
     selectedFeatures: restoreFeatures(),
     rangeStart: 0,
-    rangeEnd: 0,
-    fileText: null,
-    fileDate: null
+    rangeEnd: 0
   };
 
   function $(id){ return document.getElementById(id); }
@@ -188,16 +186,8 @@
 
   function renderRunConsoleState(){
     var nextDate = state.health && state.health.next_expected_date;
-    $('runConsoleTitle').textContent = nextDate ? 'Batch berikutnya · ' + formatDate(nextDate) : 'Replay test selesai';
-    $('chooseFileButton').disabled = !nextDate;
-  }
-
-  function clearSelectedFile(message){
-    state.fileText = null;
-    state.fileDate = null;
-    $('dayFile').value = '';
-    $('processDayButton').disabled = true;
-    $('fileSummary').textContent = message || 'Belum ada file dipilih.';
+    $('runConsoleTitle').textContent = nextDate ? 'Berikutnya · ' + formatDate(nextDate) : 'Replay test selesai';
+    $('nextDateSummary').textContent = nextDate ? 'Ambil dan proses fixture resmi berikutnya melalui halaman Prediksi.' : 'Seluruh 16 tanggal tersedia untuk dieksplorasi.';
   }
 
   async function loadDay(date, showLoader){
@@ -226,58 +216,6 @@
       showEmpty(true);
       showAlert('Data tanggal tidak dapat ditampilkan', errorMessage(error));
     } finally { if(showLoader !== false) setLoading(false); }
-  }
-
-  function bindFileFlow(){
-    $('chooseFileButton').addEventListener('click', function(){ $('dayFile').click(); });
-    $('dayFile').addEventListener('change', async function(){
-      var file = this.files && this.files[0];
-      state.fileText = null; state.fileDate = null;
-      $('processDayButton').disabled = true;
-      if(!file){ $('fileSummary').textContent = 'Belum ada file dipilih.'; return; }
-      if(file.size > 5 * 1024 * 1024){
-        $('fileSummary').textContent = 'File melebihi batas 5 MiB.'; return;
-      }
-      try {
-        var text = await file.text();
-        var date = dataLib.dateFromCsv(text);
-        state.fileText = text; state.fileDate = date;
-        $('fileSummary').textContent = file.name + ' · ' + formatDate(date);
-        $('processDayButton').disabled = false;
-      } catch(error){ $('fileSummary').textContent = errorMessage(error); }
-    });
-    $('processDayButton').addEventListener('click', processSelectedDay);
-  }
-
-  async function processSelectedDay(){
-    if(!state.fileText || !state.fileDate) return;
-    hideAlert();
-    setLoading(true, 'Menjalankan daily batch', 'Validasi dan ingest satu tanggal kalender…');
-    try {
-      $('processSteps').innerHTML = '<strong>1/3</strong> Memvalidasi input…';
-      await client.ingestDay(state.fileDate, {csv: state.fileText}, 'dashboard-ingest-' + state.fileDate);
-      $('loadingDetail').textContent = 'Menjalankan checkpoint frozen dan P1 → P2 → P3…';
-      $('processSteps').innerHTML = '<strong>2/3</strong> Inferensi model original…';
-      await client.runDay(state.fileDate);
-      $('loadingDetail').textContent = 'Menyimpan monitoring simulasi secara terpisah…';
-      $('processSteps').innerHTML = '<strong>3/3</strong> Monitoring dan provenance…';
-      await client.monitorDay(state.fileDate);
-      var completedDate = state.fileDate;
-      var responses = await Promise.all([client.health(), client.listDays(), client.listIncidents()]);
-      state.health = responses[0];
-      state.days = responses[1].days || [];
-      state.incidents = responses[2].incidents || [];
-      renderRunConsoleState();
-      await loadDay(completedDate, false);
-      var nextDate = state.health.next_expected_date;
-      clearSelectedFile(nextDate ? 'Siap memilih fixture ' + formatDate(nextDate) + '.' : 'Seluruh 16 tanggal telah diproses.');
-      $('processSteps').textContent = nextDate ? 'Selesai · lanjutkan dengan ' + formatDate(nextDate) + '.' : 'Selesai · replay test lengkap.';
-      toast('Batch ' + formatDate(completedDate) + ' selesai dan dapat diaudit.');
-    } catch(error){
-      showAlert('Daily batch gagal', errorMessage(error) + ' Tidak ada hasil pengganti yang dibuat.');
-      $('processSteps').textContent = 'Gagal · periksa pesan di area utama.';
-      toast(errorMessage(error), true);
-    } finally { setLoading(false); }
   }
 
   function renderAll(){
@@ -573,5 +511,5 @@
     state.rangeStart=start; state.rangeEnd=end; renderRhChart(); renderRhTable(); renderSensorCharts();
   }
 
-  setupTabs(); bindFileFlow(); bindControls(); refresh();
+  setupTabs(); bindControls(); refresh();
 })();

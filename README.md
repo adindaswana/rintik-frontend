@@ -19,14 +19,14 @@ daily result, synthetic monitoring, and official input series as one validated
 bundle. Any source, simulation, date, row-count, or timestamp mismatch fails
 closed.
 
-`predict.html` uses the same client and backend base URL. One official calendar
-date is sent through ingest/run/monitor and shares persisted state with the
-operator dashboard. The exact official 734-row `test.csv` uses the stateless
-`/predict` compatibility route and is labeled separately on `hasil.html`.
-Multi-date shapes other than 734, changed official fixtures, malformed CSV,
-arbitrary manual input, non-JSON responses, and unreachable backends fail
-closed. “Contoh Data Resmi” retrieves the next hash-verified official daily
-input; it is not a generated prediction.
+`predict.html` is the product workspace for the official replay. A daily click
+retrieves the next hash-verified fixture, validates it, runs one calendar-day
+ingest/run, persists the real frozen-model result, and—when the explicit demo
+switch is active—records the separate synthetic physical-RH comparison for the
+same timestamps. Batch mode automates at most 15 of those same sequential daily
+cycles; it does not turn the model into one 15-day request or alter its rolling
+window. `hasil.html` reads the authoritative stored day directly from the
+backend. There is no file picker, arbitrary manual input, or silent fallback.
 
 ## Run the dashboard locally
 
@@ -58,10 +58,11 @@ Open `http://127.0.0.1:4173/dashboard.html`. To use another local backend, add
 `?api=http://127.0.0.1:8136`. Optional `&view=sensors` or `&view=settings`
 opens a specific dashboard view.
 
-The dashboard supports chronological one-day upload/run/monitor, stored-day
-navigation, synchronized RH comparison, explicit synthetic incident/recovery
-actions, CSV/audit export, a searchable unit-safe Sensor Explorer, and a
-separate Settings / Technical Details view.
+The dashboard is now history and exploration rather than data entry. It
+supports stored-day navigation, synchronized RH comparison, explicit synthetic
+incident/recovery actions, CSV/audit export, a searchable unit-safe Sensor
+Explorer, and a separate Settings / Technical Details view. Replay input and
+simulation controls live on Prediksi.
 
 ## QA
 
@@ -71,6 +72,8 @@ From this repository:
 npm run stub:test
 npm run contract:test
 npm run public-flow:test
+npm run product-flow:test
+npm run product-flow-browser:test
 npm run dashboard:test
 ```
 
@@ -96,13 +99,14 @@ provenance, and the 48-row outage CSV export.
 
 ## QA status and scope
 
-The public visual shell remains the pre-M4 design, but its prediction and result
-paths now use the final fail-closed backend contracts. The post-M5 browser suite
-is `npm run post-m5-public-flow:test`; it records screenshots, network evidence,
-and a Playwright trace under `Prototipe/qa/evidence/post-m5-public-flow`.
+The protected home page remains byte-identical. Prediksi and Hasil use a
+self-contained, offline-capable visual system and the final fail-closed daily
+contracts. The product-flow browser suite is `npm run product-flow-browser:test`;
+it records screenshots, network evidence, and a Playwright trace under
+`Prototipe/qa/evidence/post-m5-product-flow`.
 M4 browser acceptance and the tested-host M5 rehearsal pass. See
 [`docs/MILESTONE_4_BROWSER_QA_20261010.md`](docs/MILESTONE_4_BROWSER_QA_20261010.md)
 [`docs/MILESTONE_5_FINAL_READINESS.md`](docs/MILESTONE_5_FINAL_READINESS.md), and
-[`docs/POST_M5_PUBLIC_FLOW_REPAIR.md`](docs/POST_M5_PUBLIC_FLOW_REPAIR.md).
+[`docs/POST_M5_PRODUCT_FLOW_REDESIGN.md`](docs/POST_M5_PRODUCT_FLOW_REDESIGN.md).
 Independent clean-machine portability is still explicitly unverified; local
 prototype readiness is not a production-readiness claim.

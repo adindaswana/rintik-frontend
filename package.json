@@ -7,10 +7,12 @@
     "stub:test": "node scripts/stub_smoke.js",
     "contract:test": "node scripts/rintik_api_contract.js",
     "public-flow:test": "node scripts/public_prediction_contract.js",
+    "product-flow:test": "node scripts/product_flow_contract.js",
     "dashboard:test": "node scripts/dashboard_contract.js",
     "integration:test": "node scripts/integration_smoke.js",
     "browser:test": "node scripts/m4_browser_qa.js",
     "rehearsal:test": "node scripts/m5_demo_rehearsal.js",
+    "product-flow-browser:test": "node scripts/product_flow_browser_qa.js",
     "post-m5-public-flow:test": "node scripts/post_m5_public_flow_qa.js"
   }
 }

@@ -12,7 +12,6 @@ const PROTOTYPE_DIR = path.resolve(__dirname, '..', '..');
 const EVIDENCE_DIR = process.env.RINTIK_M5_EVIDENCE_DIR
   ? path.resolve(process.env.RINTIK_M5_EVIDENCE_DIR)
   : path.join(PROTOTYPE_DIR, 'qa', 'evidence', 'm5-final-readiness', 'manual-run');
-const FIXTURE_DIR = path.join(PROTOTYPE_DIR, 'demo', 'fixtures', 'inputs_original_test_by_day');
 const MANIFEST = JSON.parse(fs.readFileSync(path.join(PROTOTYPE_DIR, 'demo', 'fixtures', 'day_manifest.json'), 'utf8'));
 const MODEL_SHA = 'adce8fda2f465679ea6e8fe31124822a45a555b9dc154e12076ef5b6140699b0';
 const STATE_SHA = 'a24da3473bf42a10fb9bde05e37495e5b69adffde9193dd4648daa9e0898996e';
@@ -37,6 +36,7 @@ function sha256(file){
 }
 function elapsedMs(start){ return Math.round(Number(process.hrtime.bigint() - start) / 1e6); }
 function dashboardUrl(){ return `${FRONTEND_URL}/dashboard.html?api=${encodeURIComponent(API_URL)}`; }
+function predictUrl(){ return `${FRONTEND_URL}/predict.html?api=${encodeURIComponent(API_URL)}`; }
 async function text(page, selector){ return (await page.locator(selector).innerText()).trim(); }
 async function capture(page, file){
   if(await page.locator('#toastRegion .toast').count()){
@@ -64,18 +64,13 @@ async function activateView(page, view){
     return tab && tab.getAttribute('aria-selected')==='true' && panel && !panel.hidden;
   }, view);
 }
-async function processDay(page, item){
+async function processDay(page, item, completedCount){
   const started=process.hrtime.bigint();
-  const fixture=path.join(FIXTURE_DIR, item.file);
-  await page.locator('#dayFile').setInputFiles(fixture);
-  await page.waitForFunction(() => !document.getElementById('processDayButton').disabled);
-  await page.click('#processDayButton');
-  await page.waitForSelector('#loadingLayer:not([hidden])', {timeout:10000});
-  await page.waitForFunction(() => document.getElementById('loadingLayer').hidden, null, {timeout:120000});
-  assert.strictEqual(await page.inputValue('#daySelect'), item.date);
-  assert.strictEqual(await text(page, '#metricRows'), `${item.rows}/48`);
-  assert((await text(page, '#processSteps')).startsWith('Selesai'));
-  assert.strictEqual(await page.locator('#globalAlert').isHidden(), true);
+  await page.waitForFunction(() => !document.getElementById('processButton').disabled);
+  await page.click('#processButton');
+  await page.waitForFunction(expected => document.getElementById('replayCount').textContent.trim()===expected && document.getElementById('processingPanel').hidden,`${completedCount} / 16 hari`,{timeout:120000});
+  assert.strictEqual(await text(page, '#latestRows'), `${item.rows}/48`);
+  assert((await text(page, '#latestStatus')).includes('Model original'));
   return {
     date:item.date,
     rows:item.rows,
@@ -122,43 +117,40 @@ async function run(){
   page.on('request', request => requests.push({method:request.method(),url:request.url()}));
 
   try {
-    await page.goto(dashboardUrl(), {waitUntil:'domcontentloaded',timeout:30000});
-    await waitSettled(page);
-    assert.strictEqual(await page.locator('#emptyState').isHidden(), false, 'Clean rehearsal must begin in the empty state.');
-    assert.strictEqual(await text(page, '#runConsoleTitle'), 'Batch berikutnya · 29 Agu 2023');
+    await page.goto(predictUrl(), {waitUntil:'domcontentloaded',timeout:30000});
+    await page.waitForFunction(() => !document.getElementById('processButton').disabled,{timeout:30000});
+    assert.strictEqual(await page.locator('#latestEmpty').isHidden(), false, 'Clean rehearsal must begin without a model result.');
+    assert((await text(page, '#nextDate')).includes('29 Agustus 2023'));
     screenshots.push(await capture(page, '00-clean-empty-state-1366x768.png'));
 
-    for(const item of MANIFEST.calendar_dates){
-      dayTimings.push(await processDay(page,item));
+    for(let index=0;index<MANIFEST.calendar_dates.length;index++){
+      const item=MANIFEST.calendar_dates[index];
+      dayTimings.push(await processDay(page,item,index+1));
       if(item.date==='2023-08-29') screenshots.push(await capture(page,'01-first-partial-18-of-48.png'));
       if(item.date==='2023-09-03') screenshots.push(await capture(page,'02-normal-before-fault.png'));
       if(item.date==='2023-09-04'){
-        assert((await text(page,'#verdictBadge')).includes('Dugaan malfungsi'));
+        assert((await text(page,'#latestVerdict')).includes('Dugaan malfungsi'));
         screenshots.push(await capture(page,'03-stuck-suspected.png'));
       }
       if(item.date==='2023-09-06'){
-        assert((await text(page,'#verdictBadge')).includes('Dugaan sensor terputus'));
-        assert.strictEqual(await text(page,'#metricSensor'),'Tidak tersedia');
-        assert((await text(page,'#metricSensorNote')).includes('data hilang'));
-        assert.strictEqual(await text(page,'#gateStatus'),'Dibatasi');
+        assert((await text(page,'#latestVerdict')).includes('Dugaan outage'));
+        assert((await text(page,'#latestSensor')).includes('Terputus'));
+        assert.strictEqual(await page.locator('#recoveryAction').isHidden(),false);
         screenshots.push(await capture(page,'04-outage-recovery-restricted.png'));
-        await activateView(page,'settings');
-        await page.selectOption('#auditScenario','pass');
-        await page.click('#applyAuditButton');
-        await waitSettled(page);
-        await activateView(page,'overview');
-        await page.click('#confirmIncidentButton');
-        await waitSettled(page);
-        assert((await text(page,'#metricRecovery')).includes('Aktif'));
-        assert.strictEqual(await page.locator('#recoveryLegend').isHidden(),false);
+        await page.click('#recoveryAction');
+        await page.waitForFunction(() => document.querySelector('#latestLegend .recovery') && document.getElementById('processingPanel').hidden,{timeout:60000});
         screenshots.push(await capture(page,'05-outage-estimated-recovery.png'));
       }
       if(item.date==='2023-09-07'){
-        assert((await text(page,'#verdictBadge')).toLowerCase().includes('pulih'));
+        assert((await text(page,'#latestVerdict')).toLowerCase().includes('pulih'));
         screenshots.push(await capture(page,'06-simulated-repaired.png'));
       }
     }
 
+    assert.strictEqual(await text(page,'#replayCount'),'16 / 16 hari');
+    assert.strictEqual(await page.locator('#processButton').isDisabled(),true);
+    await page.goto(dashboardUrl(), {waitUntil:'domcontentloaded',timeout:30000});
+    await waitSettled(page);
     assert.strictEqual(await text(page,'#runConsoleTitle'),'Replay test selesai');
     assert.strictEqual(await page.locator('#daySelect option').count(),16);
     assert.strictEqual(await page.inputValue('#daySelect'),'2023-09-13');

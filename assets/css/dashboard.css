@@ -63,6 +63,8 @@ p { color: var(--muted); }
 .brand span { display: grid; line-height: 1.12; }
 .brand strong { font-size: 16px; letter-spacing: .08em; }
 .brand small { margin-top: 4px; color: var(--muted); font-size: 11px; letter-spacing: .02em; }
+.topbar-nav { margin-left: auto; display: flex; align-items: center; gap: 5px; }
+.topbar-nav a { padding: 7px 9px; border-radius: 8px; color: var(--muted); text-decoration: none; font-size: 12px; font-weight: 700; }
 .topbar-meta { display: flex; align-items: center; gap: 12px; }
 .dataset-pill, .service-state { display: inline-flex; align-items: center; min-height: 32px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface-soft); color: var(--muted); font-size: 12px; font-weight: 650; }
 .service-state { gap: 7px; }
@@ -98,6 +100,7 @@ p { color: var(--muted); }
 .button-secondary { color: var(--ink); border-color: var(--line-strong); background: var(--surface); }
 .button-warning { color: #5e3805; border-color: #e2b862; background: var(--amber-soft); }
 .button-block { width: 100%; }
+.console-link { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
 .icon-button { width: 38px; height: 38px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); font-weight: 800; }
 .text-button { padding: 5px 2px; border: 0; color: var(--blue); background: transparent; font-weight: 720; font-size: 12px; }
 
@@ -228,6 +231,7 @@ input[type="range"] { width: 100%; accent-color: var(--green); }
 .toast.is-error { color: #762925; border-color: #e5aaa7; background: var(--red-soft); }
 
 @media (hover:hover) and (pointer:fine) {
+  .topbar-nav a:hover { color: var(--green-dark); background: var(--green-soft); }
   .nav-tab:hover { color: var(--ink); background: #eef3f0; }
   .button-primary:hover { background: var(--green-dark); border-color: var(--green-dark); }
   .button-secondary:hover, .icon-button:hover { border-color: #9fb4aa; background: var(--surface-soft); }
@@ -250,6 +254,7 @@ input[type="range"] { width: 100%; accent-color: var(--green); }
   .topbar { height: auto; min-height: 62px; padding: 10px 16px; }
   .dataset-pill { display: none; }
   .brand small { display: none; }
+  .topbar-nav { display: none; }
   .app-shell { display: block; }
   .sidebar { position: static; width: auto; height: auto; padding: 10px 14px; border-right: 0; border-bottom: 1px solid var(--line); overflow: visible; }
   .side-nav { display: flex; overflow-x: auto; padding-bottom: 2px; }
