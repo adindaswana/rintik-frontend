@@ -1,6 +1,6 @@
 # RINTIK frontend — operator dashboard
 
-Static legacy UI plus a framework-free operator dashboard for the RINTIK v1
+Static public UI plus a framework-free operator dashboard for the RINTIK v1
 backend. Backend errors are surfaced and never replaced by sample/model-like
 predictions.
 
@@ -19,6 +19,15 @@ daily result, synthetic monitoring, and official input series as one validated
 bundle. Any source, simulation, date, row-count, or timestamp mismatch fails
 closed.
 
+`predict.html` uses the same client and backend base URL. One official calendar
+date is sent through ingest/run/monitor and shares persisted state with the
+operator dashboard. The exact official 734-row `test.csv` uses the stateless
+`/predict` compatibility route and is labeled separately on `hasil.html`.
+Multi-date shapes other than 734, changed official fixtures, malformed CSV,
+arbitrary manual input, non-JSON responses, and unreachable backends fail
+closed. “Contoh Data Resmi” retrieves the next hash-verified official daily
+input; it is not a generated prediction.
+
 ## Run the dashboard locally
 
 For the final local Windows demo, use the ownership-safe launcher. It verifies
@@ -29,8 +38,8 @@ readiness before reporting success:
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts\start_m5_demo.ps1 -ResetState
 ```
 
-Open the URL printed by the script (defaults to
-`http://127.0.0.1:4174/dashboard.html?api=http://127.0.0.1:8140`). Stop only
+Open either URL printed by the script (public flow or operator dashboard;
+defaults use frontend `4174` and backend `8140`). Stop only
 the processes started by that launcher with:
 
 ```powershell
@@ -61,6 +70,7 @@ From this repository:
 ```powershell
 npm run stub:test
 npm run contract:test
+npm run public-flow:test
 npm run dashboard:test
 ```
 
@@ -86,9 +96,13 @@ provenance, and the 48-row outage CSV export.
 
 ## QA status and scope
 
-The existing public pages remain legacy UI and link to the operator dashboard.
+The public visual shell remains the pre-M4 design, but its prediction and result
+paths now use the final fail-closed backend contracts. The post-M5 browser suite
+is `npm run post-m5-public-flow:test`; it records screenshots, network evidence,
+and a Playwright trace under `Prototipe/qa/evidence/post-m5-public-flow`.
 M4 browser acceptance and the tested-host M5 rehearsal pass. See
 [`docs/MILESTONE_4_BROWSER_QA_20261010.md`](docs/MILESTONE_4_BROWSER_QA_20261010.md)
-and [`docs/MILESTONE_5_FINAL_READINESS.md`](docs/MILESTONE_5_FINAL_READINESS.md).
+[`docs/MILESTONE_5_FINAL_READINESS.md`](docs/MILESTONE_5_FINAL_READINESS.md), and
+[`docs/POST_M5_PUBLIC_FLOW_REPAIR.md`](docs/POST_M5_PUBLIC_FLOW_REPAIR.md).
 Independent clean-machine portability is still explicitly unverified; local
 prototype readiness is not a production-readiness claim.

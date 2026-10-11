@@ -35,6 +35,8 @@ async function main(){
   await client.ingestDay('2023-08-29', {csv: 'fixture'}, 'day-key');
   await client.runDay('2023-08-29');
   await client.getDaySeries('2023-08-29');
+  await client.getNextOfficialDemoInput();
+  await client.predictFull({rows: []});
   await client.monitorDay('2023-08-29');
   await client.createDemoAudit('pass', 'audit-key');
   await client.confirmIncident('incident-1', {demo_override: true}, 'confirm-key');
@@ -44,8 +46,10 @@ async function main(){
   assert.strictEqual(calls[2].url, 'http://127.0.0.1:8000/v1/days/2023-08-29/ingest');
   assert.strictEqual(calls[2].init.headers['Idempotency-Key'], 'day-key');
   assert.strictEqual(calls[4].url, 'http://127.0.0.1:8000/v1/days/2023-08-29/series');
-  assert.strictEqual(calls[5].url, 'http://127.0.0.1:8000/v1/demo/days/2023-08-29/monitor');
-  assert.strictEqual(calls[7].init.headers['Idempotency-Key'], 'confirm-key');
+  assert.strictEqual(calls[5].url, 'http://127.0.0.1:8000/v1/demo/official-input/next');
+  assert.strictEqual(calls[6].url, 'http://127.0.0.1:8000/predict');
+  assert.strictEqual(calls[7].url, 'http://127.0.0.1:8000/v1/demo/days/2023-08-29/monitor');
+  assert.strictEqual(calls[9].init.headers['Idempotency-Key'], 'confirm-key');
   assert.strictEqual(client.exportDayUrl('2023-08-29'), 'http://127.0.0.1:8000/v1/days/2023-08-29/export.csv');
 
   var serverFailure = apiLib.createClient({
@@ -60,6 +64,31 @@ async function main(){
       return error instanceof apiLib.RintikApiError &&
         error.code === 'MONITORING_UNAVAILABLE' && error.status === 503;
     }
+  );
+
+  var invalidResponse = apiLib.createClient({
+    baseUrl: 'http://frontend-not-backend',
+    fetchImpl: async function(){
+      return {ok: false, status: 501, json: async function(){ throw new SyntaxError('Unexpected token <'); }};
+    }
+  });
+  await assert.rejects(
+    function(){ return invalidResponse.predictFull({rows: []}); },
+    function(error){ return error.code === 'INVALID_BACKEND_RESPONSE' && error.status === 501; }
+  );
+
+  var timedOut = apiLib.createClient({
+    baseUrl: 'http://slow-backend',
+    timeoutMs: 5,
+    fetchImpl: function(url, init){
+      return new Promise(function(resolve, reject){
+        init.signal.addEventListener('abort', function(){ var error = new Error('aborted'); error.name = 'AbortError'; reject(error); });
+      });
+    }
+  });
+  await assert.rejects(
+    function(){ return timedOut.health(); },
+    function(error){ return error.code === 'TIMEOUT'; }
   );
 
   var networkFailure = apiLib.createClient({
@@ -112,7 +141,7 @@ async function main(){
     global.fetch = originalFetch;
   }
 
-  console.log('RINTIK_API_CONTRACT_OK calls=' + calls.length + ' failClosed=true explicitDemo=true');
+  console.log('RINTIK_API_CONTRACT_OK calls=' + calls.length + ' failClosed=true explicitDemo=true timeout=true nonJson=true');
 }
 
 main().catch(function(error){

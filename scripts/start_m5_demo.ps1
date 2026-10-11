@@ -106,6 +106,7 @@ try {
   }
   $metadata | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $paths.ProcessFile -Encoding utf8
   Write-Host 'RINTIK M5 demo is ready (real frozen model, local-only endpoints).'
+  Write-Host "Public flow: http://127.0.0.1:$FrontendPort/index.html?api=http://127.0.0.1:$BackendPort"
   Write-Host "Dashboard: http://127.0.0.1:$FrontendPort/dashboard.html?api=http://127.0.0.1:$BackendPort"
   Write-Host "Backend readiness: $([Math]::Round($backendReadySeconds, 3)) s"
   Write-Host "Process metadata: $($paths.ProcessFile)"

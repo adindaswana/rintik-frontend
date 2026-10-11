@@ -109,6 +109,15 @@
     fmtDay: fmtDay
   };
 
+  var publicPredictionLib = window.RintikPublicPrediction;
+  var publicApiClient = null;
+  var apiParams = new URLSearchParams(window.location.search);
+  var publicApiBase = apiParams.get('api') || sessionStorage.getItem('rintik_api_url') || 'http://127.0.0.1:8000';
+  if(apiParams.get('api')) sessionStorage.setItem('rintik_api_url', publicApiBase);
+  if(window.RintikApi && publicPredictionLib){
+    publicApiClient = window.RintikApi.createClient({baseUrl: publicApiBase});
+  }
+
   /* ---------------- Dropzone (Prediksi > Upload CSV) ---------------- */
   var dz = document.getElementById('dropzone');
   if(dz){
@@ -123,7 +132,7 @@
     var removeFileBtn = document.getElementById('removeFile');
     var demoBtn = document.getElementById('demoBtn');
 
-    function showFile(name, metaLabel, valid){
+    function showFile(name, metaLabel, valid, message){
       dzEmpty.hidden = true;
       dzFilled.hidden = false;
       dz.classList.add('filled');
@@ -131,9 +140,9 @@
       fileMetaEl.textContent = metaLabel;
       csvAlert.hidden = false;
       csvAlert.className = 'alert ' + (valid ? 'alert-success' : 'alert-error');
-      csvAlert.querySelector('.alert-text').textContent = valid ?
-        'Data berhasil dibaca. File Anda siap untuk diproses.' :
-        'Format file belum sesuai. Pastikan file berupa CSV dengan kolom yang benar.';
+      csvAlert.querySelector('.alert-text').textContent = message || (valid ?
+        'Struktur data didukung. Backend tetap akan memverifikasi fixture dan kronologi sebelum inferensi.' :
+        'Format file belum sesuai. Pastikan file berupa CSV dengan kolom resmi yang benar.');
       if(predictBtn) predictBtn.disabled = !valid;
     }
 
@@ -145,6 +154,7 @@
       csvPreview.hidden = true;
       if(predictBtn) predictBtn.disabled = true;
       fileInput.value = '';
+      pendingRows = [];
     }
 
     dz.addEventListener('click', function(e){
@@ -168,24 +178,11 @@
     var pendingRows = [];
 
     function esc(s){ return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
-    function parseCsvText(text){
-      var lines = String(text || '').replace(/^\uFEFF/, '').trim().split(/\r?\n/);
-      if(lines.length < 2) return [];
-      var header = lines[0].split(',').map(function(s){ return s.trim(); });
-      var rows = [];
-      for(var i = 1; i < lines.length; i++){
-        if(!lines[i].trim()) continue;
-        var cells = lines[i].split(',');
-        var obj = {};
-        for(var j = 0; j < header.length; j++) obj[header[j]] = (cells[j] || '').trim();
-        rows.push(obj);
+    function classificationMessage(classification){
+      if(classification.workflow === 'daily_batch'){
+        return 'Satu tanggal resmi (' + classification.date + ', ' + classification.rowCount + ' baris) siap diverifikasi dan diproses sebagai daily batch.';
       }
-      return rows;
-    }
-    function headerOk(rows){
-      if(!rows.length) return false;
-      var h = Object.keys(rows[0]);
-      return h.indexOf('datetime') !== -1 && h.indexOf('air_temperature') !== -1 && h.indexOf('co2') !== -1;
+      return 'Kandidat test.csv resmi 734 baris siap diverifikasi checksum-nya melalui endpoint kompatibilitas.';
     }
 
     function handleFile(file){
@@ -197,18 +194,28 @@
         showFile(file.name, 'Ukuran file terlalu besar', false);
         return;
       }
-      showFile(file.name, (file.size/1024).toFixed(1)+' KB, memeriksa data...', true);
+      if(!publicPredictionLib){
+        showFile(file.name, 'Komponen integrasi tidak tersedia', false, 'Klien backend RINTIK gagal dimuat. Muat ulang halaman sebelum mencoba lagi.');
+        return;
+      }
+      showFile(file.name, (file.size/1024).toFixed(1)+' KB, memeriksa data...', false, 'Membaca dan memeriksa struktur CSV...');
       var reader = new FileReader();
       reader.onload = function(){
-        var rows = parseCsvText(reader.result);
-        if(!headerOk(rows)){
+        try {
+          var rows = publicPredictionLib.parseCsvText(reader.result);
+          var classification = publicPredictionLib.classifyRows(rows);
+          if(!classification.ok){
+            pendingRows = [];
+            showFile(file.name, rows.length + ' baris, kontrak tidak didukung', false, classification.message);
+            return;
+          }
+          pendingRows = rows;
+          showFile(file.name, (file.size/1024).toFixed(1)+' KB, ' + rows.length + ' baris', true, classificationMessage(classification));
+          renderCsvPreview(rows.slice(0, 6), classification);
+        } catch(error){
           pendingRows = [];
-          showFile(file.name, 'Isi file belum sesuai', false);
-          return;
+          showFile(file.name, 'CSV tidak valid', false, publicPredictionLib.errorMessage(error));
         }
-        pendingRows = rows;
-        showFile(file.name, (file.size/1024).toFixed(1)+' KB, ' + rows.length + ' data siap diproses', true);
-        renderCsvPreview(rows.slice(0, 6));
       };
       reader.onerror = function(){
         pendingRows = [];
@@ -217,28 +224,42 @@
       reader.readAsText(file);
     }
 
-    function renderCsvPreview(sample){
+    function renderCsvPreview(sample, classification){
       var rows = sample.map(function(r){
-        return '<tr><td>'+esc(r.datetime)+'</td><td>'+esc(r.air_temperature)+'</td><td>'+esc(r.pressure)+'</td><td>Baik</td></tr>';
+        return '<tr><td>'+esc(r.datetime)+'</td><td>'+esc(r.air_temperature)+'</td><td>'+esc(r.pressure)+'</td><td>Pratinjau</td></tr>';
       }).join('');
       csvPreview.innerHTML =
-        '<div class="csv-preview-head"><span>Pratinjau 6 baris pertama</span></div>'+
+        '<div class="csv-preview-head"><span>Pratinjau 6 baris pertama · '+esc(classification.workflow === 'daily_batch' ? 'daily batch' : 'kompatibilitas 734 titik')+'</span></div>'+
         '<div class="table-scroll"><table class="data-table"><thead><tr><th>Waktu</th><th>Suhu Udara</th><th>Tekanan</th><th>Status</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
       csvPreview.hidden = false;
     }
 
     if(demoBtn){
-      demoBtn.addEventListener('click', function(){
-        var rows = [];
-        var start = new Date('2023-08-29T15:00:00');
-        for(var i = 0; i < 96; i++){
-          var d = new Date(start.getTime() + i * 30 * 60000);
-          var t = 24 + 3 * Math.sin((2 * Math.PI * ((i % 48) / 48 * 24 - 15)) / 24);
-          rows.push({ datetime: fmtDate(d), air_temperature: t.toFixed(2), co2: '468.9', pressure: '1009.6' });
+      demoBtn.addEventListener('click', async function(){
+        if(!publicApiClient || !publicPredictionLib){
+          showFile('fixture-resmi.csv', 'Backend belum terhubung', false, 'Klien backend RINTIK tidak tersedia.');
+          return;
         }
-        pendingRows = rows;
-        showFile('contoh-data-sensor.csv', 'Contoh data siap diproses', true);
-        renderCsvPreview(rows.slice(0, 6));
+        demoBtn.disabled = true;
+        try {
+          var fixture = await publicApiClient.getNextOfficialDemoInput();
+          if(fixture.source !== 'official_test_csv' || fixture.simulation !== false || fixture.prediction_produced !== false){
+            throw new publicPredictionLib.PublicPredictionError('INVALID_FIXTURE_PROVENANCE', 'Backend tidak mengembalikan fixture input resmi yang terverifikasi.');
+          }
+          var rows = publicPredictionLib.parseCsvText(fixture.csv);
+          var classification = publicPredictionLib.classifyRows(rows);
+          if(!classification.ok || classification.workflow !== 'daily_batch' || classification.date !== fixture.date){
+            throw new publicPredictionLib.PublicPredictionError('INVALID_FIXTURE_SHAPE', 'Fixture contoh tidak cocok dengan kontrak daily batch.');
+          }
+          pendingRows = rows;
+          showFile('official-test-' + fixture.date + '.csv', fixture.row_count + ' baris · fixture resmi', true, 'Contoh memakai input test resmi untuk tanggal berikutnya; ini bukan data sintetis dan belum merupakan prediksi.');
+          renderCsvPreview(rows.slice(0, 6), classification);
+        } catch(error){
+          pendingRows = [];
+          showFile('fixture-resmi.csv', 'Contoh tidak dapat dimuat', false, publicPredictionLib.errorMessage(error));
+        } finally {
+          demoBtn.disabled = false;
+        }
       });
     }
 
@@ -256,6 +277,7 @@
   /* ---------------- Form manual submit ---------------- */
   var formPredictBtn = document.getElementById('predictBtnForm');
   if(formPredictBtn){
+    document.querySelectorAll('[data-tab-panel="manual"] input').forEach(function(input){ input.disabled = true; });
     formPredictBtn.addEventListener('click', function(){
       var alertBox = document.getElementById('formAlert');
       function fail(msg){
@@ -265,34 +287,7 @@
           alertBox.querySelector('.alert-text').textContent = msg;
         }
       }
-      var fields = {};
-      document.querySelectorAll('[data-tab-panel="manual"] [data-field]').forEach(function(inp){
-        fields[inp.getAttribute('data-field')] = inp.value;
-      });
-      var startRaw = document.getElementById('manualStart');
-      var daysRaw = document.getElementById('manualDays');
-      var days = startRaw ? 3 : 3;
-      days = daysRaw ? parseInt(daysRaw.value, 10) : 3;
-      if(!(days >= 1 && days <= 15)){
-        fail('Jumlah hari harus antara 1 sampai 15.');
-        return;
-      }
-      var start = startRaw && startRaw.value ? new Date(startRaw.value) : new Date('2023-08-29T15:00:00');
-      if(isNaN(start.getTime())){
-        fail('Tanggal mulai belum valid.');
-        return;
-      }
-      var total = days * 48;
-      var rows = [];
-      for(var i = 0; i < total; i++){
-        var d = new Date(start.getTime() + i * 30 * 60000);
-        var r = { datetime: fmtDate(d) };
-        Object.keys(fields).forEach(function(k){ r[k] = fields[k]; });
-        if(!r.air_temperature) r.air_temperature = '26.8';
-        rows.push(r);
-      }
-      if(alertBox) alertBox.hidden = true;
-      runPredictFlow(rows);
+      fail('Form manual tidak didukung oleh model frozen final karena input harus cocok dengan fixture test resmi dan urutan daily batch. Gunakan unggah CSV atau Contoh Data Resmi.');
     });
   }
 
@@ -305,31 +300,39 @@
       if(a){
         a.hidden = false;
         a.className = 'alert alert-error';
+        a.setAttribute('role', 'alert');
+        a.setAttribute('tabindex', '-1');
         a.querySelector('.alert-text').textContent = msg;
+        a.scrollIntoView({behavior: 'smooth', block: 'center'});
+        a.focus({preventScroll: true});
       } else {
         alert(msg);
       }
     }
+    if(runPredictFlow.active) return;
+    runPredictFlow.active = true;
+    if(predictBtn) predictBtn.disabled = true;
+    if(formPredictBtn) formPredictBtn.disabled = true;
+    if(demoBtn) demoBtn.disabled = true;
+    try { localStorage.removeItem('sfh_last_result'); } catch(e){}
+    function restore(){
+      runPredictFlow.active = false;
+      if(predictBtn) predictBtn.disabled = !pendingRows.length;
+      if(formPredictBtn) formPredictBtn.disabled = false;
+      if(demoBtn) demoBtn.disabled = false;
+    }
     function go(){
-      fetch('/api/predict', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rows: rows })
-      }).then(function(res){
-        return res.json().then(function(body){
-          if(!res.ok){
-            throw new Error(body && body.error && body.error.message ? body.error.message : 'Layanan model gagal.');
-          }
-          return body;
-        });
-      }).then(function(data){
-        if(data.source !== 'real_original_pth' || data.simulation !== false || !Array.isArray(data.predictions)){
-          throw new Error('Respons bukan hasil checkpoint RINTIK yang terverifikasi.');
-        }
-        try { localStorage.setItem('sfh_last_result', JSON.stringify({ savedAt: Date.now(), payload: data })); } catch(e){}
+      if(!publicApiClient || !publicPredictionLib){
+        restore();
+        fail('Klien backend RINTIK tidak tersedia. Muat ulang halaman lalu coba lagi.');
+        return;
+      }
+      publicPredictionLib.processRows(rows, publicApiClient).then(function(result){
+        try { localStorage.setItem('sfh_last_result', JSON.stringify({ savedAt: Date.now(), payload: result.payload, meta: result.meta })); } catch(e){}
         window.location.href = 'hasil.html';
       }).catch(function(error){
-        fail(error && error.message ? error.message : 'Terjadi kendala saat memproses. Periksa data Anda lalu coba lagi.');
+        restore();
+        fail(publicPredictionLib.errorMessage(error));
       });
     }
     if(!overlay){ go(); return; }
@@ -442,22 +445,23 @@
     var d = new Date(String(s).replace(' ', 'T'));
     return isNaN(d.getTime()) ? null : d;
   }
-  function loadStoredSeries(){
+  function loadStoredResult(){
     try {
       var raw = localStorage.getItem('sfh_last_result');
       if(raw){
-        var data = JSON.parse(raw).payload || JSON.parse(raw);
-        if(data.source !== 'real_original_pth' || data.simulation !== false) return [];
+        var stored = JSON.parse(raw);
+        var data = stored.payload || stored;
+        if(data.source !== 'real_original_pth' || data.simulation !== false) return null;
         var preds = data.predictions || [];
         if(preds.length){
           var normalized = preds.map(function(p){
             return { datetime: toDateObj(p.datetime), value: Number(p.air_humidity) };
           }).filter(function(p){ return p.datetime && Number.isFinite(p.value); });
-          return normalized.length === preds.length ? normalized : [];
+          return normalized.length === preds.length ? {series: normalized, meta: stored.meta || {}, savedAt: stored.savedAt || null} : null;
         }
       }
     } catch(e){}
-    return [];
+    return null;
   }
 
   /* =========================================================
@@ -465,10 +469,23 @@
      ========================================================= */
   var hasilRoot = document.getElementById('hasilRoot');
   if(hasilRoot){
-    var FULL_SERIES = loadStoredSeries();
-    if(!FULL_SERIES.length){
-      hasilRoot.innerHTML = '<div class="alert alert-error"><div class="alert-text">Belum ada hasil model RINTIK yang valid. Jalankan backend dan proses data kembali; halaman ini tidak membuat prediksi contoh.</div></div>';
+    var storedResult = loadStoredResult();
+    if(!storedResult || !storedResult.series.length){
+      hasilRoot.innerHTML = '<div class="container"><div class="alert alert-error"><div class="alert-text">Belum ada hasil model RINTIK yang valid. Buka halaman Prediksi dan proses CSV melalui backend; halaman ini tidak membuat prediksi contoh.</div></div><div class="action-row"><a class="btn btn-primary" href="predict.html">Buka Prediksi</a><a class="btn btn-secondary" href="dashboard.html">Dashboard Operator</a></div></div>';
       return;
+    }
+    var FULL_SERIES = storedResult.series;
+    var provenance = document.getElementById('resultProvenance');
+    if(provenance){
+      if(storedResult.meta.workflow === 'daily_batch'){
+        provenance.className = 'alert ' + (storedResult.meta.monitoringStatus === 'unavailable' ? 'alert-info' : 'alert-success');
+        provenance.querySelector('.alert-text').textContent = 'Hasil model asli untuk daily batch ' + storedResult.meta.date + ' telah dipersistenkan.' +
+          (storedResult.meta.monitoringStatus === 'unavailable' ? ' Monitoring operator belum tersedia: ' + storedResult.meta.monitoringWarning : ' Hasil tersedia pada Dashboard Operator; sensor fisik simulasi tetap merupakan data terpisah.');
+      } else {
+        provenance.className = 'alert alert-info';
+        provenance.querySelector('.alert-text').textContent = 'Hasil model asli ini berasal dari endpoint kompatibilitas submission 734 titik. Jalur ini stateless dan tidak mengisi replay harian Dashboard Operator.';
+      }
+      provenance.hidden = false;
     }
     var values = FULL_SERIES.map(function(r){ return r.value; });
     var avg = values.reduce(function(a,b){return a+b;},0)/values.length;
@@ -606,8 +623,9 @@
     /* action buttons (desktop action-row + mobile sticky bar share this class) */
     document.querySelectorAll('.download-csv-btn').forEach(function(downloadBtn){
       downloadBtn.addEventListener('click', function(){
-        var lines = ['datetime,air_humidity'];
-        FULL_SERIES.forEach(function(r){ lines.push(fmtDate(r.datetime)+','+r.value.toFixed(4)); });
+        var workflow = storedResult.meta.workflow || 'unknown';
+        var lines = ['datetime,air_humidity,prediction_source,simulation,workflow'];
+        FULL_SERIES.forEach(function(r){ lines.push(fmtDate(r.datetime)+','+r.value.toFixed(4)+',real_original_pth,false,'+workflow); });
         var blob = new Blob([lines.join('\n')], {type:'text/csv'});
         var url = URL.createObjectURL(blob);
         var a = document.createElement('a');

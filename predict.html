@@ -47,7 +47,7 @@
   <div class="container">
     <span class="step-pill">Langkah 1 dari 2</span>
     <h1>Buat prediksi kelembapan udara</h1>
-    <p>Unggah data sensor Anda atau isi form manual, lalu dapatkan hasil prediksi kelembapan udara hanya dalam beberapa detik.</p>
+    <p>Unggah satu tanggal fixture test resmi untuk daily batch, atau test.csv resmi lengkap untuk pemeriksaan kompatibilitas submission.</p>
   </div>
 </section>
 
@@ -61,10 +61,10 @@
         </button>
         <button class="tab-btn" data-tab="manual">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h10M4 18h7"/></svg>
-          Form Manual
+          Form Manual (terbatas)
         </button>
       </div>
-      <span class="tab-meta">Prediksi biasanya selesai dalam beberapa detik</span>
+      <span class="tab-meta">Durasi bergantung ukuran batch dan kesiapan backend lokal</span>
     </div>
 
     <div class="split-12-1">
@@ -107,7 +107,7 @@
 
             <button type="button" class="demo-btn" id="demoBtn">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18l6-6-6-6"/></svg>
-              Gunakan Contoh Data
+              Gunakan Contoh Data Resmi
             </button>
 
             <div class="csv-preview" id="csvPreview" hidden></div>
@@ -119,7 +119,7 @@
         <div class="tab-panel" data-tab-panel="manual">
           <div class="card panel-card">
             <h3>Isi Form Manual</h3>
-            <p>Masukkan nilai sensor Anda secara manual jika Anda tidak memiliki file CSV.</p>
+            <p>Form ini dipertahankan untuk transparansi UI lama, tetapi input arbitrer tidak diterima oleh kontrak model frozen final.</p>
 
             <div class="accordion-item open">
               <div class="accordion-head">
@@ -215,13 +215,13 @@
                 <div class="field"><label>Tanggal Mulai</label><input type="datetime-local" id="manualStart" value="2023-08-29T15:00"></div>
                 <div class="field"><label>Jumlah Hari (1-15)</label><input type="number" id="manualDays" min="1" max="15" step="1" value="3"></div>
               </div>
-              <div class="alert" id="formAlert" hidden>
+              <div class="alert alert-info" id="formAlert" role="status">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>
-                <span class="alert-text"></span>
+                <span class="alert-text">Form manual tidak menjalankan inferensi final. Gunakan CSV fixture resmi agar seluruh fitur, timestamp, dan urutan daily batch dapat diverifikasi.</span>
               </div>
             </div>
 
-            <button type="button" class="btn btn-primary btn-lg btn-block" id="predictBtnForm" style="margin-top:10px;">Buat Prediksi</button>
+            <button type="button" class="btn btn-secondary btn-lg btn-block" id="predictBtnForm" style="margin-top:10px;">Mengapa form manual tidak didukung?</button>
           </div>
         </div>
       </div>
@@ -240,19 +240,19 @@
           <ul class="tips-list">
             <li>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
-              Pastikan satuan setiap nilai sesuai dengan yang tertera pada label.
+              CSV harus memuat tepat 25 kolom input resmi; target air_humidity tidak boleh ikut diunggah.
             </li>
             <li>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
-              Semakin lengkap data yang Anda masukkan, semakin akurat hasil prediksinya.
+              Gunakan satu tanggal resmi berisi 18, 48, atau 44 baris, atau test.csv resmi lengkap 734 baris.
             </li>
             <li>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
-              Gunakan tombol Gunakan Contoh Data untuk melihat contoh pengisian yang benar.
+              Gunakan tombol Contoh Data Resmi untuk mengambil tanggal berikutnya dari fixture test terverifikasi.
             </li>
             <li>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
-              Prediksi biasanya selesai hanya dalam beberapa detik.
+              Backend selalu memeriksa checksum, urutan tanggal, dan provenance sebelum inferensi.
             </li>
           </ul>
         </div>
@@ -294,7 +294,7 @@
         <ul>
           <li><a href="index.html">Beranda</a></li>
           <li><a href="predict.html">Buat Prediksi</a></li>
-          <li><a href="hasil.html">Contoh Hasil</a></li>
+          <li><a href="hasil.html">Hasil Terakhir</a></li>
         </ul>
       </div>
       <div>
@@ -312,6 +312,8 @@
   </div>
 </footer>
 
+<script src="lib/rintik-api.js"></script>
+<script src="lib/public-prediction.js"></script>
 <script src="assets/js/app.js"></script>
 </body>
 </html>
