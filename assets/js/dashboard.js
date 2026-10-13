@@ -191,7 +191,7 @@
       state.catalog = responses[2];
       state.incidents = responses[3].incidents || [];
       sessionStorage.setItem('rintik_api_url', baseUrl);
-      setService(state.health.status === 'degraded' ? 'degraded' : 'online', state.health.status === 'degraded' ? 'Model siap · monitoring terganggu' : 'Model dan monitoring siap');
+      setService(state.health.status === 'degraded' ? 'degraded' : 'online', state.health.status === 'degraded' ? 'Sistem perlu diperiksa' : 'Sistem siap');
       renderRunConsoleState();
       renderFeatureSelector();
       renderDaySelector();
@@ -206,7 +206,7 @@
     } catch(error){
       state.bundle = null;
       showEmpty(true);
-      setService('offline', 'Backend tidak tersedia');
+      setService('offline', 'Sistem tidak terhubung');
       showAlert('Backend RINTIK tidak tersedia', errorMessage(error) + ' Tidak ada prediksi pengganti yang dibuat.');
     } finally { setLoading(false); }
   }
@@ -297,21 +297,25 @@
     var result = state.bundle.result;
     var monitoring = state.bundle.monitoring;
     var predictions = result.predictions;
-    var physical = monitoring.sensor.values.map(function(row){ return row.physical_rh; });
     var modelValues = predictions.map(function(row){ return row.post_3; });
     var presentation = verdictPresentation(monitoring.assessment.verdict);
     $('verdictBadge').textContent = presentation[0];
     $('verdictBadge').className = 'verdict-badge ' + presentation[1];
-    $('overviewLead').textContent = formatDate(result.date) + ' · estimasi RINTIK dan sensor fisik simulasi ditampilkan terpisah.';
+    $('overviewLead').textContent = formatDate(result.date) + ' · prediksi, data operasional, dan kondisi sensor humidity.';
     $('metricRows').textContent = predictions.length + '/48';
     $('metricRowsNote').textContent = predictions.length === 48 ? 'batch harian lengkap' : 'potongan parsial dataset resmi';
     $('metricMean').textContent = mean(modelValues).toFixed(1) + '%';
-    var physicalMean = mean(physical);
-    $('metricSensor').textContent = physicalMean === null ? 'Tidak tersedia' : physicalMean.toFixed(1) + '%';
-    $('metricSensorNote').textContent = dataLib.sensorStateLabel(monitoring.sensor.state) + ' · bukan ground truth';
     var recovery = dataLib.recoveryPresentation(monitoring);
-    $('metricRecovery').textContent = recovery.status;
-    $('metricRecoveryNote').textContent = recovery.note;
+    var recoveryByTime = {};
+    (monitoring.recovery.values || []).forEach(function(row){ recoveryByTime[row.timestamp] = row.recovery_rh; });
+    var operational = monitoring.sensor.values.map(function(row){
+      return row.physical_rh === null || row.physical_rh === undefined ? recoveryByTime[row.timestamp] : row.physical_rh;
+    });
+    var operationalMean = mean(operational);
+    $('metricSensor').textContent = operationalMean === null ? 'Tidak tersedia' : operationalMean.toFixed(1) + '%';
+    $('metricSensorNote').textContent = recovery.showSeries ? 'estimasi RINTIK saat sensor terputus' : 'dari sensor humidity';
+    $('metricRecovery').textContent = recovery.showSeries ? 'Aktif · estimasi' : recovery.status;
+    $('metricRecoveryNote').textContent = recovery.showSeries ? 'menggunakan estimasi RINTIK' : recovery.note;
     $('recoveryLegend').hidden = !recovery.showSeries;
 
     $('diagnosisState').textContent = presentation[0];

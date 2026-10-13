@@ -30,27 +30,30 @@ assertUniqueIds(predict,'predict.html');
 assertUniqueIds(result,'hasil.html');
 assertUniqueIds(dashboard,'dashboard.html');
 
-['data-mode="daily"','data-mode="batch"','data-mode="manual"','manualGroups','validateManualButton','openResetButton','completionPanel','completionResetButton','prepareRecoveryButton','faultSimulation','processButton','latestContent','recoveryAction','prediction-flow.js'].forEach(token=>assert(predict.includes(token),`predict.html missing ${token}`));
+['data-mode="daily"','data-mode="demo"','Operasional Harian','Demo 16 Hari','manualGroups','validateManualButton','openResetButton','completionPanel','completionResetButton','prepareRecoveryButton','processButton','latestContent','operationalBanner','prediction-flow.js?v='].forEach(token=>assert(predict.includes(token),`predict.html missing ${token}`));
+['data-mode="batch"','data-mode="manual"','refreshButton','recoveryAction','faultSimulation'].forEach(token=>assert(!predict.includes(token),`predict.html must not expose legacy control ${token}`));
 assert(!predict.includes('type="file"'),'Prediction must not require File Explorer');
-assert(predict.includes('Form Manual') && predict.includes('TIDAK DISIMPAN'),'Manual inspection form must remain explicit and non-persistent');
+assert(predict.includes('Masukkan data sensor manual') && predict.includes('tanpa menyimpannya'),'Manual inspection form must remain explicit and non-persistent');
 assert(!predict.includes('assets/js/app.js'),'Prediction must not mutate or depend on shared home behavior');
 assert(!result.includes('assets/js/app.js'),'Result must not mutate or depend on shared home behavior');
 assert(!predict.includes('assets/css/style.css') && !result.includes('assets/css/style.css'),'Product flow must stay isolated from protected home styling and its external font import');
-assert(result.includes('resultChart') && result.includes('resultTableBody') && result.includes('Eksplorasi seluruh riwayat'));
+assert(result.includes('resultChart') && result.includes('resultTableBody') && result.includes('resultOperational') && result.includes('Eksplorasi seluruh riwayat'));
 assert(!dashboard.includes('dayFile') && !dashboard.includes('processDayButton') && !dashboard.includes('chooseFileButton'),'Dashboard must not own primary ingestion controls');
 assert(dashboard.includes('Buka alur Prediksi'));
 
 assert(flowJs.includes('getNextOfficialDemoInput'));
 assert(flowJs.includes("resetDemoState('RESET_DEMO_STATE')"));
-assert(flowJs.includes('23/23 fitur'));
-assert(flowJs.includes("Math.min(15,16-completed)"));
+assert(flowJs.includes('Form diperiksa:'));
+assert(flowJs.includes("state.mode === 'demo' ? 16-completed : 1"));
 assert(flowJs.includes('monitoringEnabled:simulationEnabled'));
 assert(flowJs.includes("createDemoAudit('pass'"));
 assert(flowJs.includes('confirmIncident'));
 assert(flowJs.includes("var targetDate = '2023-09-06'"));
 assert(flowJs.includes('focusLatestResult'));
+assert(flowJs.includes('operationalValues'));
+assert(flowJs.includes("row.physical_rh"));
 assert(!flowJs.includes('predictFull('),'Product replay must use daily persistence, not the stateless 734 route');
 assert(flowCss.includes('@media (prefers-reduced-motion: reduce)'));
 assert(flowCss.includes('@media (max-width: 700px)'));
 
-console.log('RINTIK_PRODUCT_FLOW_OK home=byte-identical daily=true batch15=sequential manual=inspection-only reset=explicit simulation=explicit dashboard=input-free');
+console.log('RINTIK_PRODUCT_FLOW_OK home=byte-identical modes=daily+demo16 manual=inspection-only reset=explicit recovery=single-action dashboard=input-free');

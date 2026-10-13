@@ -95,7 +95,7 @@ function main(){
   assert(js.indexOf('setDashboardDrawer')>=0);
   assert(js.indexOf("event.key === 'Escape'")>=0);
   assert(js.indexOf("activateView(params.get('view') || 'overview', false, false)") < js.indexOf('renderAll();'));
-  assert(js.indexOf('real_original_pth')===-1 || html.indexOf('model original')>=0);
+  assert(js.indexOf('real_original_pth')===-1 || (html.indexOf('Settings / Technical Details')>=0 && html.indexOf('Lineage model')>=0));
 
   console.log('RINTIK_DASHBOARD_CONTRACT_OK gaps=true unitSafe=true provenance=true a11yStatic=true references=true');
 }

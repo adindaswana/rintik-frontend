@@ -7,7 +7,7 @@
   <title>Dashboard RINTIK</title>
   <meta name="description" content="Dashboard RINTIK untuk eksplorasi hasil daily batch, monitoring sensor RH sintetis, dan recovery terlabel estimasi.">
   <link rel="icon" href="assets/img/icon-droplet.png">
-  <link rel="stylesheet" href="assets/css/dashboard.css">
+  <link rel="stylesheet" href="assets/css/dashboard.css?v=20261013f">
 </head>
 <body>
   <a class="skip-link" href="#mainContent">Lewati ke konten utama</a>
@@ -73,7 +73,7 @@
         <div class="workspace-navigation">
           <button class="button button-secondary dashboard-menu-button" id="dashboardMenuButton" type="button" aria-controls="dashboardDrawer" aria-expanded="false"><span aria-hidden="true">☰</span><span id="dashboardMenuLabel">Ringkasan</span></button>
           <div>
-            <div class="section-kicker">Tanggal pengukuran dataset</div>
+            <div class="section-kicker">Tanggal tersimpan</div>
             <div class="date-controls">
               <button class="icon-button" id="previousDay" type="button" aria-label="Tanggal sebelumnya" disabled>←</button>
               <label class="visually-hidden" for="daySelect">Pilih tanggal tersimpan</label>
@@ -93,7 +93,7 @@
         <div>
           <div class="section-kicker">Operator console siap</div>
           <h1 id="emptyTitle">Mulai replay harian RINTIK</h1>
-          <p>Hubungkan backend lokal, lalu pilih fixture tanggal berikutnya. Dashboard tidak membuat data contoh ketika belum ada hasil model.</p>
+          <p>Belum ada riwayat untuk dijelajahi. Mulai proses harian dari halaman Prediksi.</p>
         </div>
       </section>
 
@@ -102,7 +102,7 @@
           <div>
             <div class="section-kicker">Monitoring kelembapan harian</div>
             <h1>Ringkasan kelembapan harian</h1>
-            <p id="overviewLead">Pilih hasil batch untuk melihat estimasi RINTIK dan sensor RH simulasi pada waktu yang sama.</p>
+            <p id="overviewLead">Pilih tanggal untuk melihat prediksi, data operasional, dan kondisi sensor humidity.</p>
           </div>
           <span class="verdict-badge verdict-neutral" id="verdictBadge">Belum ada data</span>
         </div>
@@ -112,10 +112,10 @@
             <span>Kelengkapan batch</span><strong id="metricRows">—</strong><small id="metricRowsNote">timestamp tersimpan</small>
           </article>
           <article class="metric-card">
-            <span>Rata-rata RINTIK</span><strong id="metricMean">—</strong><small>estimasi model · %RH</small>
+            <span>Prediksi RINTIK</span><strong id="metricMean">—</strong><small>rata-rata · %RH</small>
           </article>
           <article class="metric-card">
-            <span>Sensor fisik demo</span><strong id="metricSensor">—</strong><small id="metricSensorNote">simulasi, bukan ground truth</small>
+            <span>Data operasional</span><strong id="metricSensor">—</strong><small id="metricSensorNote">dari sensor humidity</small>
           </article>
           <article class="metric-card">
             <span>Status recovery</span><strong id="metricRecovery">—</strong><small id="metricRecoveryNote">sumber selalu ditandai</small>
@@ -124,19 +124,19 @@
 
         <div class="provenance-banner" id="provenanceBanner">
           <span class="provenance-mark" aria-hidden="true"></span>
-          <div><strong>Perbandingan demo yang terpisah.</strong> Garis RINTIK berasal dari checkpoint original; garis sensor fisik dibuat khusus untuk simulasi dan tidak dipakai model.</div>
+          <div><strong>Sumber data selalu ditandai.</strong> Saat sensor humidity terputus dalam demo, data operasional menggunakan estimasi RINTIK tanpa mengubah catatan sensor aslinya.</div>
         </div>
 
         <div class="overview-grid">
           <article class="card chart-card" aria-labelledby="rhChartTitle">
             <div class="card-header">
-              <div><div class="section-kicker">30 menit · %RH</div><h2 id="rhChartTitle">RINTIK vs sensor fisik simulasi</h2></div>
+              <div><div class="section-kicker">30 menit · %RH</div><h2 id="rhChartTitle">Perubahan humidity</h2></div>
               <button class="text-button" id="toggleRhTable" type="button" aria-expanded="false" aria-controls="rhDataTable">Tampilkan tabel</button>
             </div>
             <div class="chart-legend" role="group" aria-label="Legenda grafik">
-              <span><i class="legend-line legend-model"></i>RINTIK P3 · model original</span>
-              <span><i class="legend-line legend-synthetic"></i>Sensor fisik · simulasi</span>
-              <span id="recoveryLegend" hidden><i class="legend-line legend-recovery"></i>Recovery · estimated</span>
+              <span><i class="legend-line legend-model"></i>Prediksi RINTIK</span>
+              <span><i class="legend-line legend-synthetic"></i>Sensor humidity</span>
+              <span id="recoveryLegend" hidden><i class="legend-line legend-recovery"></i>Data operasional pengganti</span>
             </div>
             <div class="chart-frame" id="rhChart" role="group" aria-label="Grafik kelembapan belum tersedia"></div>
             <div class="chart-tooltip" id="rhTooltip" role="status" aria-live="polite" hidden></div>
@@ -224,8 +224,8 @@
 
   <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
 
-  <script src="lib/rintik-api.js"></script>
-  <script src="lib/dashboard-data.js"></script>
-  <script src="assets/js/dashboard.js"></script>
+  <script src="lib/rintik-api.js?v=20261013f"></script>
+  <script src="lib/dashboard-data.js?v=20261013f"></script>
+  <script src="assets/js/dashboard.js?v=20261013f"></script>
 </body>
 </html>

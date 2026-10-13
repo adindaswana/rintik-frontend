@@ -1,104 +1,20 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#f3f7f5">
-<title>Hasil Terbaru - RINTIK</title>
-<meta name="description" content="Lihat keluaran daily batch RINTIK terbaru dan provenance simulasinya.">
-<link rel="icon" href="assets/img/logo.png">
-<link rel="stylesheet" href="assets/css/prediction-flow.css">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#f3f7f5">
+<title>Hasil - RINTIK</title><meta name="description" content="Lihat prediksi dan data humidity operasional terbaru RINTIK.">
+<link rel="icon" href="assets/img/logo.png"><link rel="stylesheet" href="assets/css/prediction-flow.css?v=20261013g">
 </head>
 <body class="flow-page result-page" data-flow-page="result">
 <a class="flow-skip-link" href="#mainContent">Lewati ke konten utama</a>
-
-<header class="navbar">
-  <div class="container navbar-inner">
-    <a href="index.html" class="brand">
-      <img src="assets/img/logo.png" alt="Logo RINTIK" class="brand-mark">
-      <span class="brand-text"><span class="brand-title">RINTIK</span><span class="brand-sub">Prediksi kelembapan udara</span></span>
-    </a>
-    <nav class="nav-links" aria-label="Navigasi utama">
-      <a href="index.html">Beranda</a><a href="predict.html" data-api-link>Prediksi</a><a href="hasil.html" class="active" aria-current="page">Hasil</a><a href="dashboard.html" data-api-link>Dashboard</a>
-    </nav>
-    <div class="nav-right">
-      <a href="dashboard.html" data-api-link class="btn btn-primary btn-sm">Buka Dashboard</a>
-      <button class="nav-toggle" type="button" aria-label="Buka menu" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-    </div>
+<header class="navbar"><div class="container navbar-inner"><a href="index.html" class="brand"><img src="assets/img/logo.png" alt="Logo RINTIK" class="brand-mark"><span class="brand-text"><span class="brand-title">RINTIK</span><span class="brand-sub">Prediksi kelembapan udara</span></span></a><nav class="nav-links" aria-label="Navigasi utama"><a href="index.html">Beranda</a><a href="predict.html" data-api-link>Prediksi</a><a href="hasil.html" class="active" aria-current="page">Hasil</a><a href="dashboard.html" data-api-link>Dashboard</a></nav><div class="nav-right"><a href="dashboard.html" data-api-link class="btn btn-primary btn-sm">Buka Dashboard</a><button class="nav-toggle" type="button" aria-label="Buka menu" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div></div><div class="mobile-menu"><div class="mobile-menu-panel"><a href="dashboard.html" data-api-link class="btn btn-primary btn-block" style="margin-bottom:12px;">Buka Dashboard</a><a href="index.html">Beranda</a><a href="predict.html" data-api-link>Prediksi</a><a href="hasil.html" class="active" aria-current="page">Hasil</a><a href="dashboard.html" data-api-link>Dashboard</a></div></div></header>
+<main id="mainContent" class="flow-main" tabindex="-1"><div class="container">
+  <section class="flow-heading flow-heading-simple" aria-labelledby="resultPageTitle"><div class="flow-heading-copy"><span class="flow-kicker">Hasil terbaru</span><h1 id="resultPageTitle">Humidity hari ini, dalam satu tampilan.</h1><p>Lihat prediksi RINTIK, data operasional, dan kondisi sensor. Buka Dashboard saat Anda ingin menjelajahi riwayat lebih lengkap.</p></div><div class="flow-system-status" id="systemStatus" role="status" aria-live="polite"><span class="flow-status-dot" aria-hidden="true"></span><strong id="systemStatusTitle">Mengambil hasil…</strong><small id="systemStatusDetail">Menyelaraskan data terbaru.</small></div></section>
+  <section class="flow-card result-empty" id="resultEmpty"><div class="result-empty-inner"><div class="result-empty-icon" aria-hidden="true">≈</div><h2>Belum ada hasil tersimpan</h2><p>Jalankan proses harian dari halaman Prediksi. RINTIK tidak menampilkan hasil pengganti ketika data belum tersedia.</p><div class="result-actions"><a class="btn btn-primary" href="predict.html" data-api-link>Mulai prediksi</a><a class="btn btn-secondary" href="index.html">Kembali ke Beranda</a></div></div></section>
+  <div class="result-layout" id="resultContent" hidden>
+    <section class="flow-card result-primary" aria-labelledby="resultDate"><div class="latest-heading"><div><span class="flow-step">Hari terbaru</span><h2 id="resultDate">—</h2><p id="resultStatus">Tersimpan dalam riwayat</p></div><span class="flow-state-label" id="resultVerdict">Siap</span></div><div class="operational-banner" id="resultOperationalBanner" hidden><strong>Data humidity tetap tersedia</strong><span id="resultOperationalBannerText">Sensor terputus. Data operasional menggunakan estimasi RINTIK.</span></div><div class="result-summary"><div class="latest-metric"><span>Prediksi RINTIK</span><strong id="resultMean">—</strong><small>rata-rata</small></div><div class="latest-metric"><span>Data operasional</span><strong id="resultOperational">—</strong><small id="resultOperationalNote">dari sensor humidity</small></div><div class="latest-metric"><span>Terendah</span><strong id="resultMin">—</strong><small>prediksi RINTIK</small></div><div class="latest-metric"><span>Tertinggi</span><strong id="resultMax">—</strong><small>prediksi RINTIK</small></div></div><div class="flow-chart-head"><h3>Perubahan humidity hari ini</h3><div class="flow-chart-legend" id="resultLegend"><span><i class="flow-line-key"></i>Prediksi RINTIK</span></div></div><div class="flow-chart" id="resultChart" role="img" aria-label="Grafik humidity hari ini"></div><details class="result-detail"><summary>Lihat data setiap 30 menit</summary><div class="result-table-wrap"><table class="result-table"><thead><tr><th>Waktu</th><th>Prediksi RINTIK</th><th>Sensor humidity</th><th>Data operasional</th></tr></thead><tbody id="resultTableBody"></tbody></table></div></details></section>
+    <aside class="flow-card result-aside" aria-labelledby="nextActionTitle"><span class="flow-step">Langkah berikutnya</span><h2 id="nextActionTitle">Lanjutkan atau jelajahi</h2><p id="resultSimulationSummary">Memeriksa kondisi sensor…</p><div class="result-provenance" id="resultProvenance"><strong>Sumber data jelas</strong><span>RINTIK membedakan prediksi, pembacaan sensor, dan data pengganti saat sensor terputus.</span></div><a class="btn btn-primary" id="resultNextAction" href="predict.html" data-api-link>Proses hari berikutnya</a><a class="btn btn-secondary" href="dashboard.html" data-api-link>Eksplorasi seluruh riwayat</a><a class="btn btn-secondary" href="index.html">Kembali ke Beranda</a></aside>
   </div>
-  <div class="mobile-menu">
-    <div class="mobile-menu-panel">
-      <a href="dashboard.html" data-api-link class="btn btn-primary btn-block" style="margin-bottom:12px;">Buka Dashboard</a>
-      <a href="index.html">Beranda</a><a href="predict.html" data-api-link>Prediksi</a><a href="hasil.html" class="active" aria-current="page">Hasil</a><a href="dashboard.html" data-api-link>Dashboard</a>
-    </div>
-  </div>
-</header>
-
-<main id="mainContent" class="flow-main" tabindex="-1">
-  <div class="container">
-    <section class="flow-heading" aria-labelledby="resultPageTitle">
-      <div class="flow-heading-copy">
-        <span class="flow-kicker">Hasil daily batch</span>
-        <h1 id="resultPageTitle">Hasil terbaru, tanpa kehilangan konteks.</h1>
-        <p>Ringkasan ini mengikuti proses di halaman Prediksi. Gunakan Dashboard untuk menjelajahi seluruh tanggal dan fitur sensor.</p>
-      </div>
-      <div class="flow-system-status" id="systemStatus" role="status" aria-live="polite">
-        <span class="flow-status-dot" aria-hidden="true"></span><strong id="systemStatusTitle">Mengambil hasil…</strong><small id="systemStatusDetail">Menyelaraskan state backend.</small>
-      </div>
-    </section>
-
-    <section class="flow-card result-empty" id="resultEmpty">
-      <div class="result-empty-inner">
-        <div class="result-empty-icon" aria-hidden="true">≈</div>
-        <h2>Belum ada daily batch yang selesai</h2>
-        <p>Mulai dari halaman Prediksi. RINTIK tidak membuat hasil contoh atau fallback ketika backend belum menghasilkan output model asli.</p>
-        <div class="result-actions"><a class="btn btn-primary" href="predict.html" data-api-link>Mulai pengambilan data</a><a class="btn btn-secondary" href="index.html">Kembali ke Beranda</a></div>
-      </div>
-    </section>
-
-    <div class="result-layout" id="resultContent" hidden>
-      <section class="flow-card result-primary" aria-labelledby="resultDate">
-        <div class="latest-heading">
-          <div><span class="flow-step">Output terbaru</span><h2 id="resultDate">—</h2><p id="resultStatus">Model original · P3 tersimpan</p></div>
-          <span class="flow-state-label" id="resultVerdict">RINTIK siap</span>
-        </div>
-
-        <div class="result-summary">
-          <div class="latest-metric"><span>Rata-rata</span><strong id="resultMean">—</strong><small>RINTIK P3</small></div>
-          <div class="latest-metric"><span>Terendah</span><strong id="resultMin">—</strong><small>RINTIK P3</small></div>
-          <div class="latest-metric"><span>Tertinggi</span><strong id="resultMax">—</strong><small>RINTIK P3</small></div>
-          <div class="latest-metric"><span>Observasi</span><strong id="resultRows">—</strong><small>interval 30 menit</small></div>
-        </div>
-
-        <div class="flow-chart-head"><h3>RINTIK dan sensor humidity simulasi</h3><div class="flow-chart-legend" id="resultLegend"><span><i class="flow-line-key"></i>RINTIK P3</span></div></div>
-        <div class="flow-chart" id="resultChart" role="img" aria-label="Grafik hasil daily batch"></div>
-
-        <details class="result-detail">
-          <summary>Lihat data 30-menit</summary>
-          <div class="result-table-wrap">
-            <table class="result-table">
-              <thead><tr><th>Waktu</th><th>RINTIK P3</th><th>Sensor simulasi</th><th>Recovery estimated</th></tr></thead>
-              <tbody id="resultTableBody"></tbody>
-            </table>
-          </div>
-        </details>
-      </section>
-
-      <aside class="flow-card result-aside" aria-labelledby="nextActionTitle">
-        <span class="flow-step">Lanjutkan alur</span>
-        <h2 id="nextActionTitle">Apa berikutnya?</h2>
-        <p id="resultSimulationSummary">Memeriksa status monitoring dan provenance…</p>
-        <div class="result-provenance" id="resultProvenance"><strong>Provenance</strong><span>Keluaran model dan sensor simulasi selalu disimpan sebagai sumber berbeda.</span></div>
-        <a class="btn btn-primary" id="resultNextAction" href="predict.html" data-api-link>Proses hari berikutnya</a>
-        <a class="btn btn-secondary" href="dashboard.html" data-api-link>Eksplorasi seluruh riwayat</a>
-        <a class="btn btn-secondary" href="index.html">Kembali ke Beranda</a>
-      </aside>
-    </div>
-  </div>
-</main>
-
-<script src="lib/rintik-api.js"></script>
-<script src="lib/public-prediction.js"></script>
-<script src="assets/js/prediction-flow.js"></script>
-</body>
-</html>
+</div></main>
+<script src="lib/rintik-api.js?v=20261013g"></script><script src="lib/public-prediction.js?v=20261013g"></script><script src="assets/js/prediction-flow.js?v=20261013g"></script>
+</body></html>

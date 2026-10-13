@@ -72,7 +72,12 @@ async function selectDay(page,date){
   assert.strictEqual(await page.inputValue('#daySelect'),date);
 }
 async function activateView(page,view){
-  await page.click(`.nav-tab[data-view="${view}"]`);
+  const tab=page.locator(`.nav-tab[data-view="${view}"]`);
+  if(!(await tab.isVisible())){
+    await page.click('#dashboardMenuButton');
+    await page.waitForFunction(()=>document.getElementById('dashboardDrawer').getAttribute('aria-hidden')==='false');
+  }
+  await tab.click();
   await page.waitForFunction(expected => {
     const tab=document.querySelector(`.nav-tab[data-view="${expected}"]`);
     const panel=document.getElementById(`panel${expected[0].toUpperCase()}${expected.slice(1)}`);
@@ -237,6 +242,7 @@ async function run(){
 
     const keyboardPage=await openPage(context,'keyboard',API_URL,{width:1366,height:768}); await selectDay(keyboardPage,'2023-09-03');
     await keyboardPage.keyboard.press('Home');
+    await keyboardPage.click('#dashboardMenuButton');
     await tabUntil(keyboardPage,info=>info.id==='tabOverview','overview tab');
     const firstFocus=await focusInfo(keyboardPage); assert.notStrictEqual(firstFocus.outlineStyle,'none'); assert.notStrictEqual(firstFocus.outlineWidth,'0px');
     await capture(keyboardPage,'12a-keyboard-focus-tab.png');
@@ -244,19 +250,22 @@ async function run(){
     await keyboardPage.keyboard.press('ArrowLeft'); assert.strictEqual(await keyboardPage.locator('#tabOverview').getAttribute('aria-selected'),'true');
     await keyboardPage.keyboard.press('End'); assert.strictEqual(await keyboardPage.locator('#tabSettings').getAttribute('aria-selected'),'true');
     await keyboardPage.keyboard.press('Home'); assert.strictEqual(await keyboardPage.locator('#tabOverview').getAttribute('aria-selected'),'true');
+    await keyboardPage.keyboard.press('Escape');
     await tabUntil(keyboardPage,info=>info.id==='daySelect','day selector'); await keyboardPage.keyboard.press('Home'); await keyboardPage.keyboard.press('ArrowDown'); await keyboardPage.keyboard.press('Enter'); await waitSettled(keyboardPage);
     await tabUntil(keyboardPage,info=>info.className.includes('plot-hit'),'RH plot');
     await keyboardPage.keyboard.press('ArrowRight'); const tooltip1=await text(keyboardPage,'#rhTooltip'); await keyboardPage.keyboard.press('ArrowRight'); const tooltip2=await text(keyboardPage,'#rhTooltip'); assert.notStrictEqual(tooltip1,tooltip2);
     await capture(keyboardPage,'12b-keyboard-chart-tooltip.png');
     await tabUntil(keyboardPage,info=>info.id==='toggleRhTable','table toggle'); await keyboardPage.keyboard.press('Enter'); assert.strictEqual(await keyboardPage.locator('#toggleRhTable').getAttribute('aria-expanded'),'true');
-    await tabUntil(keyboardPage,info=>info.id==='tabOverview','active overview tab'); await keyboardPage.keyboard.press('ArrowRight');
+    await keyboardPage.click('#dashboardMenuButton'); await tabUntil(keyboardPage,info=>info.id==='tabOverview','active overview tab'); await keyboardPage.keyboard.press('ArrowRight');
     assert.strictEqual(await keyboardPage.locator('#tabSensors').getAttribute('aria-selected'),'true');
+    await keyboardPage.keyboard.press('Escape');
     await tabUntil(keyboardPage,info=>info.id==='sensorSearch','sensor search'); await keyboardPage.keyboard.type('suhu'); assert.strictEqual(await keyboardPage.inputValue('#sensorSearch'),'suhu');
     await tabUntil(keyboardPage,info=>info.className.includes('feature-group-button'),'sensor group disclosure'); await keyboardPage.keyboard.press('Enter'); await keyboardPage.keyboard.press('Enter');
     await tabUntil(keyboardPage,info=>info.tag==='INPUT','sensor checkbox'); await keyboardPage.keyboard.press('Space');
     await tabUntil(keyboardPage,info=>info.id==='resetSensors','reset sensors');
-    await tabUntil(keyboardPage,info=>info.id==='tabSensors','active sensors tab'); await keyboardPage.keyboard.press('ArrowRight');
+    await keyboardPage.click('#dashboardMenuButton'); await tabUntil(keyboardPage,info=>info.id==='tabSensors','active sensors tab'); await keyboardPage.keyboard.press('ArrowRight');
     assert.strictEqual(await keyboardPage.locator('#tabSettings').getAttribute('aria-selected'),'true');
+    await keyboardPage.keyboard.press('Escape');
     await tabUntil(keyboardPage,info=>info.id==='auditScenario','settings audit control'); await keyboardPage.keyboard.press('Tab');
     keyboardSteps.push({step:'left settings control',focus:await focusInfo(keyboardPage)});
     await capture(keyboardPage,'12c-keyboard-settings-exit.png');

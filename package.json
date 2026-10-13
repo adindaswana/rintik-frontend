@@ -11,8 +11,9 @@
     "dashboard:test": "node scripts/dashboard_contract.js",
     "integration:test": "node scripts/integration_smoke.js",
     "browser:test": "node scripts/m4_browser_qa.js",
-    "rehearsal:test": "node scripts/m5_demo_rehearsal.js",
-    "product-flow-browser:test": "node scripts/product_flow_browser_qa.js",
-    "post-m5-public-flow:test": "node scripts/post_m5_public_flow_qa.js"
+    "rehearsal:test": "node scripts/product_overhaul_browser_qa.js",
+    "product-flow-browser:test": "node scripts/product_overhaul_browser_qa.js",
+    "product-overhaul-browser:test": "node scripts/product_overhaul_browser_qa.js",
+    "post-m5-public-flow:test": "node scripts/product_overhaul_browser_qa.js"
   }
 }

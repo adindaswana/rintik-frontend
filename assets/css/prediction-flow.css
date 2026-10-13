@@ -326,3 +326,42 @@ h1, h2, h3, h4 { margin: 0; color: #131e30; font-family: "Trebuchet MS", "Segoe 
 @media (prefers-reduced-motion: reduce) {
   .flow-page *, .flow-page *::before, .flow-page *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
 }
+
+/* Simplified product flow: two primary paths, detail on demand. */
+.flow-heading-simple { align-items: center; }
+.flow-heading-simple .flow-heading-copy { max-width: 780px; }
+.flow-heading-simple h1 { max-width: 760px; }
+.mode-switch-two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.mode-switch-two .mode-card { min-height: 126px; }
+.demo-panel { margin-top: 16px; padding: 15px; border: 1px solid var(--flow-line); border-radius: 16px; background: var(--flow-soft); }
+.demo-panel .flow-progress-card { margin: 0 0 11px; padding: 0 0 13px; border: 0; border-bottom: 1px solid var(--flow-line); border-radius: 0; background: transparent; box-shadow: none; }
+.demo-panel .completion-panel { margin: 12px 0 0; padding: 15px; grid-template-columns: auto minmax(0, 1fr); border-radius: 14px; box-shadow: none; }
+.demo-panel .completion-actions { width: auto; grid-column: 1 / -1; display: flex; flex-wrap: wrap; }
+.demo-panel .reset-confirmation { margin: 12px 0 0; }
+.manual-details { margin-top: 18px; padding-top: 0; border: 1px solid var(--flow-line); border-radius: 14px; background: var(--flow-soft); }
+.manual-details > summary { padding: 14px 15px; display: flex; align-items: center; justify-content: space-between; gap: 14px; cursor: pointer; list-style: none; }
+.manual-details > summary::-webkit-details-marker { display: none; }
+.manual-details > summary strong, .manual-details > summary small { display: block; }
+.manual-details > summary strong { font-size: 13px; }
+.manual-details > summary small { margin-top: 2px; color: var(--flow-muted); font-size: 10px; font-weight: 500; }
+.manual-details[open] > summary > span:last-child { transform: rotate(45deg); }
+.manual-details > summary > span:last-child { color: var(--flow-green); font-size: 20px; line-height: 1; transition: transform 180ms var(--flow-ease); }
+.manual-details-body { padding: 0 15px 15px; border-top: 1px solid var(--flow-line); }
+.flow-grid, .flow-control-card, .manual-details, .manual-details-body, .manual-groups, .manual-group, .manual-timestamp, .manual-timestamp input { min-width: 0; }
+.manual-details-body > p { margin: 13px 0; color: var(--flow-muted); font-size: 12px; }
+.operational-banner { margin: 16px 0 0; padding: 12px 14px; border: 1px solid #afc9bd; border-radius: 12px; color: var(--flow-green-dark); background: var(--flow-green-soft); }
+.operational-banner strong, .operational-banner span { display: block; }
+.operational-banner strong { font-size: 13px; }
+.operational-banner span { margin-top: 2px; color: #3e6857; font-size: 11px; }
+.flow-control-card > .flow-primary-action { margin-top: 16px; }
+.result-page .result-empty { min-height: 390px; }
+
+@media (max-width: 700px) {
+  .mode-switch-two { grid-template-columns: 1fr; }
+  .mode-switch-two .mode-card { min-height: 105px; }
+  .demo-panel { padding: 13px; }
+  .demo-panel .flow-progress-card { grid-template-columns: 1fr auto; }
+  .demo-panel .flow-progress-track { grid-column: 1 / -1; }
+  .demo-panel .flow-reset-button { grid-column: 1 / -1; }
+  .manual-timestamp input { width: 100%; max-width: 100%; }
+}

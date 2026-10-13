@@ -332,9 +332,10 @@ body.dashboard-drawer-open { overflow: hidden; }
 @media (max-width: 820px) {
   .main-content { padding: 0 16px 44px; }
   .sidebar { top: 75px; bottom: 10px; left: 10px; width: min(336px,calc(100vw - 20px)); padding: 15px; }
-  .workspace-bar { position: static; margin: 14px 0 20px; padding: 13px; align-items: stretch; }
+  .workspace-bar { position: static; margin: 14px 0 20px; padding: 13px; align-items: stretch; flex-direction: column; }
   .workspace-navigation { align-items: stretch; flex: 1; }
   .dashboard-menu-button { min-width: 130px; }
+  .workspace-actions { width: 100%; display: grid; grid-template-columns: 1fr 1fr; }
 }
 
 @media (max-width: 600px) {

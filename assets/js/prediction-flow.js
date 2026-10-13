@@ -32,6 +32,22 @@
       return Number(value);
     }).filter(Number.isFinite);
   }
+  function operationalValues(result,monitoring){
+    var predictions = result && result.predictions || [];
+    if(!monitoring || !monitoring.sensor) return {values:predictionValues(result),source:'prediction'};
+    var sensorMap = {}, recoveryMap = {};
+    monitoring.sensor.values.forEach(function(row){ sensorMap[row.timestamp] = row.physical_rh; });
+    (monitoring.recovery && monitoring.recovery.values || []).forEach(function(row){ recoveryMap[row.timestamp] = row.recovery_rh; });
+    var usedRecovery = false;
+    var values = predictions.map(function(row){
+      var timestamp = timestampOf(row), sensor = sensorMap[timestamp];
+      if(sensor !== null && sensor !== undefined && Number.isFinite(Number(sensor))) return Number(sensor);
+      var recovery = recoveryMap[timestamp];
+      if(recovery !== null && recovery !== undefined && Number.isFinite(Number(recovery))){ usedRecovery = true; return Number(recovery); }
+      return null;
+    }).filter(function(value){ return value !== null; });
+    return {values:values,source:usedRecovery?'recovery':'sensor'};
+  }
   function timestampOf(row){ return row.timestamp || row.datetime; }
   function sensorStateLabel(value){
     var labels = {available_simulated:'Normal · simulasi',stuck_simulated:'Stuck · simulasi',missing_simulated:'Terputus · simulasi',simulated_repaired:'Pulih · simulasi'};
@@ -112,7 +128,7 @@
     var pad = {left:38,right:10,top:14,bottom:27};
     var x = function(index){ return pad.left + index / Math.max(1,predictions.length - 1) * (width - pad.left - pad.right); };
     var y = function(value){ return pad.top + (1 - Number(value) / 100) * (height - pad.top - pad.bottom); };
-    var svg = svgNode('svg',{viewBox:'0 0 '+width+' '+height,role:'img','aria-label':'Grafik estimasi RINTIK'+(monitoring?', sensor humidity simulasi, dan recovery estimated bila tersedia':'')});
+    var svg = svgNode('svg',{viewBox:'0 0 '+width+' '+height,role:'img','aria-label':'Grafik prediksi RINTIK dan data humidity operasional'});
     [0,25,50,75,100].forEach(function(value){
       svg.appendChild(svgNode('line',{x1:pad.left,y1:y(value),x2:width-pad.right,y2:y(value),stroke:'#dce5e1','stroke-width':'1'}));
       svg.appendChild(svgNode('text',{x:pad.left-7,y:y(value)+4,fill:'#718079','font-size':'9','text-anchor':'end'},String(value)));
@@ -130,9 +146,9 @@
   }
 
   function legendHtml(monitoring){
-    var html = '<span><i class="flow-line-key"></i>RINTIK P3</span>';
-    if(monitoring) html += '<span><i class="flow-line-key sensor"></i>Sensor RH · simulasi</span>';
-    if(monitoring && monitoring.recovery && monitoring.recovery.values.length) html += '<span><i class="flow-line-key recovery"></i>Recovery · estimated</span>';
+    var html = '<span><i class="flow-line-key"></i>Prediksi RINTIK</span>';
+    if(monitoring) html += '<span><i class="flow-line-key sensor"></i>Sensor humidity</span>';
+    if(monitoring && monitoring.recovery && monitoring.recovery.values.length) html += '<span><i class="flow-line-key recovery"></i>Data operasional pengganti</span>';
     return html;
   }
 
@@ -151,33 +167,29 @@
     $('replayCount').textContent = completed + ' / 16 hari';
     $('replayProgress').style.width = (completed / 16 * 100).toFixed(2) + '%';
     var complete = !state.health.next_expected_date;
-    $('nextDate').textContent = complete ? 'Fixture resmi selesai · model tetap mendukung konteks rolling' : 'Berikutnya · ' + formatDate(state.health.next_expected_date);
-    if($('completionPanel')) $('completionPanel').hidden = !complete;
+    $('nextDate').textContent = complete ? 'Semua hari demo selesai' : 'Berikutnya · ' + formatDate(state.health.next_expected_date);
+    if($('completionPanel')) $('completionPanel').hidden = state.mode !== 'demo' || !complete;
     updateProcessButton();
   }
 
   function updateProcessButton(){
     if(!$('processButton')) return;
-    if(state.mode === 'manual'){
-      $('processButton').hidden = true;
-      return;
-    }
     $('processButton').hidden = false;
     var complete = !state.health || !state.health.next_expected_date;
     $('processButton').disabled = state.busy || complete;
     if(complete){
-      $('processButtonLabel').textContent = 'Fixture demo selesai';
-      $('processButtonSub').textContent = 'lihat opsi di atas';
+      $('processButtonLabel').textContent = state.mode === 'demo' ? 'Demo sudah selesai' : 'Menunggu data sensor baru';
+      $('processButtonSub').textContent = state.mode === 'demo' ? 'reset untuk mengulang' : 'riwayat tetap tersimpan';
       return;
     }
-    if(state.mode === 'batch'){
+    if(state.mode === 'demo'){
       var completed = state.days.filter(function(day){ return day.status === 'completed'; }).length;
-      var count = Math.min(15,16-completed);
-      $('processButtonLabel').textContent = 'Proses hingga ' + count + ' hari berikutnya';
-      $('processButtonSub').textContent = 'daily batch berurutan';
+      var count = 16-completed;
+      $('processButtonLabel').textContent = 'Jalankan ' + count + ' hari demo';
+      $('processButtonSub').textContent = 'otomatis dan berurutan';
     } else {
-      $('processButtonLabel').textContent = 'Ambil & proses ' + shortDate(state.health.next_expected_date);
-      $('processButtonSub').textContent = '1 daily batch';
+      $('processButtonLabel').textContent = 'Proses data ' + shortDate(state.health.next_expected_date);
+      $('processButtonSub').textContent = 'satu hari';
     }
   }
 
@@ -186,7 +198,7 @@
     if($('processingPanel')) $('processingPanel').hidden = !active;
     if(active){
       $('processingTitle').textContent = total > 1 ? 'Memproses hari ' + index + ' dari ' + total : 'Memproses ' + formatDate(date);
-      $('processingDetail').textContent = date ? 'Fitur ' + date + ' → model frozen → P1–P3 · RH simulasi → pembanding' : 'Mengambil data sensor resmi berikutnya…';
+      $('processingDetail').textContent = date ? 'Membaca sensor, menghitung humidity, dan menyimpan hasil…' : 'Mengambil data sensor berikutnya…';
       $('processProgress').max = total;
       $('processProgress').value = Math.max(0,index-1);
     }
@@ -195,41 +207,22 @@
   }
 
   function renderIncidents(){
-    if(!$('incidentList')) return;
-    var container = $('incidentList'); container.innerHTML = '';
-    if(!state.incidents.length){
-      var empty = document.createElement('div'); empty.className = 'incident-item'; empty.innerHTML = '<strong>Belum ada gangguan simulasi</strong><span>Replay belum mencapai skenario stuck/outage.</span>'; container.appendChild(empty);
-    } else {
-      state.incidents.forEach(function(incident){
-        var item = document.createElement('div'); item.className = 'incident-item' + (incident.type === 'sensor_outage' ? ' is-outage' : '');
-        var title = incident.type === 'sensor_outage' ? 'Sensor terputus · simulasi' : 'Sensor stuck · simulasi';
-        item.innerHTML = '<strong>' + title + '</strong><span>' + shortDate(incident.date) + ' · ' + (incident.status === 'confirmed_simulation' ? 'recovery dicatat' : 'menunggu aksi simulasi') + '</span>';
-        container.appendChild(item);
-      });
-    }
     state.outageIncident = state.incidents.filter(function(incident){ return incident.type === 'sensor_outage'; }).slice(-1)[0] || null;
-    var action = $('recoveryAction');
-    if(action){
-      action.hidden = !state.outageIncident;
-      if(state.outageIncident) action.textContent = state.outageIncident.status === 'confirmed_simulation' ? 'Lihat recovery pada ' + shortDate(state.outageIncident.date) : 'Konfirmasi outage simulasi & tampilkan recovery';
-    }
     updateRecoveryShortcut();
   }
 
   function updateRecoveryShortcut(){
     var button = $('prepareRecoveryButton');
     if(!button) return;
-    var completionButton = $('completionRecoveryButton');
     var label = $('prepareRecoveryLabel'), sub = $('prepareRecoverySub');
     button.disabled = state.busy || !state.health;
-    if(completionButton) completionButton.disabled = state.busy || !state.health;
     if(state.outageIncident){
-      label.textContent = state.outageIncident.status === 'confirmed_simulation' ? 'Buka kembali recovery 6 Sep' : 'Konfirmasi & buka recovery 6 Sep';
-      sub.textContent = 'Sensor fisik tetap berupa gap; recovery ditampilkan sebagai estimasi RINTIK.';
+      label.textContent = 'Buka hasil kerusakan sensor 6 Sep';
+      sub.textContent = 'Lihat bagaimana data humidity tetap tersedia ketika sensor terputus.';
       return;
     }
-    label.textContent = 'Siapkan & buka recovery 6 Sep';
-    sub.textContent = 'Memproses fixture resmi secara kronologis sampai skenario sensor terputus siap.';
+    label.textContent = 'Tampilkan kerusakan sensor 6 Sep';
+    sub.textContent = 'RINTIK menyiapkan hari yang diperlukan lalu membuka hasil recovery.';
   }
 
   function renderEmptyState(){
@@ -246,20 +239,23 @@
     if(!$('latestContent')) return;
     state.result = result; state.monitoring = monitoring;
     $('latestEmpty').hidden = true; $('latestContent').hidden = false;
-    var values = predictionValues(result), minimum = Math.min.apply(null,values), maximum = Math.max.apply(null,values);
+    var values = predictionValues(result), operational = operationalValues(result,monitoring);
     $('latestDate').textContent = formatDate(result.date);
-    $('latestStatus').textContent = 'Model original · snapshot daily tersimpan · ' + (result.window ? result.window.date_count : 1) + ' hari konteks';
+    $('latestStatus').textContent = 'Prediksi dan data humidity tersimpan dalam riwayat.';
     $('latestMean').textContent = fmtRh(mean(values));
-    $('latestRange').textContent = minimum.toFixed(1) + '–' + maximum.toFixed(1) + '%';
-    $('latestRows').textContent = result.predictions.length + '/48';
+    $('latestOperational').textContent = fmtRh(mean(operational.values));
+    $('latestOperationalNote').textContent = operational.source === 'recovery' ? 'menggunakan estimasi RINTIK' : operational.source === 'sensor' ? 'dari sensor humidity' : 'estimasi tersedia';
+    $('latestRows').textContent = result.predictions.length;
+    var recoveryActive = operational.source === 'recovery';
+    $('operationalBanner').hidden = !recoveryActive;
     if(monitoring){
       $('latestVerdict').textContent = verdictLabel(monitoring.assessment.verdict);
       $('latestSensor').textContent = sensorStateLabel(monitoring.sensor.state);
-      $('latestSensorNote').textContent = 'bukan ground truth';
+      $('latestSensorNote').textContent = recoveryActive ? 'data terputus · simulasi' : 'pembacaan tersedia';
     } else {
-      $('latestVerdict').textContent = 'Model asli';
-      $('latestSensor').textContent = 'Tidak dijalankan';
-      $('latestSensorNote').textContent = 'simulasi dimatikan';
+      $('latestVerdict').textContent = 'Tersimpan';
+      $('latestSensor').textContent = 'Belum tersedia';
+      $('latestSensorNote').textContent = 'prediksi tetap tersimpan';
     }
     $('latestLegend').innerHTML = legendHtml(monitoring);
     renderChart($('latestChart'),result,monitoring);
@@ -280,7 +276,7 @@
     try {
       var responses = await Promise.all([client.health(),client.listDays(),client.listIncidents()]);
       state.health = responses[0]; state.days = responses[1].days || []; state.incidents = responses[2].incidents || [];
-      setSystem(true,'Model dan state siap',state.health.completed_days + '/16 tanggal selesai · model frozen terverifikasi');
+      setSystem(true,'Sistem siap',state.health.next_expected_date ? 'Data ' + formatDate(state.health.next_expected_date) + ' siap diproses' : 'Menunggu data sensor berikutnya');
       updateReplayStatus();
       var completed = state.days.filter(function(day){ return day.status === 'completed'; });
       var target = preferredDate || localStorage.getItem('rintik_latest_daily_date') || (completed.length ? completed[completed.length-1].date : null);
@@ -289,7 +285,7 @@
       else renderIncidents();
       return true;
     } catch(error){
-      setSystem(false,'Backend tidak tersedia','Tidak ada hasil pengganti yang dibuat.');
+      setSystem(false,'Sistem belum terhubung','Periksa layanan RINTIK lalu coba lagi.');
       setAlert('Sistem RINTIK belum siap',errorMessage(error));
       if($('processButton')) $('processButton').disabled = true;
       return false;
@@ -311,8 +307,8 @@
     if(state.busy || !state.health || !state.health.next_expected_date) return;
     hideAlert();
     var completed = state.days.filter(function(day){ return day.status === 'completed'; }).length;
-    var target = state.mode === 'batch' ? Math.min(15,16-completed) : 1;
-    var simulationEnabled = $('faultSimulation').checked;
+    var target = state.mode === 'demo' ? 16-completed : 1;
+    var simulationEnabled = true;
     var latest = null;
     setBusy(true,target,1,state.health.next_expected_date);
     try {
@@ -325,28 +321,11 @@
         $('processingDetail').textContent = formatDate(latest.date) + ' selesai dan tersimpan.';
       }
       await refreshStatus(latest && latest.date);
-      setAlert('Siklus akuisisi selesai',target > 1 ? 'Daily batch berurutan selesai. Prediksi dan seri pembanding RH simulasi telah disimpan terpisah.' : 'Fitur lingkungan, prediksi RINTIK, dan pembanding RH simulasi untuk hari ini telah tersimpan. Tekan lagi untuk hari berikutnya.','info');
+      setAlert('Data berhasil diproses',target > 1 ? 'Rangkaian demo selesai. Semua hasil tersimpan dan siap dijelajahi.' : 'Prediksi dan data humidity hari ini sudah tersimpan. Anda dapat melanjutkan ke hari berikutnya.','info');
     } catch(error){
       await refreshStatus(latest && latest.date);
-      setAlert('Pemrosesan dihentikan',errorMessage(error) + ' Daily batch yang sudah selesai tetap tersimpan; tidak ada hasil palsu yang dibuat.');
+      setAlert('Pemrosesan berhenti',errorMessage(error) + ' Hasil yang sudah selesai tetap tersimpan.');
     } finally { setBusy(false,target,target,state.health && state.health.next_expected_date); }
-  }
-
-  async function applyRecovery(){
-    if(!state.outageIncident || state.busy) return;
-    var incident = Object.assign({},state.outageIncident);
-    hideAlert();
-    setBusy(true,1,1,incident.date);
-    try {
-      if(incident.status !== 'confirmed_simulation'){
-        await client.createDemoAudit('pass','prediction-audit-pass-' + incident.incident_id);
-        await client.confirmIncident(incident.incident_id,{demo_override:true,note:'Explicit simulated technician action from prediction workspace.'},'prediction-confirm-' + incident.incident_id);
-      }
-      await refreshStatus(incident.date);
-      setAlert('Recovery simulasi ditampilkan','Sensor fisik yang hilang tetap kosong. Garis biru adalah estimasi RINTIK dan tidak menggantikan raw sensor secara diam-diam.','info',{focus:false,scroll:false});
-      focusLatestResult();
-    } catch(error){ setAlert('Recovery simulasi ditolak',errorMessage(error)); }
-    finally { setBusy(false,1,1,incident.date); }
   }
 
   function focusLatestResult(){
@@ -361,8 +340,6 @@
     var targetDate = '2023-09-06';
     var scenarioDates = ['2023-09-04','2023-09-05','2023-09-06'];
     var remaining = state.days.filter(function(day){ return day.status !== 'completed' && day.date <= targetDate; }).length;
-    $('faultSimulation').checked = true;
-    $('scenarioSchedule').hidden = false;
     hideAlert();
     setBusy(true,Math.max(1,remaining),1,state.health.next_expected_date || targetDate);
     try {
@@ -389,7 +366,7 @@
         await client.confirmIncident(incident.incident_id,{demo_override:true,note:'Explicit simulated technician action from guided recovery shortcut.'},'prediction-confirm-' + incident.incident_id);
       }
       await refreshStatus(targetDate);
-      setAlert('Recovery 6 September siap','Skenario dibuat dari fixture resmi yang diproses kronologis. Raw sensor tetap gap dan garis recovery tetap berlabel estimated.','info',{focus:false,scroll:false});
+      setAlert('Kerusakan sensor 6 September siap','Sensor humidity terputus. Data operasional tetap tersedia menggunakan estimasi RINTIK dan sumbernya ditandai dengan jelas.','info',{focus:false,scroll:false});
       focusLatestResult();
     } catch(error){
       await refreshStatus();
@@ -463,7 +440,7 @@
         input.value = value === null || value === undefined || value === '' ? '' : value;
         input.dataset.officialMissing = input.value === '' ? 'true' : 'false';
       });
-      setManualResult('Snapshot sensor resmi dimuat ke form. Nilai ini belum disimpan dan belum menjalankan inferensi.',false);
+      setManualResult('Contoh pembacaan dimuat. Data ini belum disimpan atau diproses.',false);
     } catch(error){ setManualResult(errorMessage(error),true); }
     finally {
       $('loadManualExample').disabled = false;
@@ -483,8 +460,9 @@
       setManualResult('Isian belum valid. Lengkapi nilai numerik untuk: ' + missing.join(', ') + '.',true);
       return;
     }
-    var gapText = officialGaps.length ? ' ' + officialGaps.length + ' gap resmi dipertahankan: ' + officialGaps.join(', ') + '.' : '';
-    setManualResult('Validasi form PASS: 23/23 fitur diperiksa.' + gapText + ' Isian tetap berupa draft inspeksi; inferensi daily membutuhkan batch resmi lengkap dan terverifikasi hash.',false);
+    var available = manualFeatureInputs().length - officialGaps.length;
+    var gapText = officialGaps.length ? ' ' + officialGaps.length + ' nilai kosong dari sumber tetap dibiarkan kosong.' : '';
+    setManualResult('Form diperiksa: ' + available + ' nilai sensor tersedia.' + gapText + ' Untuk membuat prediksi, sistem tetap memerlukan rangkaian data satu hari penuh.',false);
   }
 
   function clearManual(){
@@ -498,17 +476,13 @@
     document.querySelectorAll('[data-mode]').forEach(function(item){
       item.setAttribute('aria-selected',String(item.dataset.mode === mode));
     });
-    var manual = mode === 'manual';
-    document.querySelector('.flow-grid').classList.toggle('is-manual',manual);
-    $('manualPanel').hidden = !manual;
-    $('simulationControl').hidden = manual;
-    if(manual){
-      $('modeExplanation').innerHTML = '<strong>Form Manual.</strong> Gunakan untuk melihat dan memeriksa 23 fitur sensor. Satu observasi tidak memenuhi kontrak batch temporal, sehingga tidak disimpan atau diinferensikan.';
-    } else if(mode === 'batch'){
-      $('modeExplanation').innerHTML = '<strong>Mode batch.</strong> Sistem tetap menjalankan siklus akuisisi tanggal satu per satu secara kronologis, maksimal 15 hari. Ini bukan perubahan rolling window model.';
+    $('demoPanel').hidden = mode !== 'demo';
+    if(mode === 'demo'){
+      $('modeExplanation').innerHTML = '<strong>Demo 16 Hari.</strong> Jalankan seluruh periode demo otomatis, termasuk skenario sensor humidity terputus dan recovery.';
     } else {
-      $('modeExplanation').innerHTML = '<strong>Mode harian.</strong> Satu klik mengambil fitur lingkungan, menjalankan model dan P1 → P2 → P3, lalu menyimpan prediksi bersama RH simulasi yang tetap terpisah.';
+      $('modeExplanation').innerHTML = '<strong>Operasional Harian.</strong> Satu klik membaca data hari berikutnya, menghasilkan prediksi, dan menyimpan pembacaan humidity untuk dibandingkan.';
     }
+    if(state.health) updateReplayStatus();
     updateProcessButton();
   }
 
@@ -524,7 +498,7 @@
       if($('completionPanel')) $('completionPanel').hidden = true;
       renderEmptyState();
       await refreshStatus();
-      setAlert('Data demo direset','Replay kembali ke tanggal pertama. Model frozen, sidecar, dan fixture resmi tidak berubah.','info');
+      setAlert('Demo siap diulang','Riwayat demo kembali ke hari pertama. Data sumber RINTIK tidak berubah.','info');
     } catch(error){ setAlert('Reset demo gagal',errorMessage(error)); }
     finally {
       state.busy = false;
@@ -539,12 +513,8 @@
         selectMode(button.dataset.mode);
       });
     });
-    $('faultSimulation').addEventListener('change',function(){ $('scenarioSchedule').hidden = !this.checked; });
     $('processButton').addEventListener('click',runProcessing);
-    $('refreshButton').addEventListener('click',function(){ refreshStatus(); });
-    $('recoveryAction').addEventListener('click',applyRecovery);
     $('prepareRecoveryButton').addEventListener('click',prepareRecovery);
-    $('completionRecoveryButton').addEventListener('click',prepareRecovery);
     function openReset(){
       $('resetConfirmation').hidden = false;
       $('cancelResetButton').focus();
@@ -569,11 +539,14 @@
   function renderResultPage(result,monitoring){
     state.result = result; state.monitoring = monitoring;
     $('resultEmpty').hidden = true; $('resultContent').hidden = false;
-    var values = predictionValues(result);
+    var values = predictionValues(result), operational = operationalValues(result,monitoring);
     $('resultDate').textContent = formatDate(result.date);
-    $('resultStatus').textContent = 'Snapshot daily tersimpan · ' + (result.window ? result.window.mode.replace(/_/g,' ') : 'daily batch');
-    $('resultMean').textContent = fmtRh(mean(values)); $('resultMin').textContent = fmtRh(Math.min.apply(null,values)); $('resultMax').textContent = fmtRh(Math.max.apply(null,values)); $('resultRows').textContent = result.predictions.length + '/48';
-    $('resultVerdict').textContent = monitoring ? verdictLabel(monitoring.assessment.verdict) : 'Model asli';
+    $('resultStatus').textContent = 'Prediksi dan data humidity tersimpan dalam riwayat.';
+    $('resultMean').textContent = fmtRh(mean(values)); $('resultMin').textContent = fmtRh(Math.min.apply(null,values)); $('resultMax').textContent = fmtRh(Math.max.apply(null,values));
+    $('resultOperational').textContent = fmtRh(mean(operational.values));
+    $('resultOperationalNote').textContent = operational.source === 'recovery' ? 'menggunakan estimasi RINTIK' : operational.source === 'sensor' ? 'dari sensor humidity' : 'estimasi tersedia';
+    $('resultOperationalBanner').hidden = operational.source !== 'recovery';
+    $('resultVerdict').textContent = monitoring ? verdictLabel(monitoring.assessment.verdict) : 'Tersimpan';
     $('resultLegend').innerHTML = legendHtml(monitoring);
     renderChart($('resultChart'),result,monitoring);
     var sensorMap = {}, recoveryMap = {};
@@ -581,19 +554,20 @@
     $('resultTableBody').innerHTML = result.predictions.map(function(row){
       var timestamp = timestampOf(row), model = row.post_3 !== undefined ? row.post_3 : row.air_humidity;
       var sensor = sensorMap[timestamp], recovery = recoveryMap[timestamp];
-      return '<tr><td>' + timestamp + '</td><td>' + Number(model).toFixed(4) + '%</td><td>' + (sensor === undefined || sensor === null ? '—' : Number(sensor).toFixed(4) + '%') + '</td><td>' + (recovery === undefined ? '—' : Number(recovery).toFixed(4) + '%') + '</td></tr>';
+      var effective = sensor !== undefined && sensor !== null ? sensor : recovery;
+      return '<tr><td>' + timestamp + '</td><td>' + Number(model).toFixed(4) + '%</td><td>' + (sensor === undefined || sensor === null ? '—' : Number(sensor).toFixed(4) + '%') + '</td><td>' + (effective === undefined || effective === null ? '—' : Number(effective).toFixed(4) + '%') + '</td></tr>';
     }).join('');
     if(monitoring){
       var recoveryActive = monitoring.recovery && monitoring.recovery.values.length;
-      $('resultSimulationSummary').textContent = sensorStateLabel(monitoring.sensor.state) + '. ' + (recoveryActive ? 'Recovery estimated aktif dan raw sensor tetap dipertahankan sebagai gap.' : 'Tidak ada recovery estimated aktif pada tanggal ini.');
-      $('resultProvenance').innerHTML = '<strong>Perbandingan simulasi yang terpisah</strong><span>RINTIK berasal dari checkpoint original. RH fisik dibuat untuk demonstrasi, tidak menjadi input model atau ground truth akurasi.</span>';
+      $('resultSimulationSummary').textContent = recoveryActive ? 'Sensor humidity terputus. Data operasional hari ini menggunakan estimasi RINTIK.' : 'Sensor humidity tersedia dan dibandingkan dengan prediksi RINTIK.';
+      $('resultProvenance').innerHTML = '<strong>Sumber data jelas</strong><span>' + (recoveryActive ? 'Nilai operasional pengganti berasal dari estimasi RINTIK; pembacaan sensor asli tetap tercatat sebagai data yang hilang.' : 'Prediksi dan pembacaan sensor disimpan sebagai dua sumber yang berbeda.') + '</span>';
     } else {
-      $('resultSimulationSummary').textContent = 'Hasil model tersedia. Monitoring sensor simulasi tidak dijalankan untuk tanggal ini.';
-      $('resultProvenance').innerHTML = '<strong>Hasil model asli</strong><span>Output berasal dari checkpoint frozen. Tidak ada data sensor humidity sintetis pada tampilan ini.</span>';
+      $('resultSimulationSummary').textContent = 'Prediksi tersedia, tetapi pembacaan sensor humidity belum tersedia untuk tanggal ini.';
+      $('resultProvenance').innerHTML = '<strong>Prediksi tersimpan</strong><span>Belum ada data sensor humidity untuk dibandingkan.</span>';
     }
     if($('resultNextAction')){
       var complete = state.health && !state.health.next_expected_date;
-      $('resultNextAction').textContent = complete ? 'Fixture selesai · lihat opsi replay' : 'Proses hari berikutnya';
+      $('resultNextAction').textContent = complete ? 'Kembali ke Prediksi' : 'Proses hari berikutnya';
     }
   }
 
@@ -601,8 +575,8 @@
     try {
       var responses = await Promise.all([client.health(),client.listDays()]);
       state.health = responses[0]; state.days = responses[1].days || [];
-      setSystem(true,'Hasil tersinkron',state.health.completed_days + '/16 tanggal tersimpan di backend');
       var completed = state.days.filter(function(day){ return day.status === 'completed'; });
+      setSystem(true,'Hasil siap',completed.length ? 'Menampilkan data terakhir yang tersimpan' : 'Belum ada hasil tersimpan');
       if(!completed.length) return;
       var requested = params.get('date') || localStorage.getItem('rintik_latest_daily_date');
       var target = completed.some(function(day){ return day.date === requested; }) ? requested : completed[completed.length-1].date;
