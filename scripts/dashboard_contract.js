@@ -70,7 +70,7 @@ function main(){
   var html = fs.readFileSync(path.join(root,'dashboard.html'),'utf8');
   var css = fs.readFileSync(path.join(root,'assets','css','dashboard.css'),'utf8');
   var js = fs.readFileSync(path.join(root,'assets','js','dashboard.js'),'utf8');
-  ['role="tablist"','role="tabpanel"','aria-live="polite"','Tampilkan tabel','Settings / Technical Details'].forEach(function(token){
+  ['role="tablist"','role="tabpanel"','aria-live="polite"','dashboardDrawer','dashboardMenuButton','Tampilkan tabel','Settings / Technical Details'].forEach(function(token){
     assert(html.indexOf(token)>=0,'missing dashboard accessibility token '+token);
   });
   var ids = Array.from(html.matchAll(/\bid="([^"]+)"/g),function(match){ return match[1]; });
@@ -92,6 +92,8 @@ function main(){
   assert.strictEqual(css.indexOf('@keyframes panel-in'),-1);
   assert.strictEqual(js.indexOf('generateSampleSeries'),-1);
   assert(js.indexOf('validateDayBundle')>=0);
+  assert(js.indexOf('setDashboardDrawer')>=0);
+  assert(js.indexOf("event.key === 'Escape'")>=0);
   assert(js.indexOf("activateView(params.get('view') || 'overview', false, false)") < js.indexOf('renderAll();'));
   assert(js.indexOf('real_original_pth')===-1 || html.indexOf('model original')>=0);
 

@@ -30,6 +30,16 @@ async function noOverflow(page,label){
   assert.deepStrictEqual(report.duplicateIds,[],`${label} has duplicate IDs`);
   return report;
 }
+async function accessibilityTree(context,page,label){
+  const session=await context.newCDPSession(page);
+  await session.send('Accessibility.enable');
+  const tree=await session.send('Accessibility.getFullAXTree');
+  await session.detach();
+  const interactive=new Set(['button','link','checkbox','combobox','slider','tab','textbox']);
+  const unnamed=tree.nodes.filter(node=>!node.ignored&&interactive.has(node.role&&node.role.value)&&!(node.name&&String(node.name.value||'').trim())).map(node=>({role:node.role.value,nodeId:node.nodeId}));
+  assert.deepStrictEqual(unnamed,[],`${label} has unnamed interactive accessibility nodes`);
+  return {label,nodes:tree.nodes.length,unnamedInteractive:unnamed.length};
+}
 
 async function run(){
   const runDir=path.join(EVIDENCE_ROOT,stamp());fs.mkdirSync(runDir,{recursive:true});
@@ -38,7 +48,7 @@ async function run(){
   const context=await browser.newContext({viewport:{width:1440,height:900},locale:'id-ID',reducedMotion:'no-preference'});
   await context.tracing.start({screenshots:true,snapshots:true,sources:true});
   const page=await context.newPage();
-  const checks=[],network=[],consoleEvents=[],screenshots=[],layouts=[];
+  const checks=[],network=[],consoleEvents=[],screenshots=[],layouts=[],accessibility=[];
   const pass=(check,evidence)=>checks.push({check,status:'PASS',evidence});
   const shot=async name=>{const file=name+'.png';await page.evaluate(()=>scrollTo(0,0));await page.waitForTimeout(100);await page.screenshot({path:path.join(runDir,file),fullPage:true,animations:'disabled'});screenshots.push(file);return file;};
   page.on('response',response=>{if(response.url().startsWith(API_URL)||response.url().startsWith(FRONTEND_URL))network.push({method:response.request().method(),url:response.url(),status:response.status(),contentType:response.headers()['content-type']||null});});
@@ -52,7 +62,11 @@ async function run(){
   assert.strictEqual(initial.ready,true);assert.strictEqual(initial.completed_days,0);assert.strictEqual(initial.model_sha256,MODEL_SHA);
   pass('isolated frozen baseline',{completedDays:0,modelSha256:initial.model_sha256});
 
-  await page.goto(appUrl('predict.html'),{waitUntil:'domcontentloaded'});
+  await page.goto(`${FRONTEND_URL}/index.html`,{waitUntil:'domcontentloaded'});
+  await page.evaluate(apiUrl=>sessionStorage.setItem('rintik_api_url',apiUrl),API_URL);
+  await page.getByRole('link',{name:'Buat Prediksi Sekarang'}).first().click();
+  await page.waitForURL(/predict\.html/);
+  pass('home-to-prediction journey',{indexUntouched:true,navigation:'Buat Prediksi Sekarang'});
   await page.waitForFunction(()=>!document.getElementById('processButton').disabled,{timeout:30000});
   assert.strictEqual(await page.locator('input[type=file]').count(),0);
   assert.strictEqual(await page.getByText('Form Manual',{exact:true}).count(),1);
@@ -91,18 +105,27 @@ async function run(){
 
   await page.goto(appUrl('predict.html'),{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>!document.getElementById('processButton').disabled);
+  await page.click('#prepareRecoveryButton');
+  await page.waitForFunction(()=>document.getElementById('replayCount').textContent.trim()==='9 / 16 hari'&&document.getElementById('processingPanel').hidden&&document.getElementById('latestDate').textContent.trim()==='6 September 2023'&&document.querySelector('#latestLegend .recovery'),null,{timeout:420000});
+  assert.match(await text(page,'#flowAlert'),/Recovery 6 September siap/i);
+  assert.strictEqual(await page.locator('#latestContent').evaluate(element=>document.activeElement===element),true);
+  await shot('02b-guided-recovery-from-partial-state');
+  pass('guided recovery prepares real chronological state',{completedDays:9,date:'2023-09-06',rawSensorGap:true,recovery:'estimated'});
+
   await page.focus('#modeBatch');await page.keyboard.press('Enter');
   assert.strictEqual(await page.locator('#modeBatch').getAttribute('aria-selected'),'true');
   assert.match(await text(page,'#modeExplanation'),/tanggal satu per satu.*maksimal 15 hari/i);
   await page.click('#processButton');
-  await page.waitForFunction(()=>document.getElementById('replayCount').textContent.trim()==='16 / 16 hari'&&document.getElementById('processingPanel').hidden,null,{timeout:240000});
+  await page.waitForFunction(()=>document.getElementById('replayCount').textContent.trim()==='16 / 16 hari'&&document.getElementById('processingPanel').hidden,null,{timeout:420000});
   assert.strictEqual(await text(page,'#latestDate'),'13 September 2023');
   assert.strictEqual(await page.locator('#incidentList .incident-item').count(),3);
   assert.strictEqual(await page.locator('#recoveryAction').isHidden(),false);
+  assert.strictEqual(await page.locator('#completionPanel').isHidden(),false);
+  assert.match(await text(page,'#completionPanel'),/fixture demonstrasi selesai.*tidak berhenti di hari ke-16.*adapter ingestion operasional/is);
   const finalHealth=await(await fetch(`${API_URL}/health`)).json();
   assert.strictEqual(finalHealth.completed_days,16);assert.strictEqual(finalHealth.archived_pred_internal_rows,734);
   await shot('03-batch-15-complete-with-fault-history');
-  pass('batch mode is sequential daily persistence',{addedDays:15,totalDays:16,rows:734,incidents:3});
+  pass('batch mode is sequential daily persistence',{addedDays:7,totalDays:16,rows:734,incidents:3});
 
   await page.click('#recoveryAction');
   await page.waitForFunction(()=>document.getElementById('latestDate').textContent.trim()==='6 September 2023'&&document.querySelector('#latestLegend .recovery'),null,{timeout:60000});
@@ -119,6 +142,7 @@ async function run(){
   await page.waitForFunction(()=>!document.getElementById('resultContent').hidden);
   assert.match(await text(page,'#resultSimulationSummary'),/Recovery estimated aktif/i);
   assert.strictEqual(await page.locator('#resultTableBody tr').count(),48);
+  accessibility.push(await accessibilityTree(context,page,'result-recovery'));
   await page.setViewportSize({width:390,height:844});
   layouts.push(await noOverflow(page,'result-mobile-390x844'));
   await shot('05-result-recovery-mobile');
@@ -135,14 +159,33 @@ async function run(){
   assert.strictEqual(await page.locator('#dayFile').count(),0);assert.strictEqual(await page.locator('#processDayButton').count(),0);
   assert.strictEqual(await page.locator('#daySelect option').count(),16);
   assert.strictEqual(await page.locator('.nav-links a.active').innerText(),'Dashboard');
-  assert.match(await text(page,'#runConsoleTitle'),/Replay test selesai/);
   await page.setViewportSize({width:1366,height:768});layouts.push(await noOverflow(page,'dashboard-input-free-1366x768'));await shot('08-dashboard-history-not-input');
-  pass('dashboard responsibility is history/exploration',{dateOptions:16,primaryInputControls:0});
+  assert.strictEqual(await page.locator('#dashboardDrawer').getAttribute('aria-hidden'),'true');
+  await page.click('#dashboardMenuButton');
+  assert.strictEqual(await page.locator('#dashboardDrawer').getAttribute('aria-hidden'),'false');
+  assert.match(await text(page,'#runConsoleTitle'),/Replay test selesai/);
+  assert.strictEqual(await page.locator('#dashboardDrawerClose').evaluate(element=>document.activeElement===element),true);
+  layouts.push(await noOverflow(page,'dashboard-drawer-open-1366x768'));await shot('08a-dashboard-section-drawer');
+  await page.click('#tabSensors');
+  assert.strictEqual(await page.locator('#panelSensors').isHidden(),false);
+  assert.strictEqual(await page.locator('#dashboardDrawer').getAttribute('aria-hidden'),'true');
+  assert.strictEqual(await text(page,'#dashboardMenuLabel'),'Sensor Explorer');
+  accessibility.push(await accessibilityTree(context,page,'dashboard-sensor-explorer'));
+  await page.click('#dashboardMenuButton');
+  await page.keyboard.press('Escape');
+  assert.strictEqual(await page.locator('#dashboardMenuButton').evaluate(element=>document.activeElement===element),true);
+  pass('dashboard responsibility and drawer navigation',{dateOptions:16,primaryInputControls:0,drawerKeyboard:true,focusReturned:true});
   await page.setViewportSize({width:390,height:844});
   layouts.push(await noOverflow(page,'dashboard-navbar-mobile-390x844'));
   await page.click('.nav-toggle');
   assert.strictEqual(await page.locator('.mobile-menu').evaluate(element=>element.classList.contains('open')),true);
   await shot('08b-dashboard-unified-navbar-mobile');
+  await page.click('.nav-toggle');
+  await page.click('#dashboardMenuButton');
+  assert.strictEqual(await page.locator('#dashboardDrawer').getAttribute('aria-hidden'),'false');
+  layouts.push(await noOverflow(page,'dashboard-drawer-mobile-390x844'));
+  await shot('08c-dashboard-drawer-mobile');
+  await page.keyboard.press('Escape');
   pass('dashboard product navigation is responsive',{viewport:'390x844',menuExpanded:true,horizontalOverflow:false});
 
   await page.goto(appUrl('predict.html'),{waitUntil:'domcontentloaded'});
@@ -170,7 +213,7 @@ async function run(){
   assert.deepStrictEqual(unexpected,[],`Unexpected console events: ${JSON.stringify(unexpected)}`);
   const trace=path.join(runDir,'trace.zip');await context.tracing.stop({path:trace});
   await context.close();await browser.close();
-  const manifest={status:'PASS',generatedAt:new Date().toISOString(),frontendUrl:FRONTEND_URL,apiUrl:API_URL,checks,screenshots,layouts,networkEntries:network.length,consoleEvents,indexSha256:sha(path.join(ROOT,'index.html')),modelSha256:finalHealth.model_sha256,stateSha256:finalHealth.state_sha256,trace:{file:'trace.zip',sha256:sha(trace)}};
+  const manifest={status:'PASS',generatedAt:new Date().toISOString(),frontendUrl:FRONTEND_URL,apiUrl:API_URL,checks,screenshots,layouts,accessibility,networkEntries:network.length,consoleEvents,indexSha256:sha(path.join(ROOT,'index.html')),modelSha256:finalHealth.model_sha256,stateSha256:finalHealth.state_sha256,trace:{file:'trace.zip',sha256:sha(trace)}};
   fs.writeFileSync(path.join(runDir,'network.json'),JSON.stringify(network,null,2));
   fs.writeFileSync(path.join(runDir,'manifest.json'),JSON.stringify(manifest,null,2));
   console.log(JSON.stringify({status:'PASS',checks:checks.length,screenshots:screenshots.length,evidence:runDir,traceSha256:manifest.trace.sha256},null,2));

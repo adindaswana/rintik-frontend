@@ -30,7 +30,7 @@ assertUniqueIds(predict,'predict.html');
 assertUniqueIds(result,'hasil.html');
 assertUniqueIds(dashboard,'dashboard.html');
 
-['data-mode="daily"','data-mode="batch"','data-mode="manual"','manualGroups','validateManualButton','openResetButton','faultSimulation','processButton','latestContent','recoveryAction','prediction-flow.js'].forEach(token=>assert(predict.includes(token),`predict.html missing ${token}`));
+['data-mode="daily"','data-mode="batch"','data-mode="manual"','manualGroups','validateManualButton','openResetButton','completionPanel','completionResetButton','prepareRecoveryButton','faultSimulation','processButton','latestContent','recoveryAction','prediction-flow.js'].forEach(token=>assert(predict.includes(token),`predict.html missing ${token}`));
 assert(!predict.includes('type="file"'),'Prediction must not require File Explorer');
 assert(predict.includes('Form Manual') && predict.includes('TIDAK DISIMPAN'),'Manual inspection form must remain explicit and non-persistent');
 assert(!predict.includes('assets/js/app.js'),'Prediction must not mutate or depend on shared home behavior');
@@ -47,6 +47,8 @@ assert(flowJs.includes("Math.min(15,16-completed)"));
 assert(flowJs.includes('monitoringEnabled:simulationEnabled'));
 assert(flowJs.includes("createDemoAudit('pass'"));
 assert(flowJs.includes('confirmIncident'));
+assert(flowJs.includes("var targetDate = '2023-09-06'"));
+assert(flowJs.includes('focusLatestResult'));
 assert(!flowJs.includes('predictFull('),'Product replay must use daily persistence, not the stateless 734 route');
 assert(flowCss.includes('@media (prefers-reduced-motion: reduce)'));
 assert(flowCss.includes('@media (max-width: 700px)'));

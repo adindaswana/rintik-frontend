@@ -307,6 +307,47 @@ input[type="range"] { width: 100%; accent-color: var(--green); }
   .run-console .button, .run-console .file-summary { margin-top: 8px; }
 }
 
+/* Product-unified dashboard shell: internal sections live in an accessible drawer. */
+h1, h2, h3 { color: #131e30; font-family: "Trebuchet MS", "Segoe UI", sans-serif; font-weight: 700; }
+.app-shell { min-height: calc(100vh - 65px); display: block; }
+.main-content { width: 100%; max-width: 1240px; min-width: 0; margin: 0 auto; padding: 0 24px 56px; }
+.drawer-backdrop { position: fixed; z-index: 70; inset: 65px 0 0; background: rgba(18,31,26,.34); backdrop-filter: blur(2px); }
+.sidebar { position: fixed; z-index: 80; top: 77px; bottom: 14px; left: max(14px, calc((100vw - 1240px) / 2)); width: min(336px, calc(100vw - 28px)); height: auto; padding: 17px; border: 1px solid var(--line); border-radius: 20px; background: rgba(251,252,251,.99); box-shadow: 0 24px 70px rgba(16,27,22,.2); overflow-y: auto; visibility: hidden; pointer-events: none; transform: translateX(calc(-100% - 28px)); transition: transform 220ms var(--ease-out), visibility 0s linear 220ms; }
+.sidebar.is-open { visibility: visible; pointer-events: auto; transform: translateX(0); transition: transform 220ms var(--ease-out); }
+.drawer-heading { margin-bottom: 15px; padding: 2px 2px 14px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--line); }
+.drawer-heading strong { display: block; margin-top: 2px; font: 700 19px/1.2 "Trebuchet MS", "Segoe UI", sans-serif; }
+.drawer-close { flex: none; font-size: 24px; line-height: 1; }
+.side-nav { display: grid; gap: 6px; }
+.nav-tab { min-height: 46px; }
+.workspace-bar { position: sticky; top: 77px; z-index: 20; margin: 20px 0 26px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 18px; background: rgba(255,255,255,.94); box-shadow: 0 7px 24px rgba(23,35,31,.045); backdrop-filter: blur(12px); }
+.workspace-navigation { min-width: 0; display: flex; align-items: center; gap: 14px; }
+.dashboard-menu-button { min-width: 142px; display: inline-flex; align-items: center; justify-content: flex-start; gap: 9px; }
+.dashboard-menu-button > span:first-child { color: var(--green); font-size: 17px; }
+body.dashboard-drawer-open { overflow: hidden; }
+
+@media (hover:hover) and (pointer:fine) {
+  .sidebar .nav-tab:hover { color: var(--ink); background: #eef3f0; }
+}
+
+@media (max-width: 820px) {
+  .main-content { padding: 0 16px 44px; }
+  .sidebar { top: 75px; bottom: 10px; left: 10px; width: min(336px,calc(100vw - 20px)); padding: 15px; }
+  .workspace-bar { position: static; margin: 14px 0 20px; padding: 13px; align-items: stretch; }
+  .workspace-navigation { align-items: stretch; flex: 1; }
+  .dashboard-menu-button { min-width: 130px; }
+}
+
+@media (max-width: 600px) {
+  .workspace-navigation { flex-direction: column; }
+  .dashboard-menu-button { width: 100%; }
+  .workspace-actions { display: grid; grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 390px) {
+  .main-content { padding-inline: 12px; }
+  .workspace-actions { grid-template-columns: 1fr; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }

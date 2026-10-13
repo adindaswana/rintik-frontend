@@ -101,6 +101,44 @@
     });
   }
 
+  function setDashboardDrawer(open, restoreFocus){
+    var drawer = $('dashboardDrawer');
+    var backdrop = $('dashboardDrawerBackdrop');
+    var trigger = $('dashboardMenuButton');
+    if(!drawer || !backdrop || !trigger) return;
+    drawer.classList.toggle('is-open', open);
+    drawer.setAttribute('aria-hidden', String(!open));
+    drawer.inert = !open;
+    backdrop.hidden = !open;
+    trigger.setAttribute('aria-expanded', String(open));
+    document.body.classList.toggle('dashboard-drawer-open', open);
+    if(open) $('dashboardDrawerClose').focus();
+    else if(restoreFocus !== false) trigger.focus();
+  }
+
+  function setupDashboardDrawer(){
+    var drawer = $('dashboardDrawer');
+    var trigger = $('dashboardMenuButton');
+    var close = $('dashboardDrawerClose');
+    var backdrop = $('dashboardDrawerBackdrop');
+    if(!drawer || !trigger || !close || !backdrop) return;
+    setDashboardDrawer(false, false);
+    trigger.addEventListener('click', function(){ setDashboardDrawer(true, false); });
+    close.addEventListener('click', function(){ setDashboardDrawer(false, true); });
+    backdrop.addEventListener('click', function(){ setDashboardDrawer(false, true); });
+    drawer.addEventListener('keydown', function(event){
+      if(event.key !== 'Tab') return;
+      var focusable = Array.prototype.slice.call(drawer.querySelectorAll('button:not([disabled]),a[href],select:not([disabled]),input:not([disabled])')).filter(function(item){ return item.offsetParent !== null; });
+      if(!focusable.length) return;
+      var first = focusable[0], last = focusable[focusable.length - 1];
+      if(event.shiftKey && document.activeElement === first){ event.preventDefault(); last.focus(); }
+      else if(!event.shiftKey && document.activeElement === last){ event.preventDefault(); first.focus(); }
+    });
+    document.addEventListener('keydown', function(event){
+      if(event.key === 'Escape' && drawer.classList.contains('is-open')) setDashboardDrawer(false, true);
+    });
+  }
+
   function activateView(view, focus, renderVisible){
     var tabs = Array.prototype.slice.call(document.querySelectorAll('.nav-tab'));
     var selectedButton = tabs.find(function(tab){ return tab.dataset.view === view; }) || tabs[0];
@@ -119,13 +157,17 @@
       }
       if(selectedButton.dataset.view === 'sensors') renderSensorCharts();
     }
+    if($('dashboardMenuLabel')){
+      var labels = {overview:'Ringkasan',sensors:'Sensor Explorer',settings:'Settings / Technical Details'};
+      $('dashboardMenuLabel').textContent = labels[selectedButton.dataset.view] || 'Menu Dashboard';
+    }
     if(focus !== false) selectedButton.focus();
   }
 
   function setupTabs(){
     var tabs = Array.prototype.slice.call(document.querySelectorAll('.nav-tab'));
     tabs.forEach(function(tab, index){
-      tab.addEventListener('click', function(){ activateView(tab.dataset.view); });
+      tab.addEventListener('click', function(){ activateView(tab.dataset.view); setDashboardDrawer(false, true); });
       tab.addEventListener('keydown', function(event){
         if(event.key !== 'ArrowRight' && event.key !== 'ArrowLeft' && event.key !== 'Home' && event.key !== 'End') return;
         event.preventDefault();
@@ -525,5 +567,5 @@
     state.rangeStart=start; state.rangeEnd=end; renderRhChart(); renderRhTable(); renderSensorCharts();
   }
 
-  setupProductNavigation(); setupTabs(); bindControls(); refresh();
+  setupProductNavigation(); setupDashboardDrawer(); setupTabs(); bindControls(); refresh();
 })();

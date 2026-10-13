@@ -69,15 +69,16 @@
     $('systemStatusDetail').textContent = detail;
   }
 
-  function setAlert(title,message,kind){
+  function setAlert(title,message,kind,options){
     var alert = $('flowAlert');
     if(!alert) return;
+    options = options || {};
     $('flowAlertTitle').textContent = title;
     $('flowAlertMessage').textContent = message;
     alert.classList.toggle('is-info', kind === 'info');
     alert.hidden = false;
-    alert.focus({preventScroll:true});
-    alert.scrollIntoView({behavior:'smooth',block:'nearest'});
+    if(options.focus !== false) alert.focus({preventScroll:true});
+    if(options.scroll !== false) alert.scrollIntoView({behavior:'smooth',block:'nearest'});
   }
   function hideAlert(){ if($('flowAlert')) $('flowAlert').hidden = true; }
 
@@ -149,7 +150,9 @@
     var completed = state.days.filter(function(day){ return day.status === 'completed'; }).length;
     $('replayCount').textContent = completed + ' / 16 hari';
     $('replayProgress').style.width = (completed / 16 * 100).toFixed(2) + '%';
-    $('nextDate').textContent = state.health.next_expected_date ? 'Berikutnya · ' + formatDate(state.health.next_expected_date) : 'Seluruh 16 tanggal resmi telah selesai';
+    var complete = !state.health.next_expected_date;
+    $('nextDate').textContent = complete ? 'Fixture resmi selesai · model tetap mendukung konteks rolling' : 'Berikutnya · ' + formatDate(state.health.next_expected_date);
+    if($('completionPanel')) $('completionPanel').hidden = !complete;
     updateProcessButton();
   }
 
@@ -163,8 +166,8 @@
     var complete = !state.health || !state.health.next_expected_date;
     $('processButton').disabled = state.busy || complete;
     if(complete){
-      $('processButtonLabel').textContent = 'Replay resmi selesai';
-      $('processButtonSub').textContent = '16 / 16 hari';
+      $('processButtonLabel').textContent = 'Fixture demo selesai';
+      $('processButtonSub').textContent = 'lihat opsi di atas';
       return;
     }
     if(state.mode === 'batch'){
@@ -188,6 +191,7 @@
       $('processProgress').value = Math.max(0,index-1);
     }
     updateProcessButton();
+    updateRecoveryShortcut();
   }
 
   function renderIncidents(){
@@ -209,6 +213,23 @@
       action.hidden = !state.outageIncident;
       if(state.outageIncident) action.textContent = state.outageIncident.status === 'confirmed_simulation' ? 'Lihat recovery pada ' + shortDate(state.outageIncident.date) : 'Konfirmasi outage simulasi & tampilkan recovery';
     }
+    updateRecoveryShortcut();
+  }
+
+  function updateRecoveryShortcut(){
+    var button = $('prepareRecoveryButton');
+    if(!button) return;
+    var completionButton = $('completionRecoveryButton');
+    var label = $('prepareRecoveryLabel'), sub = $('prepareRecoverySub');
+    button.disabled = state.busy || !state.health;
+    if(completionButton) completionButton.disabled = state.busy || !state.health;
+    if(state.outageIncident){
+      label.textContent = state.outageIncident.status === 'confirmed_simulation' ? 'Buka kembali recovery 6 Sep' : 'Konfirmasi & buka recovery 6 Sep';
+      sub.textContent = 'Sensor fisik tetap berupa gap; recovery ditampilkan sebagai estimasi RINTIK.';
+      return;
+    }
+    label.textContent = 'Siapkan & buka recovery 6 Sep';
+    sub.textContent = 'Memproses fixture resmi secara kronologis sampai skenario sensor terputus siap.';
   }
 
   function renderEmptyState(){
@@ -322,10 +343,60 @@
         await client.confirmIncident(incident.incident_id,{demo_override:true,note:'Explicit simulated technician action from prediction workspace.'},'prediction-confirm-' + incident.incident_id);
       }
       await refreshStatus(incident.date);
-      if($('latestContent')) $('latestContent').scrollIntoView({behavior:'smooth',block:'start'});
-      setAlert('Recovery simulasi ditampilkan','Sensor fisik yang hilang tetap kosong. Garis biru adalah estimasi RINTIK dan tidak menggantikan raw sensor secara diam-diam.','info');
+      setAlert('Recovery simulasi ditampilkan','Sensor fisik yang hilang tetap kosong. Garis biru adalah estimasi RINTIK dan tidak menggantikan raw sensor secara diam-diam.','info',{focus:false,scroll:false});
+      focusLatestResult();
     } catch(error){ setAlert('Recovery simulasi ditolak',errorMessage(error)); }
     finally { setBusy(false,1,1,incident.date); }
+  }
+
+  function focusLatestResult(){
+    var content = $('latestContent');
+    if(!content || content.hidden) return;
+    content.focus({preventScroll:true});
+    content.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+  }
+
+  async function prepareRecovery(){
+    if(state.busy || !state.health) return;
+    var targetDate = '2023-09-06';
+    var scenarioDates = ['2023-09-04','2023-09-05','2023-09-06'];
+    var remaining = state.days.filter(function(day){ return day.status !== 'completed' && day.date <= targetDate; }).length;
+    $('faultSimulation').checked = true;
+    $('scenarioSchedule').hidden = false;
+    hideAlert();
+    setBusy(true,Math.max(1,remaining),1,state.health.next_expected_date || targetDate);
+    try {
+      var index = 0;
+      var health = await client.health();
+      while(health.next_expected_date && health.next_expected_date <= targetDate){
+        index += 1;
+        setBusy(true,Math.max(1,remaining),index,health.next_expected_date);
+        await processOne(true);
+        $('processProgress').value = index;
+        health = await client.health();
+      }
+      var days = (await client.listDays()).days || [];
+      for(var dateIndex=0; dateIndex<scenarioDates.length; dateIndex++){
+        if(days.some(function(day){ return day.date === scenarioDates[dateIndex] && day.status === 'completed'; })){
+          await client.monitorDay(scenarioDates[dateIndex]);
+        }
+      }
+      var incidents = (await client.listIncidents()).incidents || [];
+      var incident = incidents.filter(function(item){ return item.type === 'sensor_outage' && item.date === targetDate; })[0];
+      if(!incident) throw new Error('Skenario 6 September belum tersedia. Pastikan fixture resmi diproses kronologis dengan simulasi aktif.');
+      if(incident.status !== 'confirmed_simulation'){
+        await client.createDemoAudit('pass','prediction-audit-pass-' + incident.incident_id);
+        await client.confirmIncident(incident.incident_id,{demo_override:true,note:'Explicit simulated technician action from guided recovery shortcut.'},'prediction-confirm-' + incident.incident_id);
+      }
+      await refreshStatus(targetDate);
+      setAlert('Recovery 6 September siap','Skenario dibuat dari fixture resmi yang diproses kronologis. Raw sensor tetap gap dan garis recovery tetap berlabel estimated.','info',{focus:false,scroll:false});
+      focusLatestResult();
+    } catch(error){
+      await refreshStatus();
+      setAlert('Recovery belum dapat disiapkan',errorMessage(error));
+    } finally {
+      setBusy(false,Math.max(1,remaining),Math.max(1,remaining),targetDate);
+    }
   }
 
   function manualFeatureInputs(){
@@ -450,6 +521,7 @@
       await client.resetDemoState('RESET_DEMO_STATE');
       localStorage.removeItem('rintik_latest_daily_date');
       $('resetConfirmation').hidden = true;
+      if($('completionPanel')) $('completionPanel').hidden = true;
       renderEmptyState();
       await refreshStatus();
       setAlert('Data demo direset','Replay kembali ke tanggal pertama. Model frozen, sidecar, dan fixture resmi tidak berubah.','info');
@@ -471,10 +543,15 @@
     $('processButton').addEventListener('click',runProcessing);
     $('refreshButton').addEventListener('click',function(){ refreshStatus(); });
     $('recoveryAction').addEventListener('click',applyRecovery);
-    $('openResetButton').addEventListener('click',function(){
+    $('prepareRecoveryButton').addEventListener('click',prepareRecovery);
+    $('completionRecoveryButton').addEventListener('click',prepareRecovery);
+    function openReset(){
       $('resetConfirmation').hidden = false;
       $('cancelResetButton').focus();
-    });
+      $('resetConfirmation').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});
+    }
+    $('openResetButton').addEventListener('click',openReset);
+    $('completionResetButton').addEventListener('click',openReset);
     $('cancelResetButton').addEventListener('click',function(){
       $('resetConfirmation').hidden = true;
       $('openResetButton').focus();
@@ -513,6 +590,10 @@
     } else {
       $('resultSimulationSummary').textContent = 'Hasil model tersedia. Monitoring sensor simulasi tidak dijalankan untuk tanggal ini.';
       $('resultProvenance').innerHTML = '<strong>Hasil model asli</strong><span>Output berasal dari checkpoint frozen. Tidak ada data sensor humidity sintetis pada tampilan ini.</span>';
+    }
+    if($('resultNextAction')){
+      var complete = state.health && !state.health.next_expected_date;
+      $('resultNextAction').textContent = complete ? 'Fixture selesai · lihat opsi replay' : 'Proses hari berikutnya';
     }
   }
 

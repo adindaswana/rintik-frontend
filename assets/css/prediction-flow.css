@@ -129,6 +129,16 @@ h1, h2, h3, h4 { margin: 0; color: #131e30; font-family: "Trebuchet MS", "Segoe 
 .reset-actions, .manual-actions { display: flex; align-items: center; gap: 8px; }
 .btn-danger { color: white; border-color: var(--flow-red); background: var(--flow-red); }
 
+.completion-panel { margin: 0 0 18px; padding: 20px; display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 18px; align-items: center; border: 1px solid #a9cabb; border-radius: 20px; background: linear-gradient(135deg,#f5fbf8,#eef7f3); box-shadow: 0 9px 28px rgba(20,107,74,.07); }
+.completion-icon { width: 46px; height: 46px; display: grid; place-items: center; border-radius: 15px; color: white; background: var(--flow-green); font-size: 21px; font-weight: 850; }
+.completion-copy h2 { max-width: 690px; margin: 4px 0 6px; font-size: 19px; line-height: 1.25; letter-spacing: -.02em; }
+.completion-copy p { max-width: 760px; margin: 0; color: var(--flow-muted); font-size: 12px; }
+.completion-facts { margin-top: 11px; display: flex; flex-wrap: wrap; gap: 7px; }
+.completion-facts span { padding: 6px 9px; border: 1px solid var(--flow-line); border-radius: 999px; color: var(--flow-muted); background: rgba(255,255,255,.72); font-size: 10px; }
+.completion-facts strong { color: var(--flow-ink); }
+.completion-actions { width: 210px; display: grid; gap: 7px; }
+.completion-actions .btn { width: 100%; }
+
 .flow-grid { display: grid; grid-template-columns: minmax(320px, .78fr) minmax(0, 1.22fr); gap: 18px; align-items: start; }
 .flow-grid.is-manual { grid-template-columns: 1fr; }
 .flow-grid.is-manual .live-result-card { display: none; }
@@ -185,6 +195,11 @@ h1, h2, h3, h4 { margin: 0; color: #131e30; font-family: "Trebuchet MS", "Segoe 
 .switch-copy span { display: block; margin-top: 3px; color: var(--flow-muted); font-size: 12px; line-height: 1.45; }
 .scenario-strip { margin-top: 12px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
 .scenario-strip span { padding: 8px; border: 1px solid #ead8ad; border-radius: 9px; color: #69460b; background: #fff9ec; font-size: 10px; text-align: center; }
+.scenario-action { width: 100%; margin-top: 9px; padding: 11px 13px; display: flex; align-items: center; justify-content: space-between; gap: 14px; border: 1px solid #cbd8d2; border-radius: 11px; color: var(--flow-ink); background: white; cursor: pointer; text-align: left; transition: transform 140ms var(--flow-ease), border-color 160ms ease, background-color 160ms ease; }
+.scenario-action strong { flex: none; font-size: 11px; }
+.scenario-action span { color: var(--flow-muted); font-size: 10px; text-align: right; }
+.scenario-action:active:not(:disabled) { transform: scale(.985); }
+.scenario-action:disabled { cursor: not-allowed; opacity: .55; }
 
 .flow-primary-action { width: 100%; min-height: 50px; margin-top: 20px; font-size: 14px; }
 .flow-primary-action .action-sub { margin-left: 6px; opacity: .76; font-size: 11px; font-weight: 600; }
@@ -271,6 +286,8 @@ h1, h2, h3, h4 { margin: 0; color: #131e30; font-family: "Trebuchet MS", "Segoe 
   .result-empty { min-height: 330px; }
   .mode-switch { grid-template-columns: 1fr 1fr; }
   .mode-card:last-child { grid-column: 1 / -1; min-height: 94px; }
+  .completion-panel { grid-template-columns: auto minmax(0,1fr); }
+  .completion-actions { width: auto; grid-column: 1 / -1; grid-template-columns: repeat(3,minmax(0,1fr)); }
 }
 
 @media (max-width: 700px) {
@@ -282,12 +299,17 @@ h1, h2, h3, h4 { margin: 0; color: #131e30; font-family: "Trebuchet MS", "Segoe 
   .flow-reset-button { grid-column: 1 / -1; }
   .reset-confirmation { align-items: stretch; flex-direction: column; }
   .reset-actions { display: grid; grid-template-columns: 1fr 1fr; }
+  .completion-panel { padding: 17px; grid-template-columns: 1fr; align-items: start; }
+  .completion-icon { width: 40px; height: 40px; }
+  .completion-actions { grid-column: auto; grid-template-columns: 1fr; }
   .flow-control-card, .live-result, .result-primary { padding: 17px; }
   .mode-switch { grid-template-columns: 1fr; }
   .mode-card:last-child { grid-column: auto; }
   .manual-field-grid { grid-template-columns: 1fr; }
   .flow-grid.is-manual .manual-groups { grid-template-columns: 1fr; }
   .scenario-strip { grid-template-columns: 1fr; }
+  .scenario-action { align-items: flex-start; flex-direction: column; }
+  .scenario-action span { text-align: left; }
   .latest-metrics, .result-summary { grid-template-columns: 1fr 1fr; }
   .latest-heading, .flow-chart-head { align-items: flex-start; flex-direction: column; }
   .flow-chart-legend { justify-content: flex-start; }

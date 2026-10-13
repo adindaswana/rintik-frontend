@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f4f7f5">
-  <title>RINTIK — Operator Dashboard</title>
-  <meta name="description" content="Dashboard operator RINTIK untuk daily batch, monitoring sensor RH sintetis, dan recovery terlabel estimasi.">
+  <title>Dashboard RINTIK</title>
+  <meta name="description" content="Dashboard RINTIK untuk eksplorasi hasil daily batch, monitoring sensor RH sintetis, dan recovery terlabel estimasi.">
   <link rel="icon" href="assets/img/icon-droplet.png">
   <link rel="stylesheet" href="assets/css/dashboard.css">
 </head>
@@ -30,7 +30,12 @@
   </header>
 
   <div class="app-shell">
-    <aside class="sidebar" aria-label="Navigasi dashboard">
+    <div class="drawer-backdrop" id="dashboardDrawerBackdrop" hidden></div>
+    <aside class="sidebar" id="dashboardDrawer" aria-label="Navigasi bagian Dashboard" aria-hidden="true">
+      <div class="drawer-heading">
+        <div><span class="section-kicker">Dashboard RINTIK</span><strong>Eksplorasi hasil</strong></div>
+        <button class="icon-button drawer-close" id="dashboardDrawerClose" type="button" aria-label="Tutup menu Dashboard">×</button>
+      </div>
       <nav class="side-nav" role="tablist" aria-label="Bagian dashboard">
         <button class="nav-tab is-active" id="tabOverview" role="tab" aria-selected="true" aria-controls="panelOverview" data-view="overview">
           <span aria-hidden="true">◫</span> Ringkasan
@@ -65,13 +70,16 @@
       </div>
 
       <section class="workspace-bar" aria-label="Navigasi tanggal">
-        <div>
-          <div class="section-kicker">Tanggal pengukuran dataset</div>
-          <div class="date-controls">
-            <button class="icon-button" id="previousDay" type="button" aria-label="Tanggal sebelumnya" disabled>←</button>
-            <label class="visually-hidden" for="daySelect">Pilih tanggal tersimpan</label>
-            <select id="daySelect" disabled><option value="">Belum ada tanggal</option></select>
-            <button class="icon-button" id="nextDay" type="button" aria-label="Tanggal berikutnya" disabled>→</button>
+        <div class="workspace-navigation">
+          <button class="button button-secondary dashboard-menu-button" id="dashboardMenuButton" type="button" aria-controls="dashboardDrawer" aria-expanded="false"><span aria-hidden="true">☰</span><span id="dashboardMenuLabel">Ringkasan</span></button>
+          <div>
+            <div class="section-kicker">Tanggal pengukuran dataset</div>
+            <div class="date-controls">
+              <button class="icon-button" id="previousDay" type="button" aria-label="Tanggal sebelumnya" disabled>←</button>
+              <label class="visually-hidden" for="daySelect">Pilih tanggal tersimpan</label>
+              <select id="daySelect" disabled><option value="">Belum ada tanggal</option></select>
+              <button class="icon-button" id="nextDay" type="button" aria-label="Tanggal berikutnya" disabled>→</button>
+            </div>
           </div>
         </div>
         <div class="workspace-actions">

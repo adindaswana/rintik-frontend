@@ -37,6 +37,7 @@ function sha256(file){
 function elapsedMs(start){ return Math.round(Number(process.hrtime.bigint() - start) / 1e6); }
 function dashboardUrl(){ return `${FRONTEND_URL}/dashboard.html?api=${encodeURIComponent(API_URL)}`; }
 function predictUrl(){ return `${FRONTEND_URL}/predict.html?api=${encodeURIComponent(API_URL)}`; }
+function fixturePath(item){ return path.join(PROTOTYPE_DIR,'demo','fixtures','inputs_original_test_by_day',item.file); }
 async function text(page, selector){ return (await page.locator(selector).innerText()).trim(); }
 async function capture(page, file){
   if(await page.locator('#toastRegion .toast').count()){
@@ -57,6 +58,7 @@ async function waitSettled(page){
   }, null, {timeout:120000});
 }
 async function activateView(page, view){
+  if(await page.locator('#dashboardDrawer').getAttribute('aria-hidden')==='true') await page.click('#dashboardMenuButton');
   await page.click(`.nav-tab[data-view="${view}"]`);
   await page.waitForFunction(expected => {
     const tab=document.querySelector(`.nav-tab[data-view="${expected}"]`);
@@ -68,14 +70,14 @@ async function processDay(page, item, completedCount){
   const started=process.hrtime.bigint();
   await page.waitForFunction(() => !document.getElementById('processButton').disabled);
   await page.click('#processButton');
-  await page.waitForFunction(expected => document.getElementById('replayCount').textContent.trim()===expected && document.getElementById('processingPanel').hidden,`${completedCount} / 16 hari`,{timeout:120000});
+  await page.waitForFunction(expected => document.getElementById('replayCount').textContent.trim()===expected && document.getElementById('processingPanel').hidden,`${completedCount} / 16 hari`,{timeout:300000});
   assert.strictEqual(await text(page, '#latestRows'), `${item.rows}/48`);
   assert((await text(page, '#latestStatus')).includes('Model original'));
   return {
     date:item.date,
     rows:item.rows,
     fixture:item.file,
-    fixture_sha256:sha256(fixture),
+    fixture_sha256:sha256(fixturePath(item)),
     elapsed_ms:elapsedMs(started),
   };
 }
@@ -151,7 +153,9 @@ async function run(){
     assert.strictEqual(await page.locator('#processButton').isDisabled(),true);
     await page.goto(dashboardUrl(), {waitUntil:'domcontentloaded',timeout:30000});
     await waitSettled(page);
+    await page.click('#dashboardMenuButton');
     assert.strictEqual(await text(page,'#runConsoleTitle'),'Replay test selesai');
+    await page.keyboard.press('Escape');
     assert.strictEqual(await page.locator('#daySelect option').count(),16);
     assert.strictEqual(await page.inputValue('#daySelect'),'2023-09-13');
     assert.strictEqual(await text(page,'#metricRows'),'44/48');

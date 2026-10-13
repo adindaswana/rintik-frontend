@@ -54,7 +54,26 @@
       <div class="flow-progress-copy"><strong>Progres data resmi</strong><span id="nextDate">Mencari tanggal berikutnya…</span></div>
       <div class="flow-progress-track" aria-hidden="true"><div class="flow-progress-fill" id="replayProgress"></div></div>
       <div class="flow-progress-count" id="replayCount">0 / 16 hari</div>
-      <button class="flow-reset-button" id="openResetButton" type="button">Mulai ulang demo</button>
+      <button class="flow-reset-button" id="openResetButton" type="button">Reset progres demo</button>
+    </section>
+
+    <section class="completion-panel" id="completionPanel" aria-labelledby="completionTitle" hidden>
+      <div class="completion-icon" aria-hidden="true">✓</div>
+      <div class="completion-copy">
+        <span class="flow-step">Fixture demonstrasi selesai</span>
+        <h2 id="completionTitle">16 tanggal resmi sudah diproses—RINTIK tidak berhenti di hari ke-16.</h2>
+        <p>Yang selesai adalah replay dataset kompetisi. Rolling 15 hari adalah konteks internal model; data tanggal baru memerlukan adapter ingestion operasional yang divalidasi dan tidak dibuat sintetis oleh prototipe ini.</p>
+        <div class="completion-facts" aria-label="Penjelasan batas demonstrasi">
+          <span><strong>16 hari</strong> fixture resmi tersedia</span>
+          <span><strong>15 hari</strong> konteks rolling internal</span>
+          <span><strong>Hari baru</strong> perlu input eksogen tervalidasi</span>
+        </div>
+      </div>
+      <div class="completion-actions">
+        <button class="btn btn-primary btn-sm" id="completionRecoveryButton" type="button">Buka recovery 6 Sep</button>
+        <a class="btn btn-secondary btn-sm" href="dashboard.html" data-api-link>Eksplorasi Dashboard</a>
+        <button class="flow-text-button" id="completionResetButton" type="button">Ulangi demo dari awal</button>
+      </div>
     </section>
     <section class="reset-confirmation" id="resetConfirmation" aria-labelledby="resetTitle" hidden>
       <div><strong id="resetTitle">Reset replay ke hari pertama?</strong><span>Hanya hasil, monitoring, audit, dan recovery pada database demo yang dihapus. Model frozen serta fixture resmi tetap utuh.</span></div>
@@ -91,6 +110,7 @@
             <span class="switch-copy"><strong>Sertakan pembanding RH dan simulasi gangguan</strong><span>Setiap batch juga membaca RH fisik sintetis pada timestamp yang sama. Seri ini bukan input model, pengukuran lapangan, atau ground truth.</span></span>
           </label>
           <div class="scenario-strip" id="scenarioSchedule"><span>4–5 Sep · stuck 99% RH</span><span>6 Sep · sensor terputus</span><span>7 Sep+ · pulih simulasi</span></div>
+          <button class="scenario-action" id="prepareRecoveryButton" type="button"><strong id="prepareRecoveryLabel">Siapkan &amp; buka recovery 6 Sep</strong><span id="prepareRecoverySub">Sistem memproses fixture resmi secara kronologis sampai skenario siap.</span></button>
         </div>
 
         <button class="btn btn-primary flow-primary-action" id="processButton" type="button" disabled><span id="processButtonLabel">Menyiapkan data…</span><span class="action-sub" id="processButtonSub"></span></button>
@@ -106,7 +126,7 @@
       <section class="flow-card live-result-card" aria-labelledby="latestTitle">
         <div class="result-empty" id="latestEmpty"><div class="result-empty-inner"><div class="result-empty-icon" aria-hidden="true">≈</div><h2 id="latestTitle">Hasil terbaru akan muncul di sini</h2><p>Mulai satu hari atau batch 15 hari. Halaman tetap terbuka agar progres dan perubahan hasil mudah diikuti.</p></div></div>
 
-        <div class="live-result" id="latestContent" hidden>
+        <div class="live-result" id="latestContent" tabindex="-1" hidden>
           <div class="latest-heading">
             <div><span class="flow-step">2 · Hasil terbaru</span><h2 id="latestDate">—</h2><p id="latestStatus">Model asli · data tersimpan</p></div>
             <span class="flow-state-label" id="latestVerdict">RINTIK siap</span>
