@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pemeriksaan Sensor - RINTIK</title>
+<meta name="description" content="Bandingkan bacaan sensor kelembapan Anda dengan tebakan RINTIK untuk menemukan hari saat sensor diduga bermasalah.">
+<link rel="icon" href="assets/img/logo.png">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<header class="navbar">
+  <div class="container navbar-inner">
+    <a href="index.html" class="brand">
+      <img src="assets/img/logo.png" alt="Logo RINTIK" class="brand-mark">
+      <span class="brand-text">
+        <span class="brand-title">RINTIK</span>
+        <span class="brand-sub">Prediksi kelembapan udara</span>
+      </span>
+    </a>
+    <nav class="nav-links">
+      <a href="index.html">Beranda</a>
+      <a href="predict.html">Prediksi</a>
+      <a href="hasil.html">Hasil</a>
+      <a href="periksa.html" class="active">Pemeriksaan</a>
+    </nav>
+    <div class="nav-right">
+      <a href="predict.html" class="btn btn-primary btn-sm">Coba Sekarang</a>
+      <button class="nav-toggle" aria-label="Buka menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="mobile-menu">
+    <div class="mobile-menu-panel">
+      <a href="predict.html" class="btn btn-primary btn-block" style="margin-bottom:12px;">Coba Sekarang</a>
+      <a href="index.html">Beranda</a>
+      <a href="predict.html">Prediksi</a>
+      <a href="hasil.html">Hasil</a>
+      <a href="periksa.html" class="active">Pemeriksaan</a>
+    </div>
+  </div>
+</header>
+
+<section class="page-hero-sm">
+  <div class="container">
+    <span class="step-pill">Pemeriksaan sensor</span>
+    <h1>Apakah sensor kelembapan Anda masih jujur?</h1>
+    <p>Unggah bacaan sensor kelembapan Anda. RINTIK menebak kelembapan dari sensor lain, lalu membandingkannya hari demi hari. Hari dengan selisih besar atau bacaan yang macet akan ditandai.</p>
+  </div>
+</section>
+
+<section class="predict-body" id="topPeriksa">
+  <div class="container">
+    <div class="split-12-1">
+      <div>
+        <div class="card panel-card">
+          <h3>Unggah Bacaan Sensor</h3>
+          <p>File CSV yang sama dengan halaman Prediksi, ditambah kolom bacaan sensor kelembapan bernama <code class="inline-code">air_humidity</code>.</p>
+
+          <div class="dropzone" id="pkDropzone">
+            <div id="pkDzEmpty">
+              <div class="dropzone-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M12 4l-4.5 4.5M12 4l4.5 4.5"/><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+              </div>
+              <h4>Seret file ke sini</h4>
+              <p class="muted">atau <span class="link">pilih file</span> dari perangkat Anda</p>
+              <p class="hint">CSV, paling banyak 2000 baris, waktu berformat YYYY-MM-DD HH:MM:SS</p>
+            </div>
+            <div id="pkDzFilled" hidden>
+              <div class="file-chip">
+                <span class="fic">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5"/></svg>
+                </span>
+                <span class="finfo">
+                  <strong id="pkFileName">data-sensor.csv</strong>
+                  <span id="pkFileMeta">-</span>
+                </span>
+                <button type="button" id="pkRemoveFile" aria-label="Hapus file">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          <input type="file" id="pkFileInput" accept=".csv" hidden>
+
+          <div class="alert" id="pkAlert" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>
+            <span class="alert-text"></span>
+          </div>
+
+          <div class="demo-row" id="pkDemoRow" hidden>
+            <span class="demo-row-lbl">Belum punya data?</span>
+            <button type="button" class="demo-btn demo-btn-teal" data-demo="sehat">
+              <span class="demo-dot"></span>Contoh: sensor sehat
+            </button>
+            <button type="button" class="demo-btn demo-btn-rose" data-demo="rusak">
+              <span class="demo-dot"></span>Contoh: sensor bermasalah
+            </button>
+          </div>
+          <div class="demo-note" id="pkDemoNote" hidden>
+            <span class="badge badge-violet"><span class="badge-dot"></span>Contoh dari data latih (in-sample)</span>
+            <span id="pkDemoNoteText"></span>
+          </div>
+
+          <div class="csv-preview" id="pkPreview" hidden></div>
+
+          <button type="button" class="btn btn-primary btn-lg btn-block" id="pkRunBtn" disabled style="margin-top:16px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6z"/></svg>
+            Periksa Sensor
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div class="card side-card">
+          <div class="side-card-head">
+            <span class="sic">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>
+            </span>
+            <div>
+              <strong>Cara membaca hasil</strong>
+              <span>Satu warna untuk setiap hari</span>
+            </div>
+          </div>
+          <ul class="status-legend">
+            <li><span class="sl-sw sl-sehat"></span><div><strong>Sehat</strong><span>Bacaan sensor sejalan dengan tebakan RINTIK.</span></div></li>
+            <li><span class="sl-sw sl-waspada"></span><div><strong>Waspada</strong><span>Selisih mulai terasa. Pantau beberapa hari ke depan.</span></div></li>
+            <li><span class="sl-sw sl-dugaan"></span><div><strong>Dugaan malfungsi</strong><span>Selisih besar atau bacaan macet. Cek posisi, kebersihan, atau kalibrasi sensor.</span></div></li>
+            <li><span class="sl-sw sl-kurang"></span><div><strong>Data kurang</strong><span>Bacaan hari itu terlalu sedikit untuk dinilai.</span></div></li>
+          </ul>
+        </div>
+        <div class="card side-card honest-card">
+          <div class="side-card-head">
+            <span class="sic sic-amber">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+            </span>
+            <div>
+              <strong>Catatan jujur</strong>
+              <span>Batas penilaian masih tahap demo</span>
+            </div>
+          </div>
+          <p class="honest-text"><span class="js-rule-note">Ambang demo-v1 dari simulasi 23 hari validasi, belum dikalibrasi untuk lokasi lain.</span> Tandai hasil ini sebagai petunjuk awal, bukan vonis. Tebakan RINTIK juga bisa meleset.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section pk-results" id="pkResults" hidden>
+  <div class="container">
+
+    <div class="result-head">
+      <div>
+        <div class="pk-head-badges" id="pkHeadBadges"></div>
+        <h1>Hasil Pemeriksaan Sensor</h1>
+        <span class="muted" id="pkRange">-</span>
+      </div>
+      <button type="button" class="btn btn-secondary" data-scroll-to="#topPeriksa">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v6h6M20 20v-6h-6"/><path d="M20 8a8 8 0 00-14-4M4 16a8 8 0 0014 4"/></svg>
+        Periksa File Lain
+      </button>
+    </div>
+
+    <div class="alert alert-error" id="pkResultError" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>
+      <span class="alert-text"></span>
+    </div>
+
+    <div id="pkMonitorBlock">
+      <div class="kpi-grid kpi-grid-3 pk-kpis" style="margin-bottom:22px;">
+        <div class="card kpi-card">
+          <div class="kpi-ring" id="pkRingSehat" data-pct="0" data-color="#2F9AA6" data-label="0"></div>
+          <div class="kpi-info"><span>Sehat</span><strong id="pkKpiSehat">-</strong></div>
+        </div>
+        <div class="card kpi-card">
+          <div class="kpi-ring" id="pkRingWaspada" data-pct="0" data-color="#E89A2C" data-label="0"></div>
+          <div class="kpi-info"><span>Waspada</span><strong id="pkKpiWaspada">-</strong></div>
+        </div>
+        <div class="card kpi-card">
+          <div class="kpi-ring" id="pkRingDugaan" data-pct="0" data-color="#D8547A" data-label="0"></div>
+          <div class="kpi-info"><span>Dugaan malfungsi</span><strong id="pkKpiDugaan">-</strong></div>
+        </div>
+      </div>
+      <p class="pk-kpi-foot" id="pkKpiFoot" hidden></p>
+
+      <div class="card chart-card">
+        <div class="chart-top">
+          <div>
+            <h3>Bacaan sensor vs tebakan RINTIK</h3>
+            <span class="chart-sub">Warna latar menunjukkan penilaian setiap hari</span>
+          </div>
+          <div class="pk-legend">
+            <span class="lg-line lg-sensor"><i></i>Bacaan sensor</span>
+            <span class="lg-line lg-model"><i></i>Tebakan RINTIK</span>
+          </div>
+        </div>
+        <div class="pk-chart-wrap">
+          <div id="pkChart"></div>
+          <div class="chart-tooltip pk-tooltip" id="pkTooltip"></div>
+        </div>
+        <div class="pk-legend pk-legend-status">
+          <span class="lg-band sl-sehat">Sehat</span>
+          <span class="lg-band sl-waspada">Waspada</span>
+          <span class="lg-band sl-dugaan">Dugaan malfungsi</span>
+          <span class="lg-band sl-kurang">Data kurang</span>
+        </div>
+      </div>
+
+      <div class="card pk-days-card">
+        <div class="forecast-head">
+          <h3>Rincian per hari</h3>
+          <span>Selisih = bacaan sensor dikurangi tebakan RINTIK, dalam poin %</span>
+        </div>
+        <div class="pk-days" id="pkDays"></div>
+      </div>
+    </div>
+
+    <div class="card pk-drift-card" id="pkDriftCard" hidden>
+      <div class="forecast-head pk-drift-head">
+        <div>
+          <h3>Pergeseran input (drift)</h3>
+          <span>Seberapa jauh sensor lain di file Anda dari data yang dipakai melatih RINTIK. Dihitung di perangkat Anda.</span>
+        </div>
+        <span class="badge badge-slate" id="pkDriftCount">-</span>
+      </div>
+      <div class="drift-explain">
+        <span><strong>Skor geser</strong> = (rata-rata data Anda dikurangi rata-rata data latih) dibagi sebaran data latih. Makin jauh dari 0, makin berbeda.</span>
+        <span><strong>Di luar rentang</strong> = bagian data Anda yang jatuh di luar 98% tengah data latih.</span>
+        <span>Akumulasi panas dan volume air dinilai dari kenaikan hariannya.</span>
+      </div>
+      <div class="drift-list" id="pkDriftList"></div>
+      <button type="button" class="demo-btn drift-more" id="pkDriftMore" hidden></button>
+    </div>
+
+  </div>
+</section>
+
+<section class="section pk-log-section">
+  <div class="container">
+    <div class="card result-table-card pk-log-card">
+      <div class="result-table-top">
+        <div>
+          <h3>Log pemeriksaan</h3>
+          <span class="chart-sub">20 pemeriksaan terakhir, tersimpan hanya di peramban ini</span>
+        </div>
+        <div class="table-controls">
+          <button type="button" class="btn btn-secondary btn-sm" id="pkLogDownload">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 20h16"/></svg>
+            Unduh log (JSON)
+          </button>
+          <button type="button" class="btn btn-ghost btn-sm" id="pkLogClear">Hapus log</button>
+        </div>
+      </div>
+      <div class="table-scroll" id="pkLogTableWrap">
+        <table class="data-table pk-log-table">
+          <thead><tr><th>Waktu</th><th>File</th><th>Baris</th><th>Ringkasan</th><th>Pembanding</th><th>Versi aturan</th></tr></thead>
+          <tbody id="pkLogBody"></tbody>
+        </table>
+      </div>
+      <div class="pk-log-cards" id="pkLogCards"></div>
+      <div class="pk-log-empty" id="pkLogEmpty" hidden>Belum ada pemeriksaan. Coba salah satu contoh di atas.</div>
+    </div>
+  </div>
+</section>
+
+<div class="loading-overlay" id="pkOverlay" hidden>
+  <div class="loading-card">
+    <div class="loading-spinner"></div>
+    <h4>Memeriksa sensor Anda...</h4>
+    <div class="loading-steps">
+      <div class="loading-step"><span class="dotwrap"></span><span>Membaca bacaan sensor</span></div>
+      <div class="loading-step"><span class="dotwrap"></span><span>Menghitung tebakan RINTIK</span></div>
+      <div class="loading-step"><span class="dotwrap"></span><span>Membandingkan hari demi hari</span></div>
+      <div class="loading-step"><span class="dotwrap"></span><span>Menyiapkan hasil</span></div>
+    </div>
+    <p class="loading-hint">Jika layanan sedang bangun, ini bisa memakan waktu hingga satu menit.</p>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">
+          <img src="assets/img/logo.png" alt="Logo RINTIK" style="width:36px;height:36px;border-radius:10px;object-fit:contain;">
+          <span class="footer-brand-title">RINTIK</span>
+        </div>
+        <p>Bantu Anda memantau dan memperkirakan kelembapan udara dari data sensor secara sederhana dan cepat.</p>
+      </div>
+      <div>
+        <h4>Jelajahi</h4>
+        <ul>
+          <li><a href="index.html">Beranda</a></li>
+          <li><a href="predict.html">Buat Prediksi</a></li>
+          <li><a href="hasil.html">Contoh Hasil</a></li>
+          <li><a href="periksa.html">Periksa Sensor</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Bantuan</h4>
+        <ul>
+          <li><a href="predict.html">Cara mengunggah data</a></li>
+          <li><a href="mailto:halo@smartfarm.id">Hubungi kami</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 RINTIK. Prototipe tampilan untuk NSC 2026.</span>
+      <span>RINTIK: Regresi Intrahari dengan Navigasi Temporal untuk Identifikasi Kelembapan.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/app.js"></script>
+<script src="assets/js/periksa.js"></script>
+</body>
+</html>

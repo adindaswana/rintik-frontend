@@ -106,7 +106,8 @@
     generateSampleSeries: generateSampleSeries,
     fmtDate: fmtDate,
     fmtShort: fmtShort,
-    fmtDay: fmtDay
+    fmtDay: fmtDay,
+    renderKpiRing: function(el){ renderKpiRing(el); }
   };
 
   /* ---------------- Dropzone (Prediksi > Upload CSV) ---------------- */

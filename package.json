@@ -4,6 +4,8 @@
   "private": true,
   "description": "Prediksi kelembapan udara dari data sensor. Situs statis + Vercel Functions (stub dulu).",
   "scripts": {
-    "stub:test": "node scripts/stub_smoke.js"
+    "stub:test": "node scripts/stub_smoke.js",
+    "monitor:test": "node scripts/monitor_smoke.js",
+    "monitor:assets": "python3 scripts/build_monitor_assets.py"
   }
 }
