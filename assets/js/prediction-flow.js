@@ -7,586 +7,183 @@
 
   var params = new URLSearchParams(window.location.search);
   var baseUrl = params.get('api') || sessionStorage.getItem('rintik_api_url') || 'http://127.0.0.1:8000';
-  sessionStorage.setItem('rintik_api_url', baseUrl);
-  var client = apiLib.createClient({baseUrl: baseUrl, timeoutMs: 120000});
+  sessionStorage.setItem('rintik_api_url',baseUrl);
+  var client = apiLib.createClient({baseUrl:baseUrl,timeoutMs:120000});
   var pageKind = document.body.getAttribute('data-flow-page');
-  var state = {mode:'daily',busy:false,health:null,days:[],incidents:[],result:null,monitoring:null,outageIncident:null,catalog:null};
+  var state = {
+    mode:'operational', busy:false, health:null, officialDays:[], incidents:[],
+    operational:null, operationalDay:null, catalog:null, editingTimestamp:null,
+    result:null, monitoring:null, resultScope:null, resetTarget:null
+  };
 
   function $(id){ return document.getElementById(id); }
-  function mean(values){ return values.length ? values.reduce(function(sum,value){ return sum + value; },0) / values.length : null; }
-  function fmtRh(value){ return value === null || !Number.isFinite(Number(value)) ? '—' : Number(value).toFixed(1) + '%'; }
+  function finite(value){ return value !== null && value !== '' && Number.isFinite(Number(value)); }
+  function mean(values){ return values.length ? values.reduce(function(sum,value){return sum+Number(value);},0)/values.length : null; }
+  function fmtRh(value,digits){ return finite(value) ? Number(value).toFixed(digits === undefined ? 1 : digits)+'%' : '—'; }
   function formatDate(value){
     if(!value) return '—';
-    var parts = String(value).slice(0,10).split('-');
-    var months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-    return Number(parts[2]) + ' ' + months[Number(parts[1]) - 1] + ' ' + parts[0];
+    var parts=String(value).slice(0,10).split('-');
+    var months=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    return Number(parts[2])+' '+months[Number(parts[1])-1]+' '+parts[0];
   }
-  function shortDate(value){
-    var parts = String(value).slice(0,10).split('-');
-    var months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-    return Number(parts[2]) + ' ' + months[Number(parts[1]) - 1];
-  }
-  function predictionValues(result){
-    return (result && result.predictions || []).map(function(row){
-      var value = row.post_3 !== undefined ? row.post_3 : row.air_humidity;
-      return Number(value);
-    }).filter(Number.isFinite);
-  }
-  function operationalValues(result,monitoring){
-    var predictions = result && result.predictions || [];
-    if(!monitoring || !monitoring.sensor) return {values:predictionValues(result),source:'prediction'};
-    var sensorMap = {}, recoveryMap = {};
-    monitoring.sensor.values.forEach(function(row){ sensorMap[row.timestamp] = row.physical_rh; });
-    (monitoring.recovery && monitoring.recovery.values || []).forEach(function(row){ recoveryMap[row.timestamp] = row.recovery_rh; });
-    var usedRecovery = false;
-    var values = predictions.map(function(row){
-      var timestamp = timestampOf(row), sensor = sensorMap[timestamp];
-      if(sensor !== null && sensor !== undefined && Number.isFinite(Number(sensor))) return Number(sensor);
-      var recovery = recoveryMap[timestamp];
-      if(recovery !== null && recovery !== undefined && Number.isFinite(Number(recovery))){ usedRecovery = true; return Number(recovery); }
-      return null;
-    }).filter(function(value){ return value !== null; });
-    return {values:values,source:usedRecovery?'recovery':'sensor'};
-  }
-  function timestampOf(row){ return row.timestamp || row.datetime; }
-  function sensorStateLabel(value){
-    var labels = {available_simulated:'Normal · simulasi',stuck_simulated:'Stuck · simulasi',missing_simulated:'Terputus · simulasi',simulated_repaired:'Pulih · simulasi'};
-    return labels[value] || 'Tidak dijalankan';
-  }
-  function verdictLabel(value){
-    var labels = {monitoring:'Normal · simulasi',monitoring_repaired_simulation:'Pulih · simulasi',suspected_sensor_malfunction:'Dugaan malfungsi',suspected_sensor_outage:'Dugaan outage'};
-    return labels[value] || 'Model asli';
-  }
+  function formatTime(value){ return String(value || '').slice(11,16); }
   function errorMessage(error){ return predictionLib.errorMessage(error); }
+  function timestampOf(row){ return row.timestamp || row.datetime; }
+  function predictionValues(result){ return (result && result.predictions || []).map(function(row){return Number(row.post_3 !== undefined?row.post_3:row.air_humidity);}).filter(Number.isFinite); }
+  function monitoringOf(result,monitoring){ return monitoring || (result && result.monitoring) || null; }
 
   function setupNavigation(){
     document.querySelectorAll('[data-api-link]').forEach(function(link){
-      var url = new URL(link.getAttribute('href'), window.location.href);
-      url.searchParams.set('api', baseUrl);
-      link.href = url.pathname.split('/').pop() + '?' + url.searchParams.toString();
+      var url=new URL(link.getAttribute('href'),window.location.href); url.searchParams.set('api',baseUrl);
+      link.href=url.pathname.split('/').pop()+'?'+url.searchParams.toString();
     });
-    var toggle = document.querySelector('.nav-toggle');
-    var menu = document.querySelector('.mobile-menu');
-    if(toggle && menu){
-      toggle.addEventListener('click', function(){
-        var open = !menu.classList.contains('open');
-        menu.classList.toggle('open', open);
-        toggle.setAttribute('aria-expanded', String(open));
-      });
-    }
+    var toggle=document.querySelector('.nav-toggle'), menu=document.querySelector('.mobile-menu');
+    if(toggle&&menu) toggle.addEventListener('click',function(){var open=!menu.classList.contains('open');menu.classList.toggle('open',open);toggle.setAttribute('aria-expanded',String(open));});
   }
 
   function setSystem(online,title,detail){
-    var box = $('systemStatus');
-    if(!box) return;
-    box.classList.toggle('is-online', online);
-    box.classList.toggle('is-error', !online);
-    $('systemStatusTitle').textContent = title;
-    $('systemStatusDetail').textContent = detail;
+    var box=$('systemStatus');
+    if(box){box.classList.toggle('is-online',online);box.classList.toggle('is-error',!online);$('systemStatusTitle').textContent=title;$('systemStatusDetail').textContent=detail;}
+    var runtime=$('navRuntime');
+    if(runtime){runtime.classList.toggle('is-online',online);runtime.classList.toggle('is-error',!online);runtime.querySelector('span').textContent=online?'Sistem siap':'Tidak terhubung';}
+  }
+  function setAlert(title,message,kind,focus){
+    var alert=$('flowAlert'); if(!alert) return;
+    $('flowAlertTitle').textContent=title; $('flowAlertMessage').textContent=message;
+    alert.classList.toggle('is-info',kind==='info'); alert.hidden=false;
+    if(focus!==false){alert.focus({preventScroll:true});alert.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'nearest'});}
+  }
+  function hideAlert(){if($('flowAlert'))$('flowAlert').hidden=true;}
+  function setBusy(active,title,detail,total,value){
+    state.busy=active;
+    if($('processingPanel')){$('processingPanel').hidden=!active;if(active){$('processingTitle').textContent=title||'Memproses';$('processingDetail').textContent=detail||'Mohon tunggu…';$('processProgress').max=total||1;$('processProgress').value=value||0;}}
+    document.querySelectorAll('button').forEach(function(button){if(button.id!=='cancelResetButton'&&button.id!=='confirmResetButton')button.disabled=active||button.dataset.originalDisabled==='true';});
+    if(!active) updateControls();
   }
 
-  function setAlert(title,message,kind,options){
-    var alert = $('flowAlert');
-    if(!alert) return;
-    options = options || {};
-    $('flowAlertTitle').textContent = title;
-    $('flowAlertMessage').textContent = message;
-    alert.classList.toggle('is-info', kind === 'info');
-    alert.hidden = false;
-    if(options.focus !== false) alert.focus({preventScroll:true});
-    if(options.scroll !== false) alert.scrollIntoView({behavior:'smooth',block:'nearest'});
+  function sensorStateLabel(value){
+    var labels={available_simulated:'Normal · simulasi',stuck_simulated:'Stuck · simulasi',deviating_simulated:'Menyimpang · simulasi',missing_simulated:'Hilang · simulasi',simulated_repaired:'Pulih · simulasi'};
+    return labels[value]||'Belum dibandingkan';
   }
-  function hideAlert(){ if($('flowAlert')) $('flowAlert').hidden = true; }
+  function verdictLabel(value){
+    var labels={monitoring:'Normal · simulasi',monitoring_repaired_simulation:'Pulih · simulasi',suspected_sensor_malfunction:'Dugaan ketidakcocokan',suspected_sensor_outage:'Sensor tidak tersedia'};
+    return labels[value]||'Estimasi tersimpan';
+  }
+  function operationalValues(result,monitoring){
+    var model=result.predictions||[];
+    if(!monitoring||!monitoring.sensor)return {values:predictionValues(result),source:'prediction'};
+    var sensor={},recovery={},used=false;
+    monitoring.sensor.values.forEach(function(row){sensor[row.timestamp]=row.physical_rh;});
+    (monitoring.recovery&&monitoring.recovery.values||[]).forEach(function(row){recovery[row.timestamp]=row.recovery_rh;});
+    var values=model.map(function(row){var time=timestampOf(row),physical=sensor[time];if(finite(physical))return Number(physical);if(finite(recovery[time])){used=true;return Number(recovery[time]);}return null;}).filter(function(value){return value!==null;});
+    return {values:values,source:used?'recovery':'sensor'};
+  }
 
-  function svgNode(tag,attrs,text){
-    var element = document.createElementNS('http://www.w3.org/2000/svg',tag);
-    Object.keys(attrs || {}).forEach(function(key){ element.setAttribute(key,attrs[key]); });
-    if(text !== undefined) element.textContent = text;
-    return element;
-  }
-  function seriesPath(values,x,y){
-    var path = '', drawing = false;
-    values.forEach(function(value,index){
-      if(value === null || value === undefined || !Number.isFinite(Number(value))){ drawing = false; return; }
-      path += (drawing ? 'L' : 'M') + x(index).toFixed(2) + ' ' + y(Number(value)).toFixed(2) + ' ';
-      drawing = true;
-    });
-    return path.trim();
-  }
-  function renderChart(container,result,monitoring){
-    while(container.firstChild) container.removeChild(container.firstChild);
-    var predictions = result && result.predictions || [];
-    if(!predictions.length){
-      var empty = document.createElement('div'); empty.className = 'flow-chart-empty'; empty.textContent = 'Grafik belum tersedia.'; container.appendChild(empty); return;
+  function svgNode(tag,attrs,text){var element=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.keys(attrs||{}).forEach(function(key){element.setAttribute(key,attrs[key]);});if(text!==undefined)element.textContent=text;return element;}
+  function linePath(values,x,y){var path='',drawing=false;values.forEach(function(value,index){if(!finite(value)){drawing=false;return;}path+=(drawing?'L':'M')+x(index).toFixed(2)+' '+y(Number(value)).toFixed(2)+' ';drawing=true;});return path.trim();}
+  function renderChart(container,result,monitoring,interactive){
+    if(!container)return; container.innerHTML='';
+    var rows=result&&result.predictions||[]; if(!rows.length){container.textContent='Grafik belum tersedia.';return;}
+    monitoring=monitoringOf(result,monitoring);
+    var model=predictionValues(result), sensor=monitoring&&monitoring.sensor?monitoring.sensor.values.map(function(row){return row.physical_rh;}):[];
+    var recoveryMap={}; if(monitoring&&monitoring.recovery)(monitoring.recovery.values||[]).forEach(function(row){recoveryMap[row.timestamp]=row.recovery_rh;});
+    var recovery=rows.map(function(row){var value=recoveryMap[timestampOf(row)];return value===undefined?null:value;});
+    var width=Math.max(container.clientWidth||700,320),height=interactive?330:260,pad={left:42,right:14,top:18,bottom:30};
+    var x=function(index){return pad.left+index/Math.max(1,rows.length-1)*(width-pad.left-pad.right);};
+    var y=function(value){return pad.top+(1-Number(value)/100)*(height-pad.top-pad.bottom);};
+    var svg=svgNode('svg',{viewBox:'0 0 '+width+' '+height,role:'img','aria-label':'Grafik estimasi RINTIK dan sensor humidity simulasi'});
+    [0,25,50,75,100].forEach(function(value){svg.appendChild(svgNode('line',{x1:pad.left,y1:y(value),x2:width-pad.right,y2:y(value),stroke:'#dce5e1'}));svg.appendChild(svgNode('text',{x:pad.left-7,y:y(value)+4,fill:'#718079','font-size':'9','text-anchor':'end'},value));});
+    [{values:model,color:'#146b4a',width:3,dash:''},{values:sensor,color:'#6b7470',width:2.1,dash:'7 5'},{values:recovery,color:'#2367a3',width:2.8,dash:'2 5'}].forEach(function(series){var path=linePath(series.values,x,y);if(path)svg.appendChild(svgNode('path',{d:path,fill:'none',stroke:series.color,'stroke-width':series.width,'stroke-dasharray':series.dash,'stroke-linecap':'round','stroke-linejoin':'round'}));});
+    [0,Math.floor((rows.length-1)/2),rows.length-1].forEach(function(index){svg.appendChild(svgNode('text',{x:x(index),y:height-7,fill:'#718079','font-size':'9','text-anchor':index===0?'start':index===rows.length-1?'end':'middle'},formatTime(timestampOf(rows[index]))));});
+    if(interactive){
+      var focus=svgNode('line',{x1:x(0),x2:x(0),y1:pad.top,y2:height-pad.bottom,stroke:'#9fb7ac','stroke-width':'1',hidden:'true'});
+      var hit=svgNode('rect',{x:pad.left,y:pad.top,width:width-pad.left-pad.right,height:height-pad.top-pad.bottom,fill:'transparent',tabindex:'0',role:'slider','aria-label':'Jelajahi titik waktu grafik humidity','aria-valuemin':'0','aria-valuemax':String(rows.length-1),'aria-valuenow':'0'});
+      function show(index,event){index=Math.max(0,Math.min(rows.length-1,index));focus.removeAttribute('hidden');focus.setAttribute('x1',x(index));focus.setAttribute('x2',x(index));hit.setAttribute('aria-valuenow',String(index));var physical=sensor[index],replacement=recovery[index];var copy=formatTime(timestampOf(rows[index]))+' · RINTIK '+fmtRh(model[index],2)+' · sensor '+(finite(physical)?fmtRh(physical,2):'gap')+(finite(replacement)?' · recovery '+fmtRh(replacement,2):'');hit.setAttribute('aria-valuetext',copy);var tooltip=$('resultTooltip');if(tooltip){tooltip.textContent=copy;tooltip.hidden=false;if(event){tooltip.style.left=Math.min(window.innerWidth-300,event.clientX+12)+'px';tooltip.style.top=Math.max(12,event.clientY-56)+'px';}}}
+      hit.addEventListener('mousemove',function(event){var rect=svg.getBoundingClientRect(),ratio=(event.clientX-rect.left-pad.left*rect.width/width)/((width-pad.left-pad.right)*rect.width/width);show(Math.round(Math.max(0,Math.min(1,ratio))*(rows.length-1)),event);});
+      hit.addEventListener('mouseleave',function(){focus.setAttribute('hidden','true');if($('resultTooltip'))$('resultTooltip').hidden=true;});
+      hit.addEventListener('keydown',function(event){if(event.key!=='ArrowLeft'&&event.key!=='ArrowRight')return;event.preventDefault();show(Number(hit.getAttribute('aria-valuenow'))+(event.key==='ArrowRight'?1:-1));});
+      svg.appendChild(focus);svg.appendChild(hit);
     }
-    var model = predictions.map(function(row){ return Number(row.post_3 !== undefined ? row.post_3 : row.air_humidity); });
-    var sensor = monitoring && monitoring.sensor ? monitoring.sensor.values.map(function(row){ return row.physical_rh; }) : [];
-    var recoveryMap = {};
-    if(monitoring && monitoring.recovery) monitoring.recovery.values.forEach(function(row){ recoveryMap[row.timestamp] = row.recovery_rh; });
-    var recovery = predictions.map(function(row){ var value = recoveryMap[timestampOf(row)]; return value === undefined ? null : value; });
-    var width = Math.max(container.clientWidth || 620,320), height = 260;
-    var pad = {left:38,right:10,top:14,bottom:27};
-    var x = function(index){ return pad.left + index / Math.max(1,predictions.length - 1) * (width - pad.left - pad.right); };
-    var y = function(value){ return pad.top + (1 - Number(value) / 100) * (height - pad.top - pad.bottom); };
-    var svg = svgNode('svg',{viewBox:'0 0 '+width+' '+height,role:'img','aria-label':'Grafik prediksi RINTIK dan data humidity operasional'});
-    [0,25,50,75,100].forEach(function(value){
-      svg.appendChild(svgNode('line',{x1:pad.left,y1:y(value),x2:width-pad.right,y2:y(value),stroke:'#dce5e1','stroke-width':'1'}));
-      svg.appendChild(svgNode('text',{x:pad.left-7,y:y(value)+4,fill:'#718079','font-size':'9','text-anchor':'end'},String(value)));
-    });
-    var modelPath = seriesPath(model,x,y);
-    if(modelPath) svg.appendChild(svgNode('path',{d:modelPath,fill:'none',stroke:'#146b4a','stroke-width':'2.8','stroke-linecap':'round','stroke-linejoin':'round'}));
-    var sensorPath = seriesPath(sensor,x,y);
-    if(sensorPath) svg.appendChild(svgNode('path',{d:sensorPath,fill:'none',stroke:'#68736e','stroke-width':'2.1','stroke-dasharray':'7 5','stroke-linecap':'round','stroke-linejoin':'round'}));
-    var recoveryPath = seriesPath(recovery,x,y);
-    if(recoveryPath) svg.appendChild(svgNode('path',{d:recoveryPath,fill:'none',stroke:'#2367a3','stroke-width':'2.7','stroke-dasharray':'2 5','stroke-linecap':'round','stroke-linejoin':'round'}));
-    var first = timestampOf(predictions[0]), last = timestampOf(predictions[predictions.length - 1]);
-    svg.appendChild(svgNode('text',{x:pad.left,y:height-7,fill:'#718079','font-size':'9'},String(first).slice(11,16)));
-    svg.appendChild(svgNode('text',{x:width-pad.right,y:height-7,fill:'#718079','font-size':'9','text-anchor':'end'},String(last).slice(11,16)));
     container.appendChild(svg);
   }
+  function legendHtml(monitoring){var html='<span><i class="flow-line-key"></i>Estimasi RINTIK</span>';if(monitoring)html+='<span><i class="flow-line-key sensor"></i>Sensor humidity · simulasi</span>';if(monitoring&&monitoring.recovery&&monitoring.recovery.values.length)html+='<span><i class="flow-line-key recovery"></i>Recovery · estimated</span>';return html;}
 
-  function legendHtml(monitoring){
-    var html = '<span><i class="flow-line-key"></i>Prediksi RINTIK</span>';
-    if(monitoring) html += '<span><i class="flow-line-key sensor"></i>Sensor humidity</span>';
-    if(monitoring && monitoring.recovery && monitoring.recovery.values.length) html += '<span><i class="flow-line-key recovery"></i>Data operasional pengganti</span>';
-    return html;
+  function rememberResult(scope,date){localStorage.setItem('rintik_latest_result',JSON.stringify({scope:scope,date:date}));}
+  function latestPointer(){try{return JSON.parse(localStorage.getItem('rintik_latest_result')||'null');}catch(error){return null;}}
+  async function loadResult(scope,date){
+    if(scope==='operational'){var result=await client.getOperationalResult(date);return {result:result,monitoring:result.monitoring,scope:scope};}
+    var official=await client.getDayResult(date), monitoring=null;try{monitoring=await client.getMonitoring(date);}catch(error){if(error.code!=='MONITORING_NOT_FOUND')throw error;}return {result:official,monitoring:monitoring,scope:'official'};
   }
-
-  async function monitoringForDate(date){
-    try { return await client.getMonitoring(date); }
-    catch(error){ if(error.code === 'MONITORING_NOT_FOUND') return null; throw error; }
-  }
-
-  function storeLatestDate(date){
-    localStorage.setItem('rintik_latest_daily_date',date);
-  }
-
-  function updateReplayStatus(){
-    if(!$('replayCount')) return;
-    var completed = state.days.filter(function(day){ return day.status === 'completed'; }).length;
-    $('replayCount').textContent = completed + ' / 16 hari';
-    $('replayProgress').style.width = (completed / 16 * 100).toFixed(2) + '%';
-    var complete = !state.health.next_expected_date;
-    $('nextDate').textContent = complete ? 'Semua hari demo selesai' : 'Berikutnya · ' + formatDate(state.health.next_expected_date);
-    if($('completionPanel')) $('completionPanel').hidden = state.mode !== 'demo' || !complete;
-    updateProcessButton();
-  }
-
-  function updateProcessButton(){
-    if(!$('processButton')) return;
-    $('processButton').hidden = false;
-    var complete = !state.health || !state.health.next_expected_date;
-    $('processButton').disabled = state.busy || complete;
-    if(complete){
-      $('processButtonLabel').textContent = state.mode === 'demo' ? 'Demo sudah selesai' : 'Menunggu data sensor baru';
-      $('processButtonSub').textContent = state.mode === 'demo' ? 'reset untuk mengulang' : 'riwayat tetap tersimpan';
-      return;
-    }
-    if(state.mode === 'demo'){
-      var completed = state.days.filter(function(day){ return day.status === 'completed'; }).length;
-      var count = 16-completed;
-      $('processButtonLabel').textContent = 'Jalankan ' + count + ' hari demo';
-      $('processButtonSub').textContent = 'otomatis dan berurutan';
-    } else {
-      $('processButtonLabel').textContent = 'Proses data ' + shortDate(state.health.next_expected_date);
-      $('processButtonSub').textContent = 'satu hari';
-    }
-  }
-
-  function setBusy(active,total,index,date){
-    state.busy = active;
-    if($('processingPanel')) $('processingPanel').hidden = !active;
-    if(active){
-      $('processingTitle').textContent = total > 1 ? 'Memproses hari ' + index + ' dari ' + total : 'Memproses ' + formatDate(date);
-      $('processingDetail').textContent = date ? 'Membaca sensor, menghitung humidity, dan menyimpan hasil…' : 'Mengambil data sensor berikutnya…';
-      $('processProgress').max = total;
-      $('processProgress').value = Math.max(0,index-1);
-    }
-    updateProcessButton();
-    updateRecoveryShortcut();
-  }
-
-  function renderIncidents(){
-    state.outageIncident = state.incidents.filter(function(incident){ return incident.type === 'sensor_outage'; }).slice(-1)[0] || null;
-    updateRecoveryShortcut();
-  }
-
-  function updateRecoveryShortcut(){
-    var button = $('prepareRecoveryButton');
-    if(!button) return;
-    var label = $('prepareRecoveryLabel'), sub = $('prepareRecoverySub');
-    button.disabled = state.busy || !state.health;
-    if(state.outageIncident){
-      label.textContent = 'Buka hasil kerusakan sensor 6 Sep';
-      sub.textContent = 'Lihat bagaimana data humidity tetap tersedia ketika sensor terputus.';
-      return;
-    }
-    label.textContent = 'Tampilkan kerusakan sensor 6 Sep';
-    sub.textContent = 'RINTIK menyiapkan hari yang diperlukan lalu membuka hasil recovery.';
-  }
-
-  function renderEmptyState(){
-    state.result = null;
-    state.monitoring = null;
-    state.incidents = [];
-    state.outageIncident = null;
-    if($('latestContent')) $('latestContent').hidden = true;
-    if($('latestEmpty')) $('latestEmpty').hidden = false;
-    renderIncidents();
-  }
-
-  function renderLatest(result,monitoring){
-    if(!$('latestContent')) return;
-    state.result = result; state.monitoring = monitoring;
-    $('latestEmpty').hidden = true; $('latestContent').hidden = false;
-    var values = predictionValues(result), operational = operationalValues(result,monitoring);
-    $('latestDate').textContent = formatDate(result.date);
-    $('latestStatus').textContent = 'Prediksi dan data humidity tersimpan dalam riwayat.';
-    $('latestMean').textContent = fmtRh(mean(values));
-    $('latestOperational').textContent = fmtRh(mean(operational.values));
-    $('latestOperationalNote').textContent = operational.source === 'recovery' ? 'menggunakan estimasi RINTIK' : operational.source === 'sensor' ? 'dari sensor humidity' : 'estimasi tersedia';
-    $('latestRows').textContent = result.predictions.length;
-    var recoveryActive = operational.source === 'recovery';
-    $('operationalBanner').hidden = !recoveryActive;
-    if(monitoring){
-      $('latestVerdict').textContent = verdictLabel(monitoring.assessment.verdict);
-      $('latestSensor').textContent = sensorStateLabel(monitoring.sensor.state);
-      $('latestSensorNote').textContent = recoveryActive ? 'data terputus · simulasi' : 'pembacaan tersedia';
-    } else {
-      $('latestVerdict').textContent = 'Tersimpan';
-      $('latestSensor').textContent = 'Belum tersedia';
-      $('latestSensorNote').textContent = 'prediksi tetap tersimpan';
-    }
-    $('latestLegend').innerHTML = legendHtml(monitoring);
-    renderChart($('latestChart'),result,monitoring);
-    var href = new URL('hasil.html',window.location.href); href.searchParams.set('api',baseUrl); href.searchParams.set('date',result.date); $('resultLink').href = href.pathname.split('/').pop() + '?' + href.searchParams.toString();
-    storeLatestDate(result.date);
-    renderIncidents();
-  }
-
-  async function loadDate(date){
-    var result = await client.getDayResult(date);
-    var monitoring = await monitoringForDate(date);
-    renderLatest(result,monitoring);
-    return {result:result,monitoring:monitoring};
-  }
-
-  async function refreshStatus(preferredDate){
-    hideAlert();
-    try {
-      var responses = await Promise.all([client.health(),client.listDays(),client.listIncidents()]);
-      state.health = responses[0]; state.days = responses[1].days || []; state.incidents = responses[2].incidents || [];
-      setSystem(true,'Sistem siap',state.health.next_expected_date ? 'Data ' + formatDate(state.health.next_expected_date) + ' siap diproses' : 'Menunggu data sensor berikutnya');
-      updateReplayStatus();
-      var completed = state.days.filter(function(day){ return day.status === 'completed'; });
-      var target = preferredDate || localStorage.getItem('rintik_latest_daily_date') || (completed.length ? completed[completed.length-1].date : null);
-      if(target && completed.some(function(day){ return day.date === target; })) await loadDate(target);
-      else if(!completed.length) renderEmptyState();
-      else renderIncidents();
-      return true;
-    } catch(error){
-      setSystem(false,'Sistem belum terhubung','Periksa layanan RINTIK lalu coba lagi.');
-      setAlert('Sistem RINTIK belum siap',errorMessage(error));
-      if($('processButton')) $('processButton').disabled = true;
-      return false;
-    }
-  }
-
-  async function processOne(simulationEnabled){
-    var fixture = await client.getNextOfficialDemoInput();
-    var rows = predictionLib.parseCsvText(fixture.csv);
-    var classification = predictionLib.classifyRows(rows);
-    if(!classification.ok || classification.workflow !== 'daily_batch' || classification.date !== fixture.date){
-      throw new predictionLib.PublicPredictionError('INVALID_FIXTURE_SHAPE','Fixture resmi tidak cocok dengan kontrak daily batch.');
-    }
-    var processed = await predictionLib.processRows(rows,client,{monitoringEnabled:simulationEnabled});
-    return {date:fixture.date,processed:processed};
-  }
-
-  async function runProcessing(){
-    if(state.busy || !state.health || !state.health.next_expected_date) return;
-    hideAlert();
-    var completed = state.days.filter(function(day){ return day.status === 'completed'; }).length;
-    var target = state.mode === 'demo' ? 16-completed : 1;
-    var simulationEnabled = true;
-    var latest = null;
-    setBusy(true,target,1,state.health.next_expected_date);
-    try {
-      for(var index=1; index<=target; index++){
-        var next = await client.health();
-        if(!next.next_expected_date) break;
-        setBusy(true,target,index,next.next_expected_date);
-        latest = await processOne(simulationEnabled);
-        $('processProgress').value = index;
-        $('processingDetail').textContent = formatDate(latest.date) + ' selesai dan tersimpan.';
-      }
-      await refreshStatus(latest && latest.date);
-      setAlert('Data berhasil diproses',target > 1 ? 'Rangkaian demo selesai. Semua hasil tersimpan dan siap dijelajahi.' : 'Prediksi dan data humidity hari ini sudah tersimpan. Anda dapat melanjutkan ke hari berikutnya.','info');
-    } catch(error){
-      await refreshStatus(latest && latest.date);
-      setAlert('Pemrosesan berhenti',errorMessage(error) + ' Hasil yang sudah selesai tetap tersimpan.');
-    } finally { setBusy(false,target,target,state.health && state.health.next_expected_date); }
-  }
-
-  function focusLatestResult(){
-    var content = $('latestContent');
-    if(!content || content.hidden) return;
-    content.focus({preventScroll:true});
-    content.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
-  }
-
-  async function prepareRecovery(){
-    if(state.busy || !state.health) return;
-    var targetDate = '2023-09-06';
-    var scenarioDates = ['2023-09-04','2023-09-05','2023-09-06'];
-    var remaining = state.days.filter(function(day){ return day.status !== 'completed' && day.date <= targetDate; }).length;
-    hideAlert();
-    setBusy(true,Math.max(1,remaining),1,state.health.next_expected_date || targetDate);
-    try {
-      var index = 0;
-      var health = await client.health();
-      while(health.next_expected_date && health.next_expected_date <= targetDate){
-        index += 1;
-        setBusy(true,Math.max(1,remaining),index,health.next_expected_date);
-        await processOne(true);
-        $('processProgress').value = index;
-        health = await client.health();
-      }
-      var days = (await client.listDays()).days || [];
-      for(var dateIndex=0; dateIndex<scenarioDates.length; dateIndex++){
-        if(days.some(function(day){ return day.date === scenarioDates[dateIndex] && day.status === 'completed'; })){
-          await client.monitorDay(scenarioDates[dateIndex]);
-        }
-      }
-      var incidents = (await client.listIncidents()).incidents || [];
-      var incident = incidents.filter(function(item){ return item.type === 'sensor_outage' && item.date === targetDate; })[0];
-      if(!incident) throw new Error('Skenario 6 September belum tersedia. Pastikan fixture resmi diproses kronologis dengan simulasi aktif.');
-      if(incident.status !== 'confirmed_simulation'){
-        await client.createDemoAudit('pass','prediction-audit-pass-' + incident.incident_id);
-        await client.confirmIncident(incident.incident_id,{demo_override:true,note:'Explicit simulated technician action from guided recovery shortcut.'},'prediction-confirm-' + incident.incident_id);
-      }
-      await refreshStatus(targetDate);
-      setAlert('Kerusakan sensor 6 September siap','Sensor humidity terputus. Data operasional tetap tersedia menggunakan estimasi RINTIK dan sumbernya ditandai dengan jelas.','info',{focus:false,scroll:false});
-      focusLatestResult();
-    } catch(error){
-      await refreshStatus();
-      setAlert('Recovery belum dapat disiapkan',errorMessage(error));
-    } finally {
-      setBusy(false,Math.max(1,remaining),Math.max(1,remaining),targetDate);
-    }
-  }
-
-  function manualFeatureInputs(){
-    return Array.prototype.slice.call(document.querySelectorAll('[data-manual-feature]'));
+  function renderLatest(bundle){
+    if(!$('latestContent'))return;
+    var result=bundle.result,monitoring=bundle.monitoring,scope=bundle.scope,values=predictionValues(result),operational=operationalValues(result,monitoring);
+    state.result=result;state.monitoring=monitoring;state.resultScope=scope;$('latestEmpty').hidden=true;$('latestContent').hidden=false;
+    $('latestScope').textContent=scope==='operational'?'Simulasi operasional 2026':'Demo resmi 2023';$('latestDate').textContent=formatDate(result.date);$('latestStatus').textContent=scope==='operational'?'Estimasi pada skenario sintetis tersimpan.':'Hasil replay fixture resmi tersimpan.';
+    $('latestMean').textContent=fmtRh(mean(values));$('latestOperational').textContent=fmtRh(mean(operational.values));$('latestOperationalNote').textContent=operational.source==='recovery'?'recovery estimated':operational.source==='sensor'?'dari sensor simulasi':'estimasi RINTIK';$('latestRows').textContent=result.predictions.length;
+    var sensorState=monitoring&&monitoring.sensor?(monitoring.sensor.state||monitoring.sensor_state):null,verdict=monitoring&&monitoring.assessment&&monitoring.assessment.verdict;
+    $('latestSensor').textContent=sensorStateLabel(sensorState);$('latestSensorNote').textContent=monitoring?'bukan pengukuran terverifikasi':'belum dibandingkan';$('latestVerdict').textContent=verdictLabel(verdict);$('operationalBanner').hidden=operational.source!=='recovery';$('latestLegend').innerHTML=legendHtml(monitoring);renderChart($('latestChart'),result,monitoring,false);
+    var url=new URL('hasil.html',window.location.href);url.searchParams.set('api',baseUrl);url.searchParams.set('scope',scope);url.searchParams.set('date',result.date);$('resultLink').href=url.pathname.split('/').pop()+'?'+url.searchParams.toString();rememberResult(scope,result.date);
   }
 
   function renderManualCatalog(catalog){
-    state.catalog = catalog;
-    var container = $('manualGroups');
-    container.innerHTML = '';
-    catalog.groups.forEach(function(group,index){
-      var details = document.createElement('details');
-      details.className = 'manual-group'; details.open = index === 0;
-      var summary = document.createElement('summary'); summary.textContent = group.label + ' ';
-      var count = document.createElement('span'); count.textContent = '· ' + group.features.length + ' fitur';
-      summary.appendChild(count); details.appendChild(summary);
-      var grid = document.createElement('div'); grid.className = 'manual-field-grid';
-      group.features.forEach(function(feature){
-        var field = document.createElement('div'); field.className = 'manual-field';
-        var label = document.createElement('label'); label.htmlFor = 'manual-' + feature.key; label.textContent = feature.label;
-        var input = document.createElement('input'); input.id = 'manual-' + feature.key; input.type = 'number'; input.step = 'any'; input.inputMode = 'decimal'; input.dataset.manualFeature = feature.key; input.autocomplete = 'off';
-        var unit = document.createElement('small'); unit.textContent = feature.unit || '';
-        field.appendChild(label); field.appendChild(input); field.appendChild(unit); grid.appendChild(field);
-      });
-      details.appendChild(grid); container.appendChild(details);
-    });
+    state.catalog=catalog;var container=$('manualGroups');if(!container)return;container.innerHTML='';
+    var groups=[{id:'identity',label:'Identitas pembacaan',features:[{key:'env_id',label:'ID lingkungan',unit:'ID'}]}].concat(catalog.groups||[]);
+    groups.forEach(function(group,index){var details=document.createElement('details');details.className='manual-group';details.open=index===0;var summary=document.createElement('summary');summary.innerHTML=group.label+' <span>· '+group.features.length+' fitur</span>';details.appendChild(summary);var grid=document.createElement('div');grid.className='manual-field-grid';group.features.forEach(function(feature){var field=document.createElement('div');field.className='manual-field';var label=document.createElement('label');label.htmlFor='manual-'+feature.key;label.textContent=feature.label;var input=document.createElement('input');input.id='manual-'+feature.key;input.type='number';input.step='any';input.inputMode='decimal';input.dataset.manualFeature=feature.key;input.autocomplete='off';var unit=document.createElement('small');unit.textContent=feature.unit||'';field.appendChild(label);field.appendChild(input);field.appendChild(unit);grid.appendChild(field);});details.appendChild(grid);container.appendChild(details);});
+  }
+  function manualInputs(){return Array.prototype.slice.call(document.querySelectorAll('[data-manual-feature]'));}
+  function setManualResult(message,error){var result=$('manualResult');result.textContent=message;result.classList.toggle('is-error',Boolean(error));result.hidden=false;}
+  function clearManual(){if(!$('manualTimestamp'))return;$('manualTimestamp').value='';manualInputs().forEach(function(input){input.value='';});state.editingTimestamp=null;$('saveReadingButton').textContent='Simpan pembacaan';$('manualResult').hidden=true;setDefaultManualTimestamp();}
+  function currentOperationalDate(){return state.operational&&state.operational.next_expected_date;}
+  function setDefaultManualTimestamp(){var day=currentOperationalDate();if(!day||!$('manualTimestamp'))return;var missing=state.operationalDay&&state.operationalDay.missing_slots||[];var target=missing[0]||day+' 00:00:00';$('manualTimestamp').value=target.replace(' ','T').slice(0,16);$('manualTimestamp').min=day+'T00:00';$('manualTimestamp').max=day+'T23:30';}
+  function populateReading(reading){$('manualTimestamp').value=String(reading.datetime).replace(' ','T').slice(0,16);manualInputs().forEach(function(input){input.value=reading[input.dataset.manualFeature];});}
+  async function loadManualExample(){var day=currentOperationalDate();if(!day)return;var timestamp=$('manualTimestamp').value;if(!timestamp){setDefaultManualTimestamp();timestamp=$('manualTimestamp').value;}try{var response=await client.getOperationalFixtureReading(day,timestamp.replace('T',' ')+':00'.replace(/:00:00$/,':00'));populateReading(response.reading);state.editingTimestamp=null;$('saveReadingButton').textContent='Simpan pembacaan';setManualResult('Nilai fixture dimuat ke form dan belum disimpan.',false);}catch(error){setManualResult(errorMessage(error),true);}}
+  function buildManualReading(){var timestamp=$('manualTimestamp').value;if(!timestamp)throw new Error('Pilih waktu pembacaan.');var reading={datetime:timestamp.replace('T',' ')+':00'};var missing=[];manualInputs().forEach(function(input){if(!finite(input.value))missing.push(input.dataset.manualFeature);else reading[input.dataset.manualFeature]=Number(input.value);});if(missing.length)throw new Error('Lengkapi nilai numerik: '+missing.join(', ')+'.');return reading;}
+  async function saveReading(){var day=currentOperationalDate();if(!day)return;hideAlert();try{var reading=buildManualReading();setBusy(true,state.editingTimestamp?'Menyimpan koreksi':'Menyimpan pembacaan','Memvalidasi slot, satuan, dan rentang…');var response=state.editingTimestamp?await client.updateOperationalReading(day,reading):await client.createOperationalReading(day,reading);await refreshOperational();setManualResult((response.action==='updated'?'Koreksi':'Pembacaan')+' tersimpan sebagai sumber manual.',false);clearManual();}catch(error){setManualResult(errorMessage(error),true);}finally{setBusy(false);}}
+  function editReading(timestamp){var row=(state.operationalDay.readings||[]).find(function(item){return item.timestamp===timestamp;});if(!row||state.operationalDay.locked)return;var reading=Object.assign({datetime:row.timestamp},row.values);populateReading(reading);state.editingTimestamp=timestamp;$('saveReadingButton').textContent='Simpan koreksi';$('manualTimestamp').focus();window.scrollTo({top:$('manualTimestamp').getBoundingClientRect().top+window.scrollY-130,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});}
+  function renderOperationalDay(){
+    var summary=state.operational,day=summary&&summary.next_expected_date,data=state.operationalDay;if(!summary)return;
+    if(!day){$('operationalDate').textContent='Periode 12 hari selesai';$('operationalCount').textContent='12 / 12 hari';$('operationalProgress').style.width='100%';$('readinessText').textContent='Reset operasional untuk memulai kembali.';return;}
+    var progress=data.progress;$('operationalDate').textContent=formatDate(day);$('operationalCount').textContent=progress.available+' / 48';$('operationalProgress').style.width=(progress.available/48*100)+'%';$('manualCount').textContent=progress.manual;$('fixtureCount').textContent=progress.synthetic_fixture;$('readingState').textContent=progress.available+' valid';
+    $('readinessText').textContent=progress.ready?'Semua slot tersedia. Estimasi harian siap diproses.':progress.available+' dari 48 slot tersedia; '+progress.missing+' masih kosong.';
+    var process=$('processOperationalButton');process.disabled=state.busy||!progress.ready;process.querySelector('strong').textContent=progress.ready?'Data hari ini siap. Proses estimasi humidity.':'Data belum lengkap';process.querySelector('span').textContent=progress.available+' / 48 pembacaan';$('fillMissingButton').disabled=state.busy||progress.ready;
+    var body=$('readingTableBody');body.innerHTML='';if(!data.readings.length){body.innerHTML='<tr><td colspan="7" class="table-empty">Belum ada pembacaan.</td></tr>';}else data.readings.forEach(function(row){var tr=document.createElement('tr');if(!data.locked){tr.tabIndex=0;tr.setAttribute('role','button');tr.setAttribute('aria-label','Edit pembacaan '+formatTime(row.timestamp));tr.addEventListener('click',function(){editReading(row.timestamp);});tr.addEventListener('keydown',function(event){if(event.key==='Enter'||event.key===' '){event.preventDefault();editReading(row.timestamp);}});}var values=row.values,soil=[values.soil_humidity_line1,values.soil_humidity_line2,values.soil_humidity_line3].filter(finite);tr.innerHTML='<td>'+formatTime(row.timestamp)+'</td><td>'+Number(values.air_temperature).toFixed(1)+' °C</td><td>'+Number(values.co2).toFixed(0)+' ppm</td><td>'+Number(values.pressure).toFixed(1)+' hPa</td><td>'+Number(mean(soil)).toFixed(1)+'%</td><td><span class="source-pill '+row.source+'">'+(row.source==='manual'?'Manual':'Simulasi')+'</span></td><td><span class="valid-pill">Valid</span></td>';body.appendChild(tr);});
+    setDefaultManualTimestamp();
+  }
+  async function refreshOperational(){state.operational=await client.listOperationalDays();var day=state.operational.next_expected_date;if(day)state.operationalDay=await client.getOperationalDay(day);else state.operationalDay=null;renderOperationalDay();}
+  async function fillMissing(){var day=currentOperationalDate();if(!day)return;setBusy(true,'Melengkapi slot','Mengisi hanya slot kosong dari fixture sintetis…');try{var result=await client.fillOperationalDay(day);state.operationalDay=result;await refreshOperational();setAlert('Data hari ini lengkap',result.inserted_fixture_rows+' slot diisi dari fixture. Pembacaan manual tetap dipertahankan.','info');}catch(error){setAlert('Data tidak dapat dilengkapi',errorMessage(error));}finally{setBusy(false);}}
+  async function processOperational(){var day=currentOperationalDate();if(!day)return;setBusy(true,'Memproses '+formatDate(day),'Menjalankan pipeline harian dan menyimpan hasil…');try{var result=await client.runOperationalDay(day,$('operationalScenario').value);renderLatest({result:result,monitoring:result.monitoring,scope:'operational'});await refreshOperational();setAlert('Estimasi humidity tersimpan','Hasil '+formatDate(day)+' siap dilihat dan tanggal berikutnya dapat disiapkan.','info',false);$('latestContent').focus();}catch(error){setAlert('Pemrosesan gagal',errorMessage(error));}finally{setBusy(false);}}
+
+  async function processOfficialOne(){var fixture=await client.getNextOfficialDemoInput();var rows=predictionLib.parseCsvText(fixture.csv);var classification=predictionLib.classifyRows(rows);if(!classification.ok||classification.workflow!=='daily_batch'||classification.date!==fixture.date)throw new Error('Fixture resmi tidak cocok dengan kontrak daily batch.');var processed=await predictionLib.processRows(rows,client,{monitoringEnabled:true});var result=await client.getDayResult(fixture.date);return {date:fixture.date,result:result,monitoring:processed.monitoring};}
+  function renderDemo(){var complete=state.health&&!state.health.next_expected_date,count=state.officialDays.filter(function(day){return day.status==='completed';}).length;$('demoCount').textContent=count+' / 16';$('demoProgress').style.width=(count/16*100)+'%';$('demoNextDate').textContent=complete?'Fixture demo selesai':'Berikutnya · '+formatDate(state.health&&state.health.next_expected_date);$('demoStatusText').textContent=count?count+' tanggal telah tersimpan secara kronologis.':'Belum ada tanggal yang diproses.';$('demoComplete').hidden=!complete;$('processDemoDayButton').disabled=state.busy||complete;$('processDemoAllButton').disabled=state.busy||complete;$('prepareRecoveryButton').disabled=state.busy;}
+  async function refreshOfficial(){var responses=await Promise.all([client.health(),client.listDays(),client.listIncidents()]);state.health=responses[0];state.officialDays=responses[1].days||[];state.incidents=responses[2].incidents||[];renderDemo();}
+  async function processDemo(all){if(!state.health||!state.health.next_expected_date)return;var count=state.officialDays.filter(function(day){return day.status==='completed';}).length,target=all?16-count:1,latest=null;setBusy(true,all?'Menjalankan demo resmi':'Memproses satu hari','Replay kronologis sedang berlangsung…',target,0);try{for(var i=0;i<target;i++){latest=await processOfficialOne();$('processProgress').value=i+1;$('processingDetail').textContent=formatDate(latest.date)+' selesai.';}await refreshOfficial();if(latest)renderLatest({result:latest.result,monitoring:latest.monitoring,scope:'official'});setAlert('Replay berhasil',all?'Seluruh tanggal yang tersisa sudah diproses.':'Satu tanggal selesai dan tersimpan.','info');}catch(error){await refreshOfficial();setAlert('Replay berhenti',errorMessage(error)+' Hasil yang sudah selesai tetap tersimpan.');}finally{setBusy(false);}}
+  async function prepareRecovery(){var target='2023-09-06',latest=null;setBusy(true,'Menyiapkan outage 6 September','Memproses tanggal prasyarat secara kronologis…',9,0);try{var health=await client.health(),i=0;while(health.next_expected_date&&health.next_expected_date<=target){latest=await processOfficialOne();i++;$('processProgress').value=i;health=await client.health();}var incidents=(await client.listIncidents()).incidents||[],incident=incidents.find(function(item){return item.date===target&&item.type==='sensor_outage';});if(!incident)throw new Error('Skenario outage belum tersedia.');if(incident.status!=='confirmed_simulation'){await client.createDemoAudit('pass','guided-audit-'+incident.incident_id);await client.confirmIncident(incident.incident_id,{demo_override:true,note:'Guided recovery demonstration.'},'guided-confirm-'+incident.incident_id);}var bundle=await loadResult('official',target);renderLatest(bundle);await refreshOfficial();setAlert('Recovery 6 September siap','Sensor humidity tetap tercatat hilang; nilai pengganti tampil sebagai estimated.','info',false);var url=new URL('hasil.html',window.location.href);url.searchParams.set('api',baseUrl);url.searchParams.set('scope','official');url.searchParams.set('date',target);window.location.href=url.pathname.split('/').pop()+'?'+url.searchParams.toString();}catch(error){setAlert('Recovery belum siap',errorMessage(error));}finally{setBusy(false);}}
+
+  function selectMode(mode){state.mode=mode;document.querySelectorAll('[data-mode]').forEach(function(button){button.setAttribute('aria-selected',String(button.dataset.mode===mode));});$('operationalPanel').hidden=mode!=='operational';$('demoPanel').hidden=mode!=='demo';sessionStorage.setItem('rintik_prediction_mode',mode);}
+  function updateControls(){if(pageKind!=='predict')return;renderDemo();renderOperationalDay();}
+  function openReset(target){state.resetTarget=target;$('resetDialogTitle').textContent=target==='official'?'Ulangi Demo Resmi?':'Ulangi Operasional Harian?';$('resetDialogText').textContent=target==='official'?'Hanya replay 2023, monitoring demo, dan recovery terkait yang dibersihkan.':'Hanya pembacaan dan hasil simulasi operasional 2026 yang dibersihkan.';$('resetDialog').showModal();}
+  async function confirmReset(event){event.preventDefault();$('resetDialog').close();setBusy(true,'Mereset workflow','Membersihkan state run yang dipilih…');try{if(state.resetTarget==='official'){await client.resetDemoState('RESET_DEMO_STATE');if(latestPointer()&&latestPointer().scope==='official')localStorage.removeItem('rintik_latest_result');}else{await client.resetOperationalSimulation('RESET_OPERATIONAL_SIMULATION');if(latestPointer()&&latestPointer().scope==='operational')localStorage.removeItem('rintik_latest_result');}state.result=null;state.monitoring=null;$('latestContent').hidden=true;$('latestEmpty').hidden=false;await Promise.all([refreshOfficial(),refreshOperational()]);clearManual();setAlert('Workflow berhasil direset','Fixture dan artefak model tetap utuh. Anda dapat memulai kembali dari tanggal pertama.','info');}catch(error){setAlert('Reset gagal',errorMessage(error));}finally{setBusy(false);}}
+
+  async function initPredict(){
+    document.querySelectorAll('[data-mode]').forEach(function(button){button.addEventListener('click',function(){selectMode(button.dataset.mode);});});
+    $('loadManualExample').addEventListener('click',loadManualExample);$('saveReadingButton').addEventListener('click',saveReading);$('clearManualButton').addEventListener('click',clearManual);$('fillMissingButton').addEventListener('click',fillMissing);$('processOperationalButton').addEventListener('click',processOperational);$('processDemoDayButton').addEventListener('click',function(){processDemo(false);});$('processDemoAllButton').addEventListener('click',function(){processDemo(true);});$('prepareRecoveryButton').addEventListener('click',prepareRecovery);$('resetOperationalButton').addEventListener('click',function(){openReset('operational');});$('resetDemoButton').addEventListener('click',function(){openReset('official');});$('confirmResetButton').addEventListener('click',confirmReset);
+    window.addEventListener('resize',function(){if(state.result)renderChart($('latestChart'),state.result,state.monitoring,false);});
+    try{var responses=await Promise.all([client.listFeatures(),refreshOfficial(),refreshOperational()]);renderManualCatalog(responses[0]);setSystem(true,'Sistem siap','Kedua workflow tersedia dan disimpan terpisah.');var pointer=latestPointer();if(pointer){try{renderLatest(await loadResult(pointer.scope,pointer.date));}catch(error){/* stale pointer is harmless */}}selectMode(sessionStorage.getItem('rintik_prediction_mode')||'operational');setDefaultManualTimestamp();}catch(error){setSystem(false,'Sistem belum siap','Backend tidak dapat dimuat.');setAlert('Tidak dapat memulai Prediksi',errorMessage(error));}
   }
 
-  function setManualResult(message,isError){
-    var result = $('manualResult');
-    result.textContent = message;
-    result.classList.toggle('is-error',Boolean(isError));
-    result.hidden = false;
-  }
-
-  async function loadManualExample(){
-    if(state.busy) return;
-    hideAlert();
-    $('loadManualExample').disabled = true;
-    $('validateManualButton').disabled = true;
-    try {
-      var row;
-      if(state.health && state.health.next_expected_date){
-        var fixture = await client.getNextOfficialDemoInput();
-        var rows = predictionLib.parseCsvText(fixture.csv);
-        var keys = manualFeatureInputs().map(function(input){ return input.dataset.manualFeature; });
-        row = rows.find(function(candidate){
-          return keys.every(function(key){ return candidate[key] !== '' && Number.isFinite(Number(candidate[key])); });
-        }) || rows[0];
-      } else {
-        var completed = state.days.filter(function(day){ return day.status === 'completed'; });
-        if(!completed.length) throw new Error('Belum ada fixture sensor yang dapat dibaca.');
-        var series = await client.getDaySeries(completed[completed.length-1].date);
-        var point = series.points.find(function(candidate){
-          return Object.keys(candidate.values).every(function(key){
-            return candidate.values[key] !== null && Number.isFinite(Number(candidate.values[key]));
-          });
-        }) || series.points[0];
-        row = Object.assign({datetime:point.timestamp},point.values);
-      }
-      $('manualTimestamp').value = String(row.datetime || row.timestamp || '').replace(' ','T').slice(0,16);
-      manualFeatureInputs().forEach(function(input){
-        var value = row[input.dataset.manualFeature];
-        input.value = value === null || value === undefined || value === '' ? '' : value;
-        input.dataset.officialMissing = input.value === '' ? 'true' : 'false';
-      });
-      setManualResult('Contoh pembacaan dimuat. Data ini belum disimpan atau diproses.',false);
-    } catch(error){ setManualResult(errorMessage(error),true); }
-    finally {
-      $('loadManualExample').disabled = false;
-      $('validateManualButton').disabled = false;
-    }
-  }
-
-  function validateManual(){
-    var missing = [];
-    var officialGaps = [];
-    if(!$('manualTimestamp').value) missing.push('timestamp');
-    manualFeatureInputs().forEach(function(input){
-      if(input.value === '' && input.dataset.officialMissing === 'true') officialGaps.push(input.dataset.manualFeature);
-      else if(input.value === '' || !Number.isFinite(Number(input.value))) missing.push(input.dataset.manualFeature);
-    });
-    if(missing.length){
-      setManualResult('Isian belum valid. Lengkapi nilai numerik untuk: ' + missing.join(', ') + '.',true);
-      return;
-    }
-    var available = manualFeatureInputs().length - officialGaps.length;
-    var gapText = officialGaps.length ? ' ' + officialGaps.length + ' nilai kosong dari sumber tetap dibiarkan kosong.' : '';
-    setManualResult('Form diperiksa: ' + available + ' nilai sensor tersedia.' + gapText + ' Untuk membuat prediksi, sistem tetap memerlukan rangkaian data satu hari penuh.',false);
-  }
-
-  function clearManual(){
-    $('manualTimestamp').value = '';
-    manualFeatureInputs().forEach(function(input){ input.value = ''; delete input.dataset.officialMissing; });
-    $('manualResult').hidden = true;
-  }
-
-  function selectMode(mode){
-    state.mode = mode;
-    document.querySelectorAll('[data-mode]').forEach(function(item){
-      item.setAttribute('aria-selected',String(item.dataset.mode === mode));
-    });
-    $('demoPanel').hidden = mode !== 'demo';
-    if(mode === 'demo'){
-      $('modeExplanation').innerHTML = '<strong>Demo 16 Hari.</strong> Jalankan seluruh periode demo otomatis, termasuk skenario sensor humidity terputus dan recovery.';
-    } else {
-      $('modeExplanation').innerHTML = '<strong>Operasional Harian.</strong> Satu klik membaca data hari berikutnya, menghasilkan prediksi, dan menyimpan pembacaan humidity untuk dibandingkan.';
-    }
-    if(state.health) updateReplayStatus();
-    updateProcessButton();
-  }
-
-  async function resetDemo(){
-    if(state.busy) return;
-    state.busy = true;
-    updateProcessButton();
-    $('confirmResetButton').disabled = true;
-    try {
-      await client.resetDemoState('RESET_DEMO_STATE');
-      localStorage.removeItem('rintik_latest_daily_date');
-      $('resetConfirmation').hidden = true;
-      if($('completionPanel')) $('completionPanel').hidden = true;
-      renderEmptyState();
-      await refreshStatus();
-      setAlert('Demo siap diulang','Riwayat demo kembali ke hari pertama. Data sumber RINTIK tidak berubah.','info');
-    } catch(error){ setAlert('Reset demo gagal',errorMessage(error)); }
-    finally {
-      state.busy = false;
-      $('confirmResetButton').disabled = false;
-      updateProcessButton();
-    }
-  }
-
-  function bindPredict(){
-    document.querySelectorAll('[data-mode]').forEach(function(button){
-      button.addEventListener('click',function(){
-        selectMode(button.dataset.mode);
-      });
-    });
-    $('processButton').addEventListener('click',runProcessing);
-    $('prepareRecoveryButton').addEventListener('click',prepareRecovery);
-    function openReset(){
-      $('resetConfirmation').hidden = false;
-      $('cancelResetButton').focus();
-      $('resetConfirmation').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});
-    }
-    $('openResetButton').addEventListener('click',openReset);
-    $('completionResetButton').addEventListener('click',openReset);
-    $('cancelResetButton').addEventListener('click',function(){
-      $('resetConfirmation').hidden = true;
-      $('openResetButton').focus();
-    });
-    $('confirmResetButton').addEventListener('click',resetDemo);
-    $('loadManualExample').addEventListener('click',loadManualExample);
-    $('validateManualButton').addEventListener('click',validateManual);
-    $('clearManualButton').addEventListener('click',clearManual);
-    window.addEventListener('resize',function(){ if(state.result) renderChart($('latestChart'),state.result,state.monitoring); });
-    client.listFeatures().then(renderManualCatalog).catch(function(error){ $('manualGroups').textContent = errorMessage(error); });
-    selectMode('daily');
-    refreshStatus();
-  }
-
-  function renderResultPage(result,monitoring){
-    state.result = result; state.monitoring = monitoring;
-    $('resultEmpty').hidden = true; $('resultContent').hidden = false;
-    var values = predictionValues(result), operational = operationalValues(result,monitoring);
-    $('resultDate').textContent = formatDate(result.date);
-    $('resultStatus').textContent = 'Prediksi dan data humidity tersimpan dalam riwayat.';
-    $('resultMean').textContent = fmtRh(mean(values)); $('resultMin').textContent = fmtRh(Math.min.apply(null,values)); $('resultMax').textContent = fmtRh(Math.max.apply(null,values));
-    $('resultOperational').textContent = fmtRh(mean(operational.values));
-    $('resultOperationalNote').textContent = operational.source === 'recovery' ? 'menggunakan estimasi RINTIK' : operational.source === 'sensor' ? 'dari sensor humidity' : 'estimasi tersedia';
-    $('resultOperationalBanner').hidden = operational.source !== 'recovery';
-    $('resultVerdict').textContent = monitoring ? verdictLabel(monitoring.assessment.verdict) : 'Tersimpan';
-    $('resultLegend').innerHTML = legendHtml(monitoring);
-    renderChart($('resultChart'),result,monitoring);
-    var sensorMap = {}, recoveryMap = {};
-    if(monitoring){ monitoring.sensor.values.forEach(function(row){ sensorMap[row.timestamp] = row.physical_rh; }); monitoring.recovery.values.forEach(function(row){ recoveryMap[row.timestamp] = row.recovery_rh; }); }
-    $('resultTableBody').innerHTML = result.predictions.map(function(row){
-      var timestamp = timestampOf(row), model = row.post_3 !== undefined ? row.post_3 : row.air_humidity;
-      var sensor = sensorMap[timestamp], recovery = recoveryMap[timestamp];
-      var effective = sensor !== undefined && sensor !== null ? sensor : recovery;
-      return '<tr><td>' + timestamp + '</td><td>' + Number(model).toFixed(4) + '%</td><td>' + (sensor === undefined || sensor === null ? '—' : Number(sensor).toFixed(4) + '%') + '</td><td>' + (effective === undefined || effective === null ? '—' : Number(effective).toFixed(4) + '%') + '</td></tr>';
-    }).join('');
-    if(monitoring){
-      var recoveryActive = monitoring.recovery && monitoring.recovery.values.length;
-      $('resultSimulationSummary').textContent = recoveryActive ? 'Sensor humidity terputus. Data operasional hari ini menggunakan estimasi RINTIK.' : 'Sensor humidity tersedia dan dibandingkan dengan prediksi RINTIK.';
-      $('resultProvenance').innerHTML = '<strong>Sumber data jelas</strong><span>' + (recoveryActive ? 'Nilai operasional pengganti berasal dari estimasi RINTIK; pembacaan sensor asli tetap tercatat sebagai data yang hilang.' : 'Prediksi dan pembacaan sensor disimpan sebagai dua sumber yang berbeda.') + '</span>';
-    } else {
-      $('resultSimulationSummary').textContent = 'Prediksi tersedia, tetapi pembacaan sensor humidity belum tersedia untuk tanggal ini.';
-      $('resultProvenance').innerHTML = '<strong>Prediksi tersimpan</strong><span>Belum ada data sensor humidity untuk dibandingkan.</span>';
-    }
-    if($('resultNextAction')){
-      var complete = state.health && !state.health.next_expected_date;
-      $('resultNextAction').textContent = complete ? 'Kembali ke Prediksi' : 'Proses hari berikutnya';
-    }
-  }
-
+  function resultDates(official,operational){var values=[];(operational.days||[]).filter(function(day){return day.status==='completed';}).forEach(function(day){values.push({scope:'operational',date:day.date,label:formatDate(day.date)+' · operasional 2026'});});(official||[]).filter(function(day){return day.status==='completed';}).forEach(function(day){values.push({scope:'official',date:day.date,label:formatDate(day.date)+' · demo resmi'});});return values.sort(function(a,b){return a.date.localeCompare(b.date);});}
+  function extrema(rows){var values=predictionValues({predictions:rows}),min=Math.min.apply(null,values),max=Math.max.apply(null,values),minIndex=values.indexOf(min),maxIndex=values.indexOf(max);return {min:min,max:max,minTime:formatTime(timestampOf(rows[minIndex])),maxTime:formatTime(timestampOf(rows[maxIndex]))};}
+  function renderInterpretation(result,monitoring){var values=predictionValues(result),first=values[0],last=values[values.length-1],delta=last-first,high=values.filter(function(value){return value>=80;}).length,low=values.filter(function(value){return value<50;}).length,items=[];items.push('Humidity '+(delta>=0?'meningkat':'menurun')+' '+Math.abs(delta).toFixed(1)+' poin dari awal hingga akhir data hari ini.');if(high)items.push(high+' interval berada pada ≥80% RH; ambang ini hanya deskriptif, bukan rekomendasi agronomis.');if(low)items.push(low+' interval berada di bawah 50% RH; interpretasikan sesuai konteks tanaman dan lokasi.');if(monitoring&&monitoring.assessment){var disagreement=monitoring.assessment.metrics&&monitoring.assessment.metrics.mean_absolute_disagreement_rh;if(finite(disagreement))items.push('Selisih absolut rerata terhadap sensor simulasi '+Number(disagreement).toFixed(1)+' poin RH; ini bukan ukuran akurasi lapangan.');if(monitoring.recovery&&monitoring.recovery.values.length)items.push(monitoring.recovery.values.length+' gap sensor diisi sebagai recovery estimated tanpa menimpa data mentah.');}$('resultInsights').innerHTML=items.map(function(item){return '<li>'+item+'</li>';}).join('');}
+  function renderResultPage(bundle){var result=bundle.result,monitoring=bundle.monitoring,scope=bundle.scope,values=predictionValues(result),ext=extrema(result.predictions),operational=operationalValues(result,monitoring);state.result=result;state.monitoring=monitoring;state.resultScope=scope;$('resultEmpty').hidden=true;$('resultContent').hidden=false;$('resultDate').textContent=formatDate(result.date);$('resultScope').textContent=scope==='operational'?'Simulasi operasional 2026':'Demo resmi 2023';$('resultProvenanceLabel').textContent=scope==='operational'?'Data eksogen sintetis · bukan pengukuran lapangan':'Input resmi kompetisi · sensor humidity tetap simulasi';$('resultMean').textContent=fmtRh(mean(values));$('resultMin').textContent=fmtRh(ext.min);$('resultMax').textContent=fmtRh(ext.max);$('resultRange').textContent=(ext.max-ext.min).toFixed(1)+' poin';$('resultMinTime').textContent=ext.minTime;$('resultMaxTime').textContent=ext.maxTime;$('resultCompleteness').textContent=result.predictions.length+(scope==='operational'?' / 48':' observasi');$('resultSensorStatus').textContent=sensorStateLabel(monitoring&&monitoring.sensor?(monitoring.sensor.state||monitoring.sensor_state):null);$('resultOperational').textContent=fmtRh(mean(operational.values));$('resultOperationalNote').textContent=operational.source==='recovery'?'recovery estimated':'sensor humidity simulasi';$('resultRecovery').textContent=operational.source==='recovery'?'Aktif · estimated':'Tidak aktif';$('resultLegend').innerHTML=legendHtml(monitoring);renderChart($('resultChart'),result,monitoring,true);renderInterpretation(result,monitoring);renderResultTable(result,monitoring);rememberResult(scope,result.date);var next=new URL('predict.html',window.location.href);next.searchParams.set('api',baseUrl);$('resultNextAction').href=next.pathname.split('/').pop()+'?'+next.searchParams.toString();}
+  function renderResultTable(result,monitoring){var sensor={},recovery={};if(monitoring&&monitoring.sensor)monitoring.sensor.values.forEach(function(row){sensor[row.timestamp]=row.physical_rh;});if(monitoring&&monitoring.recovery)(monitoring.recovery.values||[]).forEach(function(row){recovery[row.timestamp]=row.recovery_rh;});$('resultTableBody').innerHTML=result.predictions.map(function(row){var time=timestampOf(row),model=row.post_3!==undefined?row.post_3:row.air_humidity,physical=sensor[time],replacement=recovery[time],effective=finite(physical)?physical:replacement;return '<tr><td>'+time+'</td><td>'+Number(model).toFixed(4)+'%</td><td>'+(finite(physical)?Number(physical).toFixed(4)+'%':'gap')+'</td><td>'+(finite(effective)?Number(effective).toFixed(4)+'%':'—')+'</td><td>'+(finite(physical)?'sensor_simulated':finite(replacement)?'model_estimate':'—')+'</td></tr>';}).join('');}
+  async function loadSelectedResult(){var value=$('resultDateSelect').value;if(!value)return;var split=value.split('|');setBusy(true,'Memuat hasil','Mengambil snapshot dan data humidity…');try{var bundle=await loadResult(split[0],split[1]);renderResultPage(bundle);}catch(error){setAlert('Hasil tidak dapat dimuat',errorMessage(error));}finally{setBusy(false);}}
+  function exportCurrentResult(){if(!state.result)return;var rows=['timestamp,estimated_rh,physical_sensor_simulated_rh,recovery_estimated_rh,effective_operational_rh,source'];var sensor={},recovery={},monitoring=state.monitoring;if(monitoring&&monitoring.sensor)monitoring.sensor.values.forEach(function(row){sensor[row.timestamp]=row.physical_rh;});if(monitoring&&monitoring.recovery)(monitoring.recovery.values||[]).forEach(function(row){recovery[row.timestamp]=row.recovery_rh;});state.result.predictions.forEach(function(row){var time=timestampOf(row),model=row.post_3!==undefined?row.post_3:row.air_humidity,physical=sensor[time],replacement=recovery[time],effective=finite(physical)?physical:replacement,source=finite(physical)?'sensor_simulated':finite(replacement)?'model_estimate':'model_only';rows.push([time,model,finite(physical)?physical:'',finite(replacement)?replacement:'',finite(effective)?effective:'',source].join(','));});var blob=new Blob([rows.join('\n')+'\n'],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),anchor=document.createElement('a');anchor.href=url;anchor.download='rintik-hasil-'+state.result.date+'.csv';anchor.click();URL.revokeObjectURL(url);}
   async function initResult(){
-    try {
-      var responses = await Promise.all([client.health(),client.listDays()]);
-      state.health = responses[0]; state.days = responses[1].days || [];
-      var completed = state.days.filter(function(day){ return day.status === 'completed'; });
-      setSystem(true,'Hasil siap',completed.length ? 'Menampilkan data terakhir yang tersimpan' : 'Belum ada hasil tersimpan');
-      if(!completed.length) return;
-      var requested = params.get('date') || localStorage.getItem('rintik_latest_daily_date');
-      var target = completed.some(function(day){ return day.date === requested; }) ? requested : completed[completed.length-1].date;
-      var result = await client.getDayResult(target), monitoring = await monitoringForDate(target);
-      renderResultPage(result,monitoring); storeLatestDate(target);
-    } catch(error){ setSystem(false,'Hasil tidak tersedia','Backend gagal merespons.'); $('resultEmpty').querySelector('p').textContent = errorMessage(error) + ' Tidak ada hasil pengganti yang dibuat.'; }
-    window.addEventListener('resize',function(){ if(state.result) renderChart($('resultChart'),state.result,state.monitoring); });
+    $('resultDateSelect').addEventListener('change',loadSelectedResult);$('exportResultButton').addEventListener('click',exportCurrentResult);window.addEventListener('resize',function(){if(state.result)renderChart($('resultChart'),state.result,state.monitoring,true);});
+    try{var responses=await Promise.all([client.health(),client.listDays(),client.listOperationalDays()]);state.health=responses[0];state.officialDays=responses[1].days||[];state.operational=responses[2];setSystem(true,'Hasil siap','Pilih tanggal yang sudah diproses.');var dates=resultDates(state.officialDays,state.operational),select=$('resultDateSelect');select.innerHTML=dates.length?'':'<option value="">Belum ada hasil</option>';dates.forEach(function(item){var option=document.createElement('option');option.value=item.scope+'|'+item.date;option.textContent=item.label;select.appendChild(option);});if(!dates.length)return;var requested={scope:params.get('scope'),date:params.get('date')},pointer=latestPointer(),target=dates.find(function(item){return item.scope===requested.scope&&item.date===requested.date;})||dates.find(function(item){return pointer&&item.scope===pointer.scope&&item.date===pointer.date;})||dates[dates.length-1];select.value=target.scope+'|'+target.date;await loadSelectedResult();}catch(error){setSystem(false,'Hasil tidak tersedia','Backend tidak dapat dimuat.');$('resultEmpty').querySelector('p').textContent=errorMessage(error)+' Tidak ada hasil pengganti yang dibuat.';}
   }
 
   setupNavigation();
-  if(pageKind === 'predict') bindPredict();
-  if(pageKind === 'result') initResult();
+  if(pageKind==='predict')initPredict();
+  if(pageKind==='result')initResult();
 })();

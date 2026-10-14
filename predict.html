@@ -1,55 +1,87 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#f3f7f5">
-<title>Prediksi - RINTIK</title>
-<meta name="description" content="Proses data sensor harian dan lihat kelembapan tetap tersedia saat sensor humidity terganggu.">
-<link rel="icon" href="assets/img/logo.png">
-<link rel="stylesheet" href="assets/css/prediction-flow.css?v=20261013g">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f7f5">
+  <title>Prediksi — RINTIK</title>
+  <meta name="description" content="Masukkan pembacaan sensor per 30 menit atau jalankan demo resmi 16 hari RINTIK.">
+  <link rel="icon" href="assets/img/icon-droplet.png">
+  <link rel="stylesheet" href="assets/css/prediction-flow.css?v=20261014a">
 </head>
 <body class="flow-page" data-flow-page="predict">
-<a class="flow-skip-link" href="#mainContent">Lewati ke konten utama</a>
-<header class="navbar">
-  <div class="container navbar-inner">
-    <a href="index.html" class="brand"><img src="assets/img/logo.png" alt="Logo RINTIK" class="brand-mark"><span class="brand-text"><span class="brand-title">RINTIK</span><span class="brand-sub">Prediksi kelembapan udara</span></span></a>
-    <nav class="nav-links" aria-label="Navigasi utama"><a href="index.html">Beranda</a><a href="predict.html" class="active" aria-current="page">Prediksi</a><a href="hasil.html" data-api-link>Hasil</a><a href="dashboard.html" data-api-link>Dashboard</a></nav>
-    <div class="nav-right"><a href="dashboard.html" data-api-link class="btn btn-primary btn-sm">Buka Dashboard</a><button class="nav-toggle" type="button" aria-label="Buka menu" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div>
-  </div>
-  <div class="mobile-menu"><div class="mobile-menu-panel"><a href="dashboard.html" data-api-link class="btn btn-primary btn-block" style="margin-bottom:12px;">Buka Dashboard</a><a href="index.html">Beranda</a><a href="predict.html" class="active" aria-current="page">Prediksi</a><a href="hasil.html" data-api-link>Hasil</a><a href="dashboard.html" data-api-link>Dashboard</a></div></div>
-</header>
+  <a class="flow-skip-link" href="#mainContent">Lewati ke konten utama</a>
+  <header class="navbar">
+    <div class="container navbar-inner">
+      <a href="index.html" class="brand" aria-label="Kembali ke Beranda RINTIK"><img src="assets/img/logo.png" alt="Logo RINTIK" class="brand-mark"><span class="brand-text"><span class="brand-title">RINTIK</span><span class="brand-sub">Prediksi kelembapan udara</span></span></a>
+      <nav class="nav-links" aria-label="Navigasi utama"><a href="index.html">Beranda</a><a href="predict.html" class="active" aria-current="page">Prediksi</a><a href="hasil.html" data-api-link>Hasil</a><a href="dashboard.html" data-api-link>Dashboard</a><a href="settings.html" data-api-link>Settings</a></nav>
+      <div class="nav-right"><span class="nav-runtime" id="navRuntime"><i></i><span>Memeriksa sistem</span></span><button class="nav-toggle" type="button" aria-label="Buka menu" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div>
+    </div>
+    <div class="mobile-menu"><div class="mobile-menu-panel"><a href="index.html">Beranda</a><a class="active" href="predict.html">Prediksi</a><a href="hasil.html" data-api-link>Hasil</a><a href="dashboard.html" data-api-link>Dashboard</a><a href="settings.html" data-api-link>Settings</a></div></div>
+  </header>
 
-<main id="mainContent" class="flow-main" tabindex="-1"><div class="container">
-  <section class="flow-heading flow-heading-simple" aria-labelledby="pageTitle">
-    <div class="flow-heading-copy"><span class="flow-kicker">Prediksi harian</span><h1 id="pageTitle">Data masuk. Kelembapan langsung tersedia.</h1><p>Setiap hari, RINTIK membaca data lingkungan, memperkirakan kelembapan, lalu menyimpan hasilnya. Jika sensor humidity terputus, estimasi RINTIK menjaga data operasional tetap tersedia.</p></div>
-    <div class="flow-system-status" id="systemStatus" role="status" aria-live="polite"><span class="flow-status-dot" aria-hidden="true"></span><strong id="systemStatusTitle">Menghubungkan sistem…</strong><small id="systemStatusDetail">Memeriksa data berikutnya.</small></div>
-  </section>
-  <div class="flow-grid">
-    <section class="flow-card flow-control-card" aria-labelledby="controlTitle">
-      <div class="flow-card-head"><div><span class="flow-step">Mulai di sini</span><h2 id="controlTitle">Pilih cara menjalankan RINTIK</h2><p>Proses satu hari seperti operasi rutin, atau jalankan rangkaian demo.</p></div></div>
-      <div class="mode-switch mode-switch-two" role="tablist" aria-label="Mode pemrosesan">
-        <button class="mode-card" id="modeDaily" type="button" role="tab" aria-selected="true" aria-controls="modeExplanation" data-mode="daily"><b>1</b><strong>Operasional Harian</strong><span>Ambil dan proses data sensor untuk hari berikutnya.</span></button>
-        <button class="mode-card" id="modeDemo" type="button" role="tab" aria-selected="false" aria-controls="modeExplanation demoPanel" data-mode="demo"><b>▶</b><strong>Demo 16 Hari</strong><span>Jalankan periode demo dan peragakan sensor terputus.</span></button>
+  <main id="mainContent" class="flow-main" tabindex="-1"><div class="container">
+    <section class="flow-heading flow-heading-simple" aria-labelledby="pageTitle">
+      <div class="flow-heading-copy"><span class="flow-kicker">Pusat pemrosesan</span><h1 id="pageTitle">Dari pembacaan sensor menjadi estimasi humidity harian.</h1><p>Pilih alur kerja, siapkan satu hari data, lalu proses. Menyimpan pembacaan dan menjalankan estimasi adalah dua langkah yang terpisah.</p></div>
+      <div class="flow-system-status" id="systemStatus" role="status" aria-live="polite"><span class="flow-status-dot" aria-hidden="true"></span><strong id="systemStatusTitle">Menghubungkan sistem…</strong><small id="systemStatusDetail">Memeriksa state kedua workflow.</small></div>
+    </section>
+
+    <section class="journey-root" aria-labelledby="workflowTitle">
+      <div class="journey-label"><span>1</span><div><strong id="workflowTitle">Pilih workflow</strong><small>Keduanya memiliki state dan sumber data terpisah.</small></div></div>
+      <div class="mode-switch mode-switch-two" role="tablist" aria-label="Workflow prediksi">
+        <button class="mode-card" id="modeOperational" type="button" role="tab" aria-selected="true" aria-controls="operationalPanel" data-mode="operational"><b>48</b><strong>Operasional Harian</strong><span>Susun pembacaan 30 menit, lalu proses satu tanggal.</span></button>
+        <button class="mode-card" id="modeDemo" type="button" role="tab" aria-selected="false" aria-controls="demoPanel" data-mode="demo"><b>16</b><strong>Demo Resmi</strong><span>Replay fixture kompetisi 2023 per hari atau sekaligus.</span></button>
       </div>
-      <div class="mode-explainer" id="modeExplanation" role="tabpanel" aria-live="polite"><strong>Operasional Harian.</strong> Satu klik membaca data hari berikutnya, menghasilkan prediksi, dan menyimpan pembacaan humidity untuk dibandingkan.</div>
-      <section class="demo-panel" id="demoPanel" hidden>
-        <div class="flow-progress-card" aria-label="Progres demo 16 hari"><div class="flow-progress-copy"><strong>Perjalanan demo</strong><span id="nextDate">Mencari tanggal berikutnya…</span></div><div class="flow-progress-track" aria-hidden="true"><div class="flow-progress-fill" id="replayProgress"></div></div><div class="flow-progress-count" id="replayCount">0 / 16 hari</div><button class="flow-reset-button" id="openResetButton" type="button">Reset demo</button></div>
-        <div class="scenario-strip" aria-label="Skenario gangguan sensor"><span>4–5 Sep · pembacaan tidak berubah</span><span>6 Sep · sensor terputus</span><span>7 Sep · sensor kembali</span></div>
-        <button class="scenario-action" id="prepareRecoveryButton" type="button"><strong id="prepareRecoveryLabel">Tampilkan kerusakan sensor 6 Sep</strong><span id="prepareRecoverySub">RINTIK menyiapkan hari yang diperlukan lalu membuka hasil recovery.</span></button>
-        <section class="completion-panel" id="completionPanel" aria-labelledby="completionTitle" hidden><div class="completion-icon" aria-hidden="true">✓</div><div class="completion-copy"><span class="flow-step">Demo selesai</span><h2 id="completionTitle">Seluruh 16 hari demo sudah diproses.</h2><p>Riwayat siap dieksplorasi. Anda dapat mengulang demo kapan saja.</p></div><div class="completion-actions"><a class="btn btn-secondary btn-sm" href="dashboard.html" data-api-link>Lihat Dashboard</a><button class="flow-text-button" id="completionResetButton" type="button">Ulangi demo</button></div></section>
-        <section class="reset-confirmation" id="resetConfirmation" aria-labelledby="resetTitle" hidden><div><strong id="resetTitle">Mulai ulang demo dari hari pertama?</strong><span>Hanya riwayat demo yang dibersihkan. Data sumber RINTIK tetap aman.</span></div><div class="reset-actions"><button class="btn btn-secondary btn-sm" id="cancelResetButton" type="button">Batal</button><button class="btn btn-danger btn-sm" id="confirmResetButton" type="button">Ya, reset demo</button></div></section>
-      </section>
-      <button class="btn btn-primary flow-primary-action" id="processButton" type="button" disabled><span id="processButtonLabel">Menyiapkan data…</span><span class="action-sub" id="processButtonSub"></span></button>
-      <div class="flow-alert" id="flowAlert" role="alert" tabindex="-1" hidden><div><strong id="flowAlertTitle">Proses tidak dapat dilanjutkan</strong><span id="flowAlertMessage"></span></div></div>
-      <div class="processing-panel" id="processingPanel" role="status" aria-live="polite" hidden><header><span class="processing-spinner" aria-hidden="true"></span><div><strong id="processingTitle">Memproses data harian</strong><span id="processingDetail">Mengambil data sensor…</span></div></header><progress id="processProgress" max="1" value="0">0%</progress></div>
-      <details class="manual-panel manual-details" id="manualPanel"><summary><span><strong>Masukkan data sensor manual</strong><small>Periksa satu pembacaan sensor tanpa menyimpannya</small></span><span aria-hidden="true">＋</span></summary><div class="manual-details-body"><p>Gunakan form ini untuk memeriksa kelengkapan satu pembacaan. Pemrosesan harian tetap memerlukan rangkaian data satu hari penuh.</p><label class="manual-timestamp">Waktu pembacaan<input id="manualTimestamp" type="datetime-local" step="1800"></label><div class="manual-groups" id="manualGroups" aria-live="polite"><div class="manual-loading">Memuat daftar sensor…</div></div><div class="manual-actions"><button class="btn btn-secondary btn-sm" id="loadManualExample" type="button">Isi contoh pembacaan</button><button class="btn btn-primary btn-sm" id="validateManualButton" type="button">Periksa data</button><button class="flow-text-button" id="clearManualButton" type="button">Kosongkan</button></div><div class="manual-result" id="manualResult" role="status" aria-live="polite" hidden></div></div></details>
     </section>
-    <section class="flow-card live-result-card" aria-labelledby="latestTitle">
-      <div class="result-empty" id="latestEmpty"><div class="result-empty-inner"><div class="result-empty-icon" aria-hidden="true">≈</div><h2 id="latestTitle">Belum ada hasil hari ini</h2><p>Tekan proses untuk mengambil data sensor hari berikutnya. Hasil akan langsung muncul di sini.</p></div></div>
-      <div class="live-result" id="latestContent" tabindex="-1" hidden><div class="latest-heading"><div><span class="flow-step">Hasil terbaru</span><h2 id="latestDate">—</h2><p id="latestStatus">Tersimpan dalam riwayat</p></div><span class="flow-state-label" id="latestVerdict">Siap</span></div><div class="operational-banner" id="operationalBanner" hidden><strong>Data humidity tetap tersedia</strong><span id="operationalBannerText">Sensor terputus. Data operasional menggunakan estimasi RINTIK.</span></div><div class="latest-metrics"><div class="latest-metric"><span>Prediksi RINTIK</span><strong id="latestMean">—</strong><small>rata-rata hari ini</small></div><div class="latest-metric"><span>Data operasional</span><strong id="latestOperational">—</strong><small id="latestOperationalNote">dari sensor humidity</small></div><div class="latest-metric"><span>Jumlah pembacaan</span><strong id="latestRows">—</strong><small>tersimpan</small></div><div class="latest-metric"><span>Sensor humidity</span><strong id="latestSensor">—</strong><small id="latestSensorNote">status hari ini</small></div></div><div class="flow-chart-head"><h3>Perubahan humidity hari ini</h3><div class="flow-chart-legend" id="latestLegend"><span><i class="flow-line-key"></i>Prediksi RINTIK</span></div></div><div class="flow-chart" id="latestChart" role="img" aria-label="Grafik humidity hari ini"></div><div class="result-actions"><a class="btn btn-primary" id="resultLink" href="hasil.html" data-api-link>Lihat hasil lengkap</a><a class="btn btn-secondary" href="dashboard.html" data-api-link>Eksplorasi riwayat</a></div></div>
+
+    <div class="flow-alert" id="flowAlert" role="alert" tabindex="-1" hidden><div><strong id="flowAlertTitle"></strong><span id="flowAlertMessage"></span></div></div>
+    <div class="processing-panel" id="processingPanel" role="status" aria-live="polite" hidden><header><span class="processing-spinner" aria-hidden="true"></span><div><strong id="processingTitle">Memproses</strong><span id="processingDetail">Mohon tunggu…</span></div></header><progress id="processProgress" max="1" value="0">0%</progress></div>
+
+    <section id="operationalPanel" class="workflow-panel" role="tabpanel" aria-labelledby="modeOperational">
+      <header class="workflow-head"><div><span class="flow-step">Simulasi operasional · 14–25 Oktober 2026</span><h2>Siapkan data hari ini</h2><p>Data dasar bersifat sintetis dan dapat dilengkapi dengan pembacaan manual Anda. Ini bukan pengukuran lapangan Oktober 2026.</p></div><button class="flow-reset-button" id="resetOperationalButton" type="button">Reset operasional</button></header>
+      <div class="day-progress-card"><div><span>Tanggal aktif</span><strong id="operationalDate">14 Oktober 2026</strong></div><div class="day-progress-main"><div class="flow-progress-track"><div class="flow-progress-fill" id="operationalProgress"></div></div><strong id="operationalCount">0 / 48</strong></div><div class="source-counts"><span><i class="source-dot manual"></i><b id="manualCount">0</b> manual</span><span><i class="source-dot fixture"></i><b id="fixtureCount">0</b> simulasi</span></div></div>
+
+      <div class="operational-grid">
+        <article class="flow-card collection-card" aria-labelledby="manualTitle">
+          <div class="flow-card-head"><div><span class="flow-step">2 · Tambahkan pembacaan</span><h2 id="manualTitle">Input sensor 30 menit</h2><p>Satu slot tersimpan sebagai satu baris. Pilih baris pada tabel untuk mengoreksi sebelum diproses.</p></div><span class="flow-sim-label">SIMULASI 2026</span></div>
+          <label class="manual-timestamp">Waktu pembacaan<input id="manualTimestamp" type="datetime-local" step="1800"></label>
+          <div class="manual-groups" id="manualGroups" aria-live="polite"><div class="manual-loading">Memuat daftar sensor…</div></div>
+          <div class="manual-actions"><button class="btn btn-secondary btn-sm" id="loadManualExample" type="button">Isi dari fixture</button><button class="btn btn-primary btn-sm" id="saveReadingButton" type="button">Simpan pembacaan</button><button class="flow-text-button" id="clearManualButton" type="button">Kosongkan</button></div>
+          <div class="manual-result" id="manualResult" role="status" aria-live="polite" hidden></div>
+        </article>
+
+        <article class="flow-card prepare-card" aria-labelledby="prepareTitle">
+          <div class="flow-card-head"><div><span class="flow-step">3 · Lengkapi dan proses</span><h2 id="prepareTitle">Batch harian</h2><p id="readinessText">Belum ada pembacaan. Tambahkan manual atau lengkapi slot dari fixture.</p></div></div>
+          <button class="btn btn-secondary btn-block" id="fillMissingButton" type="button"><span>Lengkapi slot yang kosong</span><small>Baris manual tetap dipertahankan</small></button>
+          <label class="scenario-select" for="operationalScenario"><span>Kondisi sensor humidity saat hari diproses</span><select id="operationalScenario"><option value="normal">Normal · simulasi</option><option value="stuck">Stuck · hampir konstan</option><option value="deviating">Menyimpang · bias simulasi</option><option value="missing">Hilang · gunakan recovery estimated</option><option value="repaired">Pulih setelah pemeriksaan</option></select><small>Sensor humidity ini hanya pembanding; tidak masuk ke input model.</small></label>
+          <button class="btn btn-primary btn-block process-day-button" id="processOperationalButton" type="button" disabled><strong>Data belum lengkap</strong><span>0 / 48 pembacaan</span></button>
+          <div class="boundary-note"><strong>Konteks bertambah per hari.</strong><span>Periode ini hanya 12 hari, sehingga belum mencapai rolling 15 hari.</span></div>
+        </article>
+      </div>
+
+      <article class="flow-card readings-card" aria-labelledby="readingsTitle">
+        <div class="flow-card-head"><div><span class="flow-step">Pratinjau CSV</span><h2 id="readingsTitle">Pembacaan yang tersimpan</h2><p>Klik baris manual untuk memuatnya kembali ke form.</p></div><span class="flow-state-label" id="readingState">0 valid</span></div>
+        <div class="reading-table-wrap"><table class="reading-table"><thead><tr><th>Waktu</th><th>Suhu</th><th>CO₂</th><th>Tekanan</th><th>Kelembapan tanah</th><th>Sumber</th><th>Status</th></tr></thead><tbody id="readingTableBody"><tr><td colspan="7" class="table-empty">Belum ada pembacaan.</td></tr></tbody></table></div>
+      </article>
     </section>
-  </div>
-</div></main>
-<script src="lib/rintik-api.js?v=20261013g"></script><script src="lib/public-prediction.js?v=20261013g"></script><script src="assets/js/prediction-flow.js?v=20261013g"></script>
-</body></html>
+
+    <section id="demoPanel" class="workflow-panel" role="tabpanel" aria-labelledby="modeDemo" hidden>
+      <header class="workflow-head"><div><span class="flow-step">Fixture resmi · 29 Agustus–13 September 2023</span><h2>Replay 16 hari kompetisi</h2><p>734 observasi diproses kronologis. Hari pertama berisi 18 baris dan hari terakhir 44 baris—tidak ada slot yang direkayasa.</p></div><button class="flow-reset-button" id="resetDemoButton" type="button">Reset demo</button></header>
+      <div class="demo-journey-card"><div class="flow-progress-copy"><strong id="demoNextDate">Memeriksa tanggal berikutnya…</strong><span id="demoStatusText">State demo terpisah dari simulasi 2026.</span></div><div class="flow-progress-track"><div class="flow-progress-fill" id="demoProgress"></div></div><strong class="flow-progress-count" id="demoCount">0 / 16</strong><div class="demo-actions"><button class="btn btn-secondary" id="processDemoDayButton" type="button">Proses satu hari</button><button class="btn btn-primary" id="processDemoAllButton" type="button">Proses seluruh demo</button></div></div>
+      <article class="recovery-story"><div><span class="flow-step">Skenario sensor</span><h3>Peragakan outage 6 September</h3><p>Siapkan tanggal yang diperlukan, tandai sensor humidity hilang, lalu tampilkan recovery sebagai <em>estimated</em>.</p></div><button class="btn btn-secondary" id="prepareRecoveryButton" type="button">Siapkan dan lihat recovery</button></article>
+      <div class="demo-complete" id="demoComplete" hidden><strong>Demo resmi selesai.</strong><span>Fixture habis—bukan berarti RINTIK berhenti bekerja. Gunakan Operasional Harian untuk skenario data baru.</span></div>
+    </section>
+
+    <section class="flow-card live-result-card" id="latestResultCard" aria-labelledby="latestTitle">
+      <div class="result-empty" id="latestEmpty"><div class="result-empty-inner"><div class="result-empty-icon" aria-hidden="true">≈</div><h2 id="latestTitle">Belum ada hasil terbaru</h2><p>Siapkan satu hari data pada workflow yang dipilih. Hasil yang selesai akan muncul di sini.</p></div></div>
+      <div class="live-result" id="latestContent" tabindex="-1" hidden><div class="latest-heading"><div><span class="flow-step" id="latestScope">Hasil terbaru</span><h2 id="latestDate">—</h2><p id="latestStatus">Tersimpan dalam riwayat</p></div><span class="flow-state-label" id="latestVerdict">Siap</span></div><div class="operational-banner" id="operationalBanner" hidden><strong>Recovery aktif · estimated</strong><span>Pembacaan humidity yang hilang tidak ditimpa; estimasi disimpan sebagai sumber terpisah.</span></div><div class="latest-metrics"><div class="latest-metric"><span>Estimasi RINTIK</span><strong id="latestMean">—</strong><small>rata-rata</small></div><div class="latest-metric"><span>Data operasional</span><strong id="latestOperational">—</strong><small id="latestOperationalNote">—</small></div><div class="latest-metric"><span>Observasi</span><strong id="latestRows">—</strong><small>hari ini</small></div><div class="latest-metric"><span>Sensor humidity</span><strong id="latestSensor">—</strong><small id="latestSensorNote">—</small></div></div><div class="flow-chart-head"><h3>Humidity sepanjang hari</h3><div class="flow-chart-legend" id="latestLegend"></div></div><div class="flow-chart" id="latestChart" role="img" aria-label="Grafik humidity hasil terbaru"></div><div class="result-actions"><a class="btn btn-primary" id="resultLink" href="hasil.html" data-api-link>Lihat hasil lengkap</a><a class="btn btn-secondary" href="dashboard.html" data-api-link>Eksplorasi riwayat</a></div></div>
+    </section>
+  </div></main>
+
+  <dialog class="reset-dialog" id="resetDialog" aria-labelledby="resetDialogTitle"><form method="dialog"><span class="dialog-icon" aria-hidden="true">↻</span><h2 id="resetDialogTitle">Mulai ulang workflow?</h2><p id="resetDialogText">Riwayat run terpilih akan dibersihkan tanpa menyentuh model atau fixture.</p><div class="dialog-actions"><button class="btn btn-secondary" value="cancel">Batal</button><button class="btn btn-danger" id="confirmResetButton" value="confirm">Ya, reset</button></div></form></dialog>
+
+  <script src="lib/rintik-api.js?v=20261014a"></script>
+  <script src="lib/public-prediction.js?v=20261014a"></script>
+  <script src="assets/js/prediction-flow.js?v=20261014a"></script>
+</body>
+</html>

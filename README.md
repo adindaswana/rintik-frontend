@@ -1,116 +1,101 @@
-# RINTIK frontend — operator dashboard
+# RINTIK frontend
 
-Static public UI plus a framework-free operator dashboard for the RINTIK v1
-backend. Backend errors are surfaced and never replaced by sample/model-like
-predictions.
+Static, framework-free product interface for the RINTIK frozen-model backend.
+Backend and contract failures are shown to the user and are never replaced by
+sample or model-like predictions.
+
+## Product pages
+
+- `index.html` is the protected landing page. Final product work does not edit
+  it or its shared `assets/css/style.css` and `assets/js/app.js` files.
+- `predict.html` is the data-preparation and processing workspace.
+- `hasil.html` explains the latest or selected daily humidity result.
+- `dashboard.html` explores humidity history and exogenous sensor features.
+- `settings.html` contains system and humidity-sensor inspections.
+
+Prediksi has two explicitly isolated workflows:
+
+1. **Operasional Harian** stores editable 30-minute readings for the
+   deterministic 14-25 October 2026 synthetic scenario. Missing slots are
+   filled only after an explicit action, manual rows are preserved, and daily
+   inference remains disabled until all 48 slots exist.
+2. **Demo Resmi** replays only the immutable 29 August-13 September 2023
+   competition fixture, one date at a time or as 16 sequential daily runs.
+
+Each workflow has its own progress, provenance, state, and confirmed reset.
+There is no file picker and no silent fallback. Simulated physical humidity is
+always separate from exogenous model input and from the RINTIK estimate.
+
+Hasil is humidity-centric and shows P3, separately simulated physical sensor
+readings, and any `estimated` recovery without merging their provenance.
+Dashboard provides date ranges, unit-separated Sensor Explorer charts, and
+descriptive temporal associations with sample-size and non-causality caveats.
+Settings provides model/pipeline inspection, humidity-sensor inspection,
+reversible browser-only threshold previews, and a separate independent accuracy
+status.
+
+## Run locally
+
+The final Windows launcher verifies frozen artifacts, fixtures, dependencies,
+database schema, and live readiness before printing the URLs:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\start_m5_demo.ps1 -ResetState
+```
+
+Stop only its tracked processes with:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\stop_m5_demo.ps1
+```
+
+For manual development, start the backend and serve this directory:
+
+```powershell
+python -m http.server 4173
+```
+
+Open `http://127.0.0.1:4173/predict.html`. To select another local backend,
+append `?api=http://127.0.0.1:8136`.
 
 ## Safety modes
 
 - `MODEL_MODE=remote` requires `MODEL_API_URL`; remote failure returns an error
   without predictions.
 - `MODEL_MODE=demo_stub` is the only way to enable the legacy deterministic
-  stub. Its response is explicitly marked `source=explicit_demo_stub` and
+  stub. It is explicitly labeled `source=explicit_demo_stub` and
   `simulation=true`.
-- an unset or unknown mode fails closed.
+- an unset or unknown legacy mode fails closed.
 
-The daily product API is exposed through `lib/rintik-api.js`, including the
-separate `/v1/demo` monitoring namespace. `dashboard.html` consumes the real
-daily result, synthetic monitoring, and official input series as one validated
-bundle. Any source, simulation, date, row-count, or timestamp mismatch fails
-closed.
-
-`predict.html` is the product workspace for the official replay. A daily click
-retrieves the next hash-verified fixture, validates it, runs one calendar-day
-ingest/run, persists the real frozen-model result, and—when the explicit demo
-switch is active—records the separate synthetic physical-RH comparison for the
-same timestamps. Batch mode automates at most 15 of those same sequential daily
-cycles; it does not turn the model into one 15-day request or alter its rolling
-window. `hasil.html` reads the authoritative stored day directly from the
-backend. There is no file picker or silent fallback. A 23-field Form Manual is
-available for sensor-value inspection and schema validation only; it is
-explicitly non-persistent and does not pretend that one observation satisfies
-the frozen daily temporal contract. The progress card also exposes an explicit,
-confirmed local demo reset.
-
-## Run the dashboard locally
-
-For the final local Windows demo, use the ownership-safe launcher. It verifies
-the frozen artifacts, dependencies, fixtures, database schema, and live
-readiness before reporting success:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts\start_m5_demo.ps1 -ResetState
-```
-
-Open either URL printed by the script (public flow or operator dashboard;
-defaults use frontend `4174` and backend `8140`). Stop only
-the processes started by that launcher with:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts\stop_m5_demo.ps1
-```
-
-The reset flag deletes only the isolated ignored database under
-`Prototipe/qa/runtime`; it never touches official inputs or the checkpoint.
-For a manual development server, start the backend, then serve this directory:
-
-```powershell
-python -m http.server 4173
-```
-
-Open `http://127.0.0.1:4173/dashboard.html`. To use another local backend, add
-`?api=http://127.0.0.1:8136`. Optional `&view=sensors` or `&view=settings`
-opens a specific dashboard view.
-
-The dashboard is now history and exploration rather than data entry. It
-supports stored-day navigation, synchronized RH comparison, explicit synthetic
-incident/recovery actions, CSV/audit export, a searchable unit-safe Sensor
-Explorer, and a separate Settings / Technical Details view. Replay input and
-simulation controls live on Prediksi.
+The final product pages use `lib/rintik-api.js` and the real backend contracts,
+not the legacy stub. The official and operational namespaces remain isolated.
 
 ## QA
 
-From this repository:
+Static and integration checks:
 
 ```powershell
-npm run stub:test
 npm run contract:test
 npm run public-flow:test
 npm run product-flow:test
-npm run product-flow-browser:test
 npm run dashboard:test
-```
-
-The complete browser-operated 16-day rehearsal (clean demo database, frozen
-model, screenshots, trace, exports, and local-network assertion) is:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts\run_m5_rehearsal.ps1
-```
-
-For a real cross-repository smoke test, start the backend with a clean runtime
-database, then run:
-
-```powershell
-$env:RINTIK_API_URL='http://127.0.0.1:8000'
 npm run integration:test
 ```
 
-The integration script replays all 16 official dates, checks 734 model-backed
-rows, 23 catalog features and per-day input series, the synthetic
-stuck/outage/repaired scenario, explicit simulated confirmation, recovery
-provenance, and the 48-row outage CSV export.
+The final browser-operated acceptance suite is:
 
-## QA status and scope
+```powershell
+$env:RINTIK_FRONTEND_URL='http://127.0.0.1:4174'
+$env:RINTIK_API_URL='http://127.0.0.1:8141'
+npm run final-product-browser:test
+```
 
-The protected home page remains byte-identical. Prediksi and Hasil use a
-self-contained, offline-capable visual system and the final fail-closed daily
-contracts. The product-flow browser suite is `npm run product-flow-browser:test`;
-it records screenshots, network evidence, and a Playwright trace under
-`Prototipe/qa/evidence/post-m5-product-flow`.
-M4 browser acceptance and the tested-host M5 rehearsal pass. See
-[`docs/MILESTONE_4_BROWSER_QA_20261010.md`](docs/MILESTONE_4_BROWSER_QA_20261010.md)
-[`docs/MILESTONE_5_FINAL_READINESS.md`](docs/MILESTONE_5_FINAL_READINESS.md), and
-[`docs/POST_M5_PRODUCT_FLOW_REDESIGN.md`](docs/POST_M5_PRODUCT_FLOW_REDESIGN.md).
-Independent clean-machine portability is still explicitly unverified; local
-prototype readiness is not a production-readiness claim.
+It operates both namespaces and verifies manual persistence, explicit 48-slot
+completion, missing-sensor recovery, exact 16-day/734-row official replay,
+scoped resets, date-range persistence, keyboard focus, responsive layouts,
+accessibility, and network/console health. Screenshots, a manifest, and a
+Playwright trace are written below
+`Prototipe/qa/evidence/final-product-experience`.
+
+The protected landing page remains byte-identical. Prototype demo readiness is
+not a production-readiness or field-validation claim.
