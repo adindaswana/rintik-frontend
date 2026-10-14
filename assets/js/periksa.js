@@ -192,9 +192,12 @@
   });
   // File contoh berisi potongan data latih lomba, jadi tidak di-host di situs publik.
   // Tombol contoh hanya muncul bila file tersedia (salinan lokal untuk demo).
-  fetch('assets/data/demo_sehat.csv', { method: 'HEAD' }).then(function(r){
-    if(r.ok) $('pkDemoRow').hidden = false;
-  }).catch(function(){});
+  var isLocal = location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+  if(isLocal){
+    fetch('assets/data/demo_sehat.csv', { method: 'HEAD' }).then(function(r){
+      if(r.ok) $('pkDemoRow').hidden = false;
+    }).catch(function(){});
+  }
 
   /* ---------------- run ---------------- */
   var overlay = $('pkOverlay');
