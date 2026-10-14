@@ -43,6 +43,11 @@ database schema, and live readiness before printing the URLs:
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts\start_m5_demo.ps1 -ResetState
 ```
 
+Omit `-ResetState` to preserve the current demo database. The launcher verifies
+both frozen-model health and the operational workflow endpoint; a live PID alone
+is not considered ready. The standard browser origin on port 4174 remains
+allowed when a temporary frontend port is used for QA.
+
 Stop only its tracked processes with:
 
 ```powershell
@@ -80,7 +85,13 @@ npm run public-flow:test
 npm run product-flow:test
 npm run dashboard:test
 npm run integration:test
+npm run runtime:smoke
 ```
+
+`runtime:smoke` opens Prediksi through the managed Chromium/CDP session,
+verifies migration from the legacy local API port 8000 to 8140, records real
+HTTP responses and console errors, and writes evidence below
+`Prototipe/qa/evidence/runtime-backend-recovery`.
 
 The final browser-operated acceptance suite is:
 

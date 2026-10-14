@@ -6,7 +6,9 @@
   if(!apiLib || !predictionLib) return;
 
   var params = new URLSearchParams(window.location.search);
-  var baseUrl = params.get('api') || sessionStorage.getItem('rintik_api_url') || 'http://127.0.0.1:8000';
+  var requestedApi = params.get('api');
+  var storedApi = sessionStorage.getItem('rintik_api_url');
+  var baseUrl = requestedApi || (!storedApi || storedApi === 'http://127.0.0.1:8000' ? 'http://127.0.0.1:8140' : storedApi);
   sessionStorage.setItem('rintik_api_url',baseUrl);
   var client = apiLib.createClient({baseUrl:baseUrl,timeoutMs:120000});
   var pageKind = document.body.getAttribute('data-flow-page');

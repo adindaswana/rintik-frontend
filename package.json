@@ -15,6 +15,7 @@
     "product-flow-browser:test": "node scripts/product_overhaul_browser_qa.js",
     "product-overhaul-browser:test": "node scripts/product_overhaul_browser_qa.js",
     "post-m5-public-flow:test": "node scripts/product_overhaul_browser_qa.js",
-    "final-product-browser:test": "node scripts/final_product_browser_qa.js"
+    "final-product-browser:test": "node scripts/final_product_browser_qa.js",
+    "runtime:smoke": "node scripts/runtime_browser_smoke.js"
   }
 }

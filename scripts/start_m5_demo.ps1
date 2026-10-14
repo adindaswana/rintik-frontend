@@ -21,8 +21,35 @@ if (Test-Path -LiteralPath $paths.ProcessFile) {
   if ($old.status -eq 'running') {
     $backendAlive = $old.backend -and (Get-Process -Id ([int]$old.backend.pid) -ErrorAction SilentlyContinue)
     $frontendAlive = $old.frontend -and (Get-Process -Id ([int]$old.frontend.pid) -ErrorAction SilentlyContinue)
+    $backendHealthy = $false
+    $frontendHealthy = $false
+    if ($backendAlive) {
+      try {
+        $existingHealth = Invoke-RestMethod -Uri "$($old.backend_url)/health" -TimeoutSec 3
+        $existingOperational = Invoke-RestMethod -Uri "$($old.backend_url)/v1/operational/days" -TimeoutSec 3
+        $backendHealthy = $existingHealth.ready -and $existingHealth.source -eq 'real_original_pth' -and -not $existingHealth.simulation -and $existingOperational.mode -eq 'synthetic-operational-2026-v1'
+      } catch {}
+    }
+    if ($frontendAlive) {
+      try {
+        $existingFrontend = Invoke-WebRequest -UseBasicParsing -Uri "$($old.frontend_url)/predict.html" -TimeoutSec 3
+        $frontendHealthy = $existingFrontend.StatusCode -eq 200
+      } catch {}
+    }
+    if ($backendHealthy -and $frontendHealthy) {
+      Write-Host 'RINTIK M5 demo is already ready (verified through live HTTP checks).'
+      Write-Host "Public flow: $($old.frontend_url)/index.html?api=$($old.backend_url)"
+      Write-Host "Dashboard: $($old.frontend_url)/dashboard.html?api=$($old.backend_url)"
+      exit 0
+    }
     if ($backendAlive -or $frontendAlive) {
-      throw "Tracked RINTIK demo processes are still running. Use stop_m5_demo.ps1 first; no process was replaced."
+      Write-Warning 'Tracked launcher processes exist but their HTTP endpoints are not healthy. Stopping only the PID(s) whose start time still matches the launcher metadata.'
+      foreach ($item in @(
+        [PSCustomObject]@{ entry=$old.frontend; label='frontend' },
+        [PSCustomObject]@{ entry=$old.backend; label='backend' }
+      )) {
+        if ($item.entry) { Stop-RintikTrackedProcess -Entry $item.entry -Label $item.label | Out-Host }
+      }
     }
   }
 }
@@ -50,7 +77,13 @@ $launchStarted = [DateTime]::UtcNow
 
 try {
   $env:RINTIK_DATABASE_PATH = $database
-  $env:RINTIK_CORS_ORIGINS = "http://127.0.0.1:$FrontendPort,http://localhost:$FrontendPort"
+  $corsOrigins = @(
+    "http://127.0.0.1:$FrontendPort",
+    "http://localhost:$FrontendPort",
+    'http://127.0.0.1:4174',
+    'http://localhost:4174'
+  ) | Select-Object -Unique
+  $env:RINTIK_CORS_ORIGINS = $corsOrigins -join ','
   $backend = Start-Process -FilePath $python `
     -ArgumentList "-m uvicorn app:app --host 127.0.0.1 --port $BackendPort" `
     -WorkingDirectory $paths.Backend -WindowStyle Hidden `
@@ -59,9 +92,13 @@ try {
 
   $backendReadyStarted = [DateTime]::UtcNow
   $health = Wait-RintikJson -Uri "http://127.0.0.1:$BackendPort/health" -TimeoutSeconds $TimeoutSeconds
+  $operationalReadiness = Wait-RintikJson -Uri "http://127.0.0.1:$BackendPort/v1/operational/days" -TimeoutSeconds 15
   $backendReadySeconds = ([DateTime]::UtcNow - $backendReadyStarted).TotalSeconds
   if (-not $health.ready -or $health.source -ne 'real_original_pth' -or $health.simulation) {
     throw "Backend readiness is not the frozen real model: $($health | ConvertTo-Json -Compress)"
+  }
+  if ($operationalReadiness.mode -ne 'synthetic-operational-2026-v1') {
+    throw "Backend does not expose the required operational workflow: $($operationalReadiness | ConvertTo-Json -Compress)"
   }
 
   $frontend = Start-Process -FilePath $python `
