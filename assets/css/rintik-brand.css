@@ -228,3 +228,169 @@ svg text[fill="#718079"], svg text[fill="#65756e"]{ fill:#5F7086; }
 /* Fokus keyboard selalu terlihat, termasuk skip link dan tombol yang punya outline:none dari stylesheet lama */
 .skip-link:focus-visible, .flow-skip-link:focus-visible, .btn:focus-visible, .status-back:focus-visible,
 a:focus-visible, button:focus-visible{ outline:3px solid var(--r-blue-500) !important; outline-offset:3px !important; }
+
+/* =========================================================
+   LATAR ILUSTRATIF (bukit, awan, matahari)
+   Aset: assets/img/illus/ (diwarnai ulang ke palet biru RINTIK)
+   - hero-hills       : latar hero Beranda (PNG 64 warna, lebih kecil dari WebP)
+   - header-clouds    : pita langit + awan di kepala halaman kerja (repeat-x mulus)
+   - header-icon      : tetes % + termometer di pojok kepala halaman kerja
+   - cloud-divider    : pita awan pembatas section (dipakai sebagai mask)
+   - sun-cloud        : stiker matahari + awan (dekorasi, empty state)
+   ========================================================= */
+:root{
+  --illus-hills:url('../img/illus/hero-hills.png');
+  --illus-band:url('../img/illus/header-clouds.png');
+  --illus-icon:url('../img/illus/header-icon.png');
+  --illus-sun:url('../img/illus/sun-cloud.png');
+  --illus-cloud-mask:url('../img/illus/cloud-divider.png');
+  --illus-band-h:420px;
+  --illus-content-edge:max(24px, calc(50% - 596px));
+}
+@supports (background-image:image-set(url('x.webp') type('image/webp'))){
+  :root{
+    --illus-icon:image-set(url('../img/illus/header-icon.webp') type('image/webp'), url('../img/illus/header-icon.png') type('image/png'));
+    --illus-sun:image-set(url('../img/illus/sun-cloud.webp') type('image/webp'), url('../img/illus/sun-cloud.png') type('image/png'));
+  }
+}
+
+/* Pita awan sebagai pembatas: warna diatur lewat background-color */
+.home-hero::after, .site-footer::before, .home-how::before, .home-start::before, .home-honest::before{
+  content:""; position:absolute; left:0; right:0; pointer-events:none;
+  -webkit-mask-image:var(--illus-cloud-mask); mask-image:var(--illus-cloud-mask);
+  -webkit-mask-size:auto 100%; mask-size:auto 100%;
+  -webkit-mask-repeat:repeat-x; mask-repeat:repeat-x;
+  -webkit-mask-position:center bottom; mask-position:center bottom;
+}
+
+/* ---------- Beranda: hero bukit ---------- */
+.home-hero{
+  background-color:#DEEAFD;
+  background-image:var(--illus-hills);
+  background-size:cover;
+  background-position:center bottom;
+  background-repeat:no-repeat;
+  padding-bottom:132px;
+}
+.home-hero::after{ bottom:-1px; height:124px; background:#fff; z-index:0; }
+.home-hero-grid{ position:relative; z-index:1; }
+.home-roles{ border-top:0; }
+.home-lede{ color:#2F3E52; }
+.home-facts{ color:#3B4A5E; }
+
+/* Section "Dari 23 sensor": awan bawah dari section putih + stiker matahari */
+.home-how{ position:relative; overflow:hidden; background:var(--r-bg); padding-top:132px; }
+.home-how::before{ top:-1px; height:64px; background:#fff; transform:scaleY(-1); }
+.home-how > .container{ position:relative; }
+.home-how > .container::before{
+  content:""; position:absolute; z-index:0; pointer-events:none;
+  top:-56px; right:24px; width:260px; aspect-ratio:600/370;
+  background:var(--illus-sun) center/contain no-repeat;
+}
+.home-how > .container > *{ position:relative; z-index:1; }
+
+/* Section "Coba sendiri": awan biru muda turun dari section "Dari 23 sensor" */
+.home-start{ position:relative; border-top:0; border-bottom:0; padding-top:120px; }
+.home-start::before{ top:-1px; height:56px; background:var(--r-bg); transform:scaleY(-1); }
+.home-start > .container{ position:relative; z-index:1; }
+
+/* Section "Yang perlu diketahui": awan putih turun dari section sebelumnya */
+.home-honest{ position:relative; padding-top:116px; padding-bottom:132px; }
+.home-honest::before{ top:-1px; height:56px; background:#fff; transform:scaleY(-1); }
+
+/* Footer: tepi awan navy di atas footer */
+.site-footer{ position:relative; }
+.site-footer::before{ bottom:calc(100% - 1px); height:72px; background:var(--r-navy); }
+
+/* ---------- Halaman kerja: pita langit + awan di kepala halaman ---------- */
+body:not(.home){ position:relative; isolation:isolate; }
+body:not(.home)::before, body:not(.home)::after{
+  content:""; position:absolute; z-index:-1; pointer-events:none;
+}
+body:not(.home)::before{
+  top:0; left:0; right:0; height:var(--illus-band-h);
+  background-color:transparent;
+  background-image:var(--illus-band);
+  background-size:auto 100%;
+  background-position:center bottom;
+  background-repeat:repeat-x;
+}
+body:not(.home)::after{
+  top:calc(var(--r-header-h) + 16px); right:var(--illus-content-edge);
+  width:104px; aspect-ratio:204/216;
+  background:var(--illus-icon) center/contain no-repeat;
+}
+body[data-flow-page="predict"]{ --illus-band-h:470px; }
+body.result-page{ --illus-band-h:430px; }
+body:has(.app-shell){ --illus-band-h:360px; }
+body:has(.app-shell) .main-content{ padding-top:104px; }
+body:has(.app-shell)::after{ width:80px; top:calc(var(--r-header-h) + 14px); }
+body.settings-page{ --illus-band-h:420px; }
+body:has(.page-hero-sm){ --illus-band-h:460px; }
+body.status-page{ --illus-band-h:380px; }
+
+/* Header sedikit lebih transparan agar langit terasa di bawahnya */
+body:not(.home) .navbar{ background:rgba(255,255,255,.86); }
+
+/* Ruang atas agar ikon tidak bertabrakan dengan kontrol kanan */
+.flow-main{ padding-top:56px; }
+.settings-main{ padding-top:76px; }
+.flow-heading p, .settings-heading p, .page-hero-sm p, .result-toolbar p{ color:#3B4A5E; }
+.page-hero-sm{ padding-top:56px; padding-bottom:24px; }
+
+/* ---------- Empty state: stiker matahari + awan di atas ubin langit ---------- */
+.result-empty-icon, .empty-icon{
+  width:156px !important; height:112px !important; border-radius:28px !important;
+  background:var(--illus-sun) center 62%/82% auto no-repeat, linear-gradient(180deg, #CFE2FF 0%, #E6F0FF 100%) !important;
+  color:transparent !important; font-size:0 !important; overflow:hidden;
+}
+.empty-icon{ flex:none; }
+
+/* ---------- Gerak lembut (mati saat reduced motion) ---------- */
+@media (prefers-reduced-motion: no-preference){
+  .home-how > .container::before{ animation:illus-bob 7s ease-in-out infinite; }
+  .result-empty-icon, .empty-icon{ animation:illus-bob 6s ease-in-out infinite; }
+}
+@keyframes illus-bob{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-6px); } }
+
+/* ---------- Responsif ---------- */
+@media (max-width:1100px){
+  .home-how > .container::before{ width:200px; top:-40px; }
+}
+@media (max-width:960px){
+  .home-hero{ padding-bottom:110px; background-position:60% bottom; }
+  /* Matahari bukit tidak terlihat di layar sempit: ganti dengan stiker */
+  .home-hero::before{
+    content:""; position:absolute; z-index:0; pointer-events:none;
+    top:18px; right:-30px; width:190px; aspect-ratio:600/370;
+    background:var(--illus-sun) center/contain no-repeat;
+  }
+  .home-hero::after{ height:72px; }
+}
+@media (min-width:641px) and (max-width:1180px){
+  /* kontrol kanan Hasil dan Pengaturan naik sejajar judul: ikon disembunyikan */
+  body.result-page::after, body.settings-page::after{ display:none; }
+}
+@media (max-width:640px){
+  :root{ --illus-content-edge:16px; }
+  .home-hero{ padding-bottom:84px; background-position:30% bottom; }
+  .home-hero::before{ top:6px; right:-34px; width:124px; }
+  .home-hero::after{ height:52px; }
+  .home-how{ padding-top:128px; }
+  .home-start{ padding-top:96px; }
+  .home-start::before{ height:40px; }
+  .home-how::before{ height:44px; }
+  .home-how > .container::before{ width:120px; top:-104px; right:12px; }
+  .home-honest{ padding-bottom:96px; }
+  .site-footer::before{ height:48px; }
+  body:not(.home)::after{ width:54px; top:calc(var(--r-header-h) + 10px); }
+  body.status-page::after{ display:none; }
+  body:not(.home){ --illus-band-h:330px; }
+  .flow-main, .settings-main{ padding-top:56px; }
+  .page-hero-sm{ padding-top:56px; }
+  body:has(.app-shell) .main-content{ padding-top:84px; }
+  body:has(.app-shell)::after{ width:54px; }
+  .result-empty-icon, .empty-icon{ width:128px !important; height:92px !important; border-radius:24px !important; }
+  .home-honest{ padding-top:88px; }
+  .home-honest::before{ height:40px; }
+}
