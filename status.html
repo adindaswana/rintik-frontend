@@ -3,36 +3,50 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Status Layanan - RINTIK</title>
+<meta name="theme-color" content="#F5FAFD">
+<title>Status layanan · RINTIK</title>
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" href="assets/img/logo.png">
+<link rel="icon" type="image/svg+xml" href="assets/img/logo-rintik.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Quicksand:wght@500;600;700&amp;display=swap">
 <link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/rintik-brand.css?v=20261017a">
 </head>
-<body>
+<body class="status-page">
 
-<section class="section" style="padding-top:48px;">
-  <div class="container" style="max-width:560px;">
-    <div class="card panel-card">
-      <h3>Status Layanan Prediksi</h3>
+<header class="navbar">
+  <div class="container navbar-inner status-navbar">
+    <a href="index.html" class="brand"><img src="assets/img/logo-rintik.svg" alt="" class="brand-mark" width="37" height="42"><img src="assets/img/wordmark-rintik-sm.png" srcset="assets/img/wordmark-rintik-sm.png 1x, assets/img/wordmark-rintik-sm@2x.png 2x" alt="RINTIK" class="brand-wordmark" width="115" height="30"></a>
+    <a href="index.html" class="btn btn-secondary btn-sm status-back">Kembali ke Beranda</a>
+  </div>
+</header>
+
+<main class="status-main">
+  <div class="container status-wrap">
+    <div class="card panel-card status-card">
+      <img class="status-mascot" src="assets/img/mascot/rintik_wave.svg" alt="" width="88" height="99">
+      <h1>Status layanan prediksi</h1>
       <p>Halaman internal untuk pemanasan sebelum demo. Tidak ditautkan di navigasi.</p>
       <div class="alert" id="stAlert" hidden>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>
         <span class="alert-text"></span>
       </div>
-      <p><strong>Status: <span id="stState">memeriksa...</span></strong></p>
+      <p class="status-line"><strong>Status: <span id="stState">memeriksa...</span></strong></p>
       <button type="button" class="btn btn-primary btn-block" id="stBtn">Periksa Sekarang</button>
       <p class="hint">Jika belum terjangkau, jalankan launcher lokal RINTIK dan periksa alamat API yang digunakan halaman ini.</p>
     </div>
   </div>
-</section>
+</main>
 
-<script src="lib/rintik-api.js"></script>
+<script src="lib/rintik-config.js"></script><script src="lib/rintik-api.js"></script>
 <script>
 (function(){
   var state = document.getElementById('stState');
   var alertBox = document.getElementById('stAlert');
   var params = new URLSearchParams(window.location.search);
-  var baseUrl = params.get('api') || sessionStorage.getItem('rintik_api_url') || 'http://127.0.0.1:8000';
+  var baseUrl = params.get('api') || sessionStorage.getItem('rintik_api_url') || (window.RINTIK_DEFAULT_API||'http://127.0.0.1:8140');
   if(params.get('api')) sessionStorage.setItem('rintik_api_url', baseUrl);
   var client = window.RintikApi.createClient({baseUrl: baseUrl, timeoutMs: 15000});
   function show(ok){

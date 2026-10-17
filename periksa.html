@@ -3,47 +3,50 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pemeriksaan Sensor - RINTIK</title>
+<title>Pemeriksaan sensor · RINTIK</title>
 <meta name="description" content="Bandingkan bacaan sensor kelembapan Anda dengan tebakan RINTIK untuk menemukan hari saat sensor diduga bermasalah.">
-<link rel="icon" href="assets/img/logo.png">
+<meta name="theme-color" content="#F5FAFD">
+<link rel="icon" type="image/svg+xml" href="assets/img/logo-rintik.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Quicksand:wght@500;600;700&amp;display=swap">
 <link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/rintik-brand.css?v=20261017a">
 </head>
 <body>
 
+<a class="skip-link" href="#topPeriksa">Lewati ke konten utama</a>
+
 <header class="navbar">
   <div class="container navbar-inner">
-    <a href="index.html" class="brand">
-      <img src="assets/img/logo.png" alt="Logo RINTIK" class="brand-mark">
-      <span class="brand-text">
-        <span class="brand-title">RINTIK</span>
-        <span class="brand-sub">Prediksi kelembapan udara</span>
-      </span>
-    </a>
-    <nav class="nav-links">
+    <a href="index.html" class="brand"><img src="assets/img/logo-rintik.svg" alt="" class="brand-mark" width="37" height="42"><img src="assets/img/wordmark-rintik-sm.png" srcset="assets/img/wordmark-rintik-sm.png 1x, assets/img/wordmark-rintik-sm@2x.png 2x" alt="RINTIK" class="brand-wordmark" width="115" height="30"></a>
+    <nav class="nav-links" aria-label="Navigasi utama">
       <a href="index.html">Beranda</a>
       <a href="predict.html">Prediksi</a>
       <a href="hasil.html">Hasil</a>
       <a href="dashboard.html">Dashboard</a>
-    <a href="periksa.html" class="active" aria-current="page">Pemeriksaan</a>
+      <a href="periksa.html" class="active" aria-current="page">Pemeriksaan</a>
+      <a href="settings.html">Pengaturan</a>
     </nav>
     <div class="nav-right">
-      <a href="dashboard.html" class="btn btn-primary btn-sm">Dashboard Operator</a>
-      <button class="nav-toggle" aria-label="Buka menu">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      <button class="nav-toggle" type="button" aria-label="Buka menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
     </div>
   </div>
   <div class="mobile-menu">
     <div class="mobile-menu-panel">
-      <a href="dashboard.html" class="btn btn-primary btn-block" style="margin-bottom:12px;">Dashboard Operator</a>
       <a href="index.html">Beranda</a>
       <a href="predict.html">Prediksi</a>
       <a href="hasil.html">Hasil</a>
       <a href="dashboard.html">Dashboard</a>
-    <a href="periksa.html" class="active" aria-current="page">Pemeriksaan</a>
+      <a href="periksa.html" class="active" aria-current="page">Pemeriksaan</a>
+      <a href="settings.html">Pengaturan</a>
     </div>
   </div>
 </header>
+
 
 <section class="page-hero-sm">
   <div class="container">
@@ -281,41 +284,9 @@
   </div>
 </div>
 
-<footer class="footer">
-  <div class="container">
-    <div class="footer-grid">
-      <div>
-        <div class="footer-brand">
-          <img src="assets/img/logo.png" alt="Logo RINTIK" style="width:36px;height:36px;border-radius:10px;object-fit:contain;">
-          <span class="footer-brand-title">RINTIK</span>
-        </div>
-        <p>Bantu Anda memantau dan memperkirakan kelembapan udara dari data sensor secara sederhana dan cepat.</p>
-      </div>
-      <div>
-        <h4>Jelajahi</h4>
-        <ul>
-          <li><a href="index.html">Beranda</a></li>
-          <li><a href="predict.html">Buat Prediksi</a></li>
-          <li><a href="hasil.html">Contoh Hasil</a></li>
-          <li><a href="periksa.html">Periksa Sensor</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4>Bantuan</h4>
-        <ul>
-          <li><a href="predict.html">Cara mengunggah data</a></li>
-          <li><a href="mailto:halo@smartfarm.id">Hubungi kami</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <span>&copy; 2026 RINTIK. Prototipe tampilan untuk NSC 2026.</span>
-      <span>RINTIK: Regresi Intrahari dengan Navigasi Temporal untuk Identifikasi Kelembapan.</span>
-    </div>
-  </div>
-</footer>
+<footer class="site-foot"><div class="container"><span><img src="assets/img/wordmark-rintik-sm.png" srcset="assets/img/wordmark-rintik-sm.png 1x, assets/img/wordmark-rintik-sm@2x.png 2x" alt="RINTIK" width="84" height="22">Prediksi %RH dari 23 sensor lain</span><span>Prototipe · data kompetisi NSC 2026 + simulasi · bukan alat referensi</span></div></footer>
 
-<script src="assets/js/app.js"></script>
+<script src="lib/rintik-config.js"></script><script src="assets/js/app.js"></script>
 <script src="assets/js/periksa.js"></script>
 </body>
 </html>

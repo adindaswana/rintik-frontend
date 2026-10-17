@@ -3,197 +3,243 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RINTIK - Prediksi Kelembapan Udara</title>
-<meta name="description" content="Proses fixture sensor resmi melalui model frozen RINTIK dengan provenance yang dapat ditelusuri.">
-<link rel="icon" href="assets/img/logo.png">
+<meta name="theme-color" content="#F5FAFD">
+<title>RINTIK · Prediksi kelembapan udara dari 23 sensor lain</title>
+<meta name="description" content="RINTIK memprediksi kelembapan udara (%RH) setiap 30 menit dari 23 sensor lain di perkebunan pintar, untuk memeriksa sensor kelembapan dan menggantikannya sementara saat bermasalah.">
+<link rel="icon" type="image/svg+xml" href="assets/img/logo-rintik.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Quicksand:wght@500;600;700&amp;display=swap">
 <link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/rintik-brand.css?v=20261017a">
 </head>
-<body>
+<body class="home">
+<a class="skip-link" href="#mainContent">Lewati ke konten utama</a>
 
 <header class="navbar">
   <div class="container navbar-inner">
-    <a href="index.html" class="brand">
-      <img src="assets/img/logo.png" alt="Logo RINTIK" class="brand-mark">
-      <span class="brand-text">
-        <span class="brand-title">RINTIK</span>
-        <span class="brand-sub">Prediksi kelembapan udara</span>
-      </span>
-    </a>
-    <nav class="nav-links">
-      <a href="index.html" class="active">Beranda</a>
+    <a href="index.html" class="brand"><img src="assets/img/logo-rintik.svg" alt="" class="brand-mark" width="37" height="42"><img src="assets/img/wordmark-rintik-sm.png" srcset="assets/img/wordmark-rintik-sm.png 1x, assets/img/wordmark-rintik-sm@2x.png 2x" alt="RINTIK" class="brand-wordmark" width="115" height="30"></a>
+    <nav class="nav-links" aria-label="Navigasi utama">
+      <a href="index.html" class="active" aria-current="page">Beranda</a>
       <a href="predict.html">Prediksi</a>
       <a href="hasil.html">Hasil</a>
       <a href="dashboard.html">Dashboard</a>
-    <a href="periksa.html">Pemeriksaan</a>
+      <a href="periksa.html">Pemeriksaan</a>
+      <a href="settings.html">Pengaturan</a>
     </nav>
     <div class="nav-right">
-      <a href="dashboard.html" class="btn btn-primary btn-sm">Dashboard Operator</a>
-      <button class="nav-toggle" aria-label="Buka menu">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      <button class="nav-toggle" type="button" aria-label="Buka menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
     </div>
   </div>
   <div class="mobile-menu">
     <div class="mobile-menu-panel">
-      <a href="dashboard.html" class="btn btn-primary btn-block" style="margin-bottom:12px;">Dashboard Operator</a>
-      <a href="index.html" class="active">Beranda</a>
+      <a href="index.html" class="active" aria-current="page">Beranda</a>
       <a href="predict.html">Prediksi</a>
       <a href="hasil.html">Hasil</a>
       <a href="dashboard.html">Dashboard</a>
-    <a href="periksa.html">Pemeriksaan</a>
+      <a href="periksa.html">Pemeriksaan</a>
+      <a href="settings.html">Pengaturan</a>
     </div>
   </div>
 </header>
 
-<section class="hero">
-  <div class="container">
-    <div class="hero-inner">
-      <div class="hero-copy">
-        <span class="eyebrow"><span class="dot"></span>Prediksi Kelembapan Udara</span>
-        <h1>Ubah sinyal sensor jadi estimasi <span class="accent">kelembapan udara</span> yang dapat ditelusuri.</h1>
-        <p class="hero-lede">Proses fixture test resmi melalui model frozen RINTIK dan tinjau hasil daily batch beserta provenance-nya.</p>
-        <div class="hero-actions">
-          <a href="predict.html" class="btn btn-primary btn-lg">Buat Prediksi Sekarang</a>
-          <a href="hasil.html" class="btn btn-secondary btn-lg">Lihat Hasil Terakhir</a>
-        </div>
+<main id="mainContent" tabindex="-1">
+
+<section class="home-hero" aria-labelledby="heroTitle">
+  <div class="container home-hero-grid">
+    <div class="home-hero-copy">
+      <p class="home-wordmark"><img src="assets/img/wordmark-rintik.png" srcset="assets/img/wordmark-rintik.png 1x, assets/img/wordmark-rintik@2x.png 2x" alt="RINTIK" width="855" height="223"></p>
+      <h1 id="heroTitle">Saat sensor kelembapan salah, RINTIK menangkapnya.</h1>
+      <p class="home-lede">RINTIK memprediksi kelembapan udara (%RH) setiap 30 menit dari 23 sensor lain di perkebunan pintar. Estimasi itu dipakai untuk memeriksa sensor kelembapan, dan menggantikannya sementara saat sensor itu bermasalah.</p>
+      <div class="home-actions">
+        <a href="predict.html" class="btn btn-primary btn-lg">Coba Prediksi</a>
+        <a href="periksa.html" class="btn btn-secondary btn-lg">Periksa sensor</a>
+        <a href="dashboard.html" class="home-textlink">Buka Dashboard<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h11M11 5.5 15.5 10 11 14.5"/></svg></a>
       </div>
-      <div class="preview-card">
-        <div class="preview-head">
-          <div class="preview-title">
-            <span class="ic"><img src="assets/img/icon-droplet.png" alt=""></span>
-            <div>
-              <strong>Prediksi Kelembapan</strong>
-              <span>Ilustrasi tampilan · bukan keluaran model</span>
-            </div>
+      <p class="home-facts"><span>Batch harian, 48 slot per 30 menit</span><span>Bacaan kelembapan tidak dipakai sebagai input</span></p>
+    </div>
+
+    <figure class="home-figure" aria-labelledby="figCaption">
+      <img class="home-mascot" src="assets/img/mascot/rintik_wave.svg" alt="" width="240" height="270">
+      <div class="signal-card">
+        <div class="signal-head">
+          <div>
+            <strong>Satu hari, dua garis</strong>
+            <span>Sensor kelembapan dibandingkan dengan estimasi RINTIK</span>
           </div>
-          <span class="badge badge-sky"><span class="badge-dot"></span>Ilustrasi UI</span>
+          <span class="tag tag-amber">Ilustrasi</span>
         </div>
-        <div class="preview-kpis">
-          <div class="preview-kpi"><span>Contoh nilai</span><strong>87%</strong></div>
-          <div class="preview-kpi"><span>Contoh estimasi</span><strong>89%</strong></div>
+        <svg class="signal-svg" viewBox="0 0 560 236" role="img" aria-labelledby="sigTitle sigDesc">
+          <title id="sigTitle">Ilustrasi sensor kelembapan yang macet</title>
+          <desc id="sigDesc">Garis estimasi RINTIK terus naik turun sepanjang hari, sedangkan bacaan sensor kelembapan berhenti di sekitar 61 persen sejak pukul 13.00. Area setelah pukul 13.00 ditandai sebagai dugaan malfungsi.</desc>
+          <rect class="sig-band" x="322.4" y="24" width="221.6" height="180" rx="8"/>
+          <g class="sig-grid">
+            <line x1="48" x2="544" y1="24" y2="24"/><line x1="48" x2="544" y1="84" y2="84"/><line x1="48" x2="544" y1="144" y2="144"/><line x1="48" x2="544" y1="204" y2="204"/>
+          </g>
+          <g class="sig-axis">
+            <text x="38" y="28" text-anchor="end">100</text><text x="38" y="88" text-anchor="end">80</text><text x="38" y="148" text-anchor="end">60</text><text x="38" y="208" text-anchor="end">40</text>
+            <text x="48" y="226" text-anchor="start">00.00</text><text x="174.6" y="226" text-anchor="middle">06.00</text><text x="301.3" y="226" text-anchor="middle">12.00</text><text x="427.9" y="226" text-anchor="middle">18.00</text><text x="544" y="226" text-anchor="end">24.00</text>
+          </g>
+          <path class="sig-model" pathLength="1" d="M48.0 89.6 L58.6 80.9 L69.1 74.9 L79.7 72.4 L90.2 71.7 L100.8 70.3 L111.3 66.7 L121.9 61.6 L132.4 57.3 L143.0 56.2 L153.5 58.8 L164.1 63.4 L174.6 67.5 L185.2 69.4 L195.7 69.8 L206.3 70.9 L216.9 75.0 L227.4 82.4 L238.0 91.5 L248.5 99.5 L259.1 104.7 L269.6 107.8 L280.2 111.0 L290.7 116.6 L301.3 124.9 L311.8 133.9 L322.4 141.1 L332.9 144.9 L343.5 145.8 L354.0 146.3 L364.6 148.6 L375.1 152.9 L385.7 157.6 L396.3 159.9 L406.8 158.5 L417.4 154.0 L427.9 149.0 L438.5 145.8 L449.0 144.7 L459.6 144.0 L470.1 141.1 L480.7 134.8 L491.2 126.0 L501.8 117.1 L512.3 110.5 L522.9 106.7 L533.4 103.8 L544.0 99.5"/>
+          <path class="sig-sensor" pathLength="1" d="M48.0 92.2 L58.6 84.7 L69.1 75.9 L79.7 75.7 L90.2 75.8 L100.8 71.2 L111.3 62.7 L121.9 58.7 L132.4 54.7 L143.0 58.8 L153.5 58.4 L164.1 65.6 L174.6 70.7 L185.2 73.2 L195.7 72.5 L206.3 66.8 L216.9 71.8 L227.4 79.5 L238.0 88.6 L248.5 102.4 L259.1 106.5 L269.6 106.6 L280.2 108.8 L290.7 113.2 L301.3 121.2 L311.8 137.9 L322.4 140.1 L544.0 140.1"/>
+          <g class="sig-flag">
+            <circle cx="322.4" cy="140.1" r="5"/>
+            <text x="332" y="46">Bacaan macet sejak 13.00</text>
+          </g>
+        </svg>
+        <div class="signal-legend">
+          <span><i class="key key-model"></i>Estimasi RINTIK</span>
+          <span><i class="key key-sensor"></i>Sensor kelembapan</span>
         </div>
-        <div class="preview-chart-lbl"><span>Tren 24 jam terakhir</span><span>%RH</span></div>
-        <div id="previewChart"></div>
-        <div class="preview-chips">
-          <span class="badge badge-teal">Mudah digunakan</span>
-          <span class="badge badge-violet">Hasil cepat</span>
+        <div class="signal-verdict">
+          <span class="tag tag-rose"><i></i>Dugaan malfungsi</span>
+          <span class="tag tag-teal"><i></i>Pengganti sementara: estimated</span>
         </div>
       </div>
-    </div>
+      <figcaption id="figCaption" class="visually-hidden">Ilustrasi cara RINTIK menandai sensor kelembapan yang macet.</figcaption>
+    </figure>
   </div>
 </section>
 
-<section class="section" id="cara-kerja">
+<section class="home-roles" aria-labelledby="rolesTitle">
   <div class="container">
-    <div class="section-head">
-      <span class="eyebrow"><span class="dot"></span>Cara Kerja</span>
-      <h2>Tiga langkah sederhana</h2>
-      <p>Cukup ikuti langkah berikut untuk mendapatkan prediksi kelembapan udara Anda.</p>
+    <div class="home-section-head">
+      <h2 id="rolesTitle">Satu estimasi, dua peran.</h2>
+      <p>Sensor kelembapan bisa macet, bergeser, atau mati. Nilainya tetap tampak wajar di layar. Karena RINTIK tidak membaca sensor itu, estimasinya bisa dipakai sebagai pembanding yang independen.</p>
     </div>
-    <div class="grid-3">
-      <div class="card step-card">
-        <span class="step-no">01</span>
-        <div class="step-icon sky">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1269E2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M12 4l-4.5 4.5M12 4l4.5 4.5"/><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
-        </div>
-        <h3>Unggah Data Sensor</h3>
-        <p>Unggah file data sensor Anda, atau isi form manual jika Anda hanya punya beberapa data.</p>
-      </div>
-      <div class="card step-card">
-        <span class="step-no">02</span>
-        <div class="step-icon violet">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7C5CE0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a1.7 1.7 0 00.34 1.87l.06.06a2.06 2.06 0 11-2.92 2.92l-.06-.06a1.7 1.7 0 00-1.87-.34 1.7 1.7 0 00-1.03 1.56V20a2.06 2.06 0 11-4.12 0v-.1a1.7 1.7 0 00-1.11-1.56 1.7 1.7 0 00-1.87.34l-.06.06a2.06 2.06 0 11-2.92-2.92l.06-.06a1.7 1.7 0 00.34-1.87 1.7 1.7 0 00-1.56-1.03H4a2.06 2.06 0 110-4.12h.1a1.7 1.7 0 001.56-1.11 1.7 1.7 0 00-.34-1.87l-.06-.06a2.06 2.06 0 112.92-2.92l.06.06a1.7 1.7 0 001.87.34H10a1.7 1.7 0 001.03-1.56V4a2.06 2.06 0 114.12 0v.1a1.7 1.7 0 001.03 1.56 1.7 1.7 0 001.87-.34l.06-.06a2.06 2.06 0 112.92 2.92l-.06.06a1.7 1.7 0 00-.34 1.87V10a1.7 1.7 0 001.56 1.03H20a2.06 2.06 0 110 4.12h-.1a1.7 1.7 0 00-1.56 1.03z"/></svg>
-        </div>
-        <h3>Diproses Otomatis</h3>
-        <p>Sistem membaca dan memproses data Anda secara otomatis, biasanya hanya dalam hitungan detik.</p>
-      </div>
-      <div class="card step-card">
-        <span class="step-no">03</span>
-        <div class="step-icon amber">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E89A2C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19h16"/><path d="M7 19v-6M12 19V9M17 19v-3"/></svg>
-        </div>
-        <h3>Lihat &amp; Unduh Hasil</h3>
-        <p>Lihat grafik dan ringkasan hasil, lalu unduh prediksi kelembapan udara dalam format CSV.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="section section-alt">
-  <div class="container">
-    <div class="section-head">
-      <span class="eyebrow"><span class="dot"></span>Contoh Tampilan</span>
-      <h2>Tren kelembapan yang mudah dibaca</h2>
-      <p>Ringkasan singkat dari data kelembapan udara, disajikan dalam grafik dan angka yang mudah dipahami.</p>
-    </div>
-    <div class="split-135-95">
-      <div class="card mini-chart-card">
-        <div class="mini-chart-top">
-          <h3>Contoh Tren Kelembapan (2 Hari Terakhir)</h3>
-          <span class="badge badge-sky">%RH</span>
-        </div>
-        <div id="miniChart"></div>
-      </div>
-      <div class="kpi-stack">
-        <div class="card kpi-card">
-          <div class="kpi-ring" data-pct="87" data-color="#1269E2" data-label="87%"></div>
-          <div class="kpi-info"><span>Rata-rata Kelembapan</span><strong>87.2%</strong></div>
-        </div>
-        <div class="card kpi-card">
-          <div class="kpi-ring" data-pct="65" data-color="#2F9AA6" data-label="&plusmn;6%"></div>
-          <div class="kpi-info"><span>Rentang Harian</span><strong>82% - 94%</strong></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="section">
-  <div class="container">
-    <div class="cta-strip">
-      <div>
-        <h3>Siap coba prediksinya sendiri?</h3>
-        <p>Unggah fixture test resmi dan jalankan model asli dalam beberapa langkah yang dapat diaudit.</p>
-      </div>
-      <a href="predict.html" class="btn btn-on-cta btn-lg">Buat Prediksi Sekarang</a>
-    </div>
-  </div>
-</section>
-
-<footer class="footer">
-  <div class="container">
-    <div class="footer-grid">
-      <div>
-        <div class="footer-brand">
-          <img src="assets/img/logo.png" alt="Logo RINTIK" style="width:36px;height:36px;border-radius:10px;object-fit:contain;">
-          <span class="footer-brand-title">RINTIK</span>
-        </div>
-        <p>Bantu Anda memantau dan memperkirakan kelembapan udara dari data sensor secara sederhana dan cepat.</p>
-      </div>
-      <div>
-        <h4>Jelajahi</h4>
-        <ul>
-          <li><a href="index.html">Beranda</a></li>
-          <li><a href="predict.html">Buat Prediksi</a></li>
-          <li><a href="hasil.html">Hasil Terakhir</a></li>
-          <li><a href="periksa.html">Periksa Sensor</a></li>
+    <div class="roles-grid">
+      <article class="role role-check">
+        <img class="role-mascot" src="assets/img/mascot/rintik_worried.svg" alt="" width="96" height="108">
+        <h3>Memeriksa sensor</h3>
+        <p>RINTIK membandingkan bacaan sensor kelembapan dengan estimasinya, hari demi hari. Hari dengan selisih besar atau bacaan yang macet ditandai agar petugas memeriksa perangkatnya.</p>
+        <ul class="status-scale" aria-label="Status per hari">
+          <li class="s-ok"><i></i>Sehat</li>
+          <li class="s-warn"><i></i>Waspada</li>
+          <li class="s-bad"><i></i>Dugaan malfungsi</li>
+          <li class="s-na"><i></i>Data kurang</li>
         </ul>
-      </div>
-      <div>
-        <h4>Bantuan</h4>
-        <ul>
-          <li><a href="predict.html">Cara mengunggah data</a></li>
-          <li><a href="mailto:halo@smartfarm.id">Hubungi kami</a></li>
-        </ul>
-      </div>
+        <p class="role-note">Ambang penilaian masih tahap demo dan belum dikalibrasi untuk lokasi lain. Anggap sebagai petunjuk awal, bukan vonis.</p>
+        <a href="periksa.html" class="role-link">Buka Pemeriksaan<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h11M11 5.5 15.5 10 11 14.5"/></svg></a>
+      </article>
+      <article class="role role-replace">
+        <img class="role-mascot" src="assets/img/mascot/rintik_thumbs.svg" alt="" width="96" height="108">
+        <h3>Menggantikan sementara</h3>
+        <p>Saat sensor kelembapan hilang atau rusak, estimasi RINTIK mengisi celahnya sampai sensor diperbaiki. Nilai ini selalu berlabel <em>estimated</em> dan disimpan terpisah, tidak pernah menimpa bacaan sensor.</p>
+        <div class="role-chart">
+          <div class="role-chart-head"><span>Contoh kurva %RH dua hari</span><span class="tag tag-amber">Ilustrasi</span></div>
+          <div id="miniChart"></div>
+        </div>
+        <a href="hasil.html" class="role-link">Lihat Hasil<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h11M11 5.5 15.5 10 11 14.5"/></svg></a>
+      </article>
     </div>
-    <div class="footer-bottom">
-      <span>&copy; 2026 RINTIK. Prototipe tampilan untuk NSC 2026.</span>
-      <span>RINTIK: Regresi Intrahari dengan Navigasi Temporal untuk Identifikasi Kelembapan.</span>
+  </div>
+</section>
+
+<section class="home-how" id="cara-kerja" aria-labelledby="howTitle">
+  <div class="container">
+    <div class="home-section-head">
+      <h2 id="howTitle">Dari 23 sensor menjadi satu angka %RH.</h2>
+      <p>Setiap malam satu batch harian diproses. Bacaan kelembapan ditutup dari input, jadi model tidak pernah melihat nilai yang sedang ditebaknya.</p>
+    </div>
+    <ol class="pipeline">
+      <li class="pipe pipe-in">
+        <span class="pipe-tag">Input</span>
+        <h3>23 sensor lain</h3>
+        <p>Suhu, CO₂, tekanan, kondisi tanah, dan lainnya, 48 slot per 30 menit.</p>
+      </li>
+      <li class="pipe">
+        <span class="pipe-tag">Stage 1</span>
+        <h3>Level harian</h3>
+        <p>Menebak level kelembapan rata-rata untuk hari itu.</p>
+      </li>
+      <li class="pipe">
+        <span class="pipe-tag">Stage 2</span>
+        <h3>Deviasi 30 menit</h3>
+        <p>Menebak naik turunnya setiap 30 menit di sekitar level tersebut.</p>
+      </li>
+      <li class="pipe">
+        <span class="pipe-tag">P1 sampai P3</span>
+        <h3>Perapian</h3>
+        <p>Level dan deviasi dijumlahkan, dihaluskan, lalu dirapikan tiga aturan tetap tanpa latih ulang.</p>
+      </li>
+      <li class="pipe pipe-out">
+        <span class="pipe-tag">Nilai akhir</span>
+        <h3>%RH per 30 menit</h3>
+        <p>Siap dibandingkan dengan sensor, atau dipakai sebagai pengganti sementara.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="home-start" aria-labelledby="startTitle">
+  <div class="container home-start-grid">
+    <div class="home-start-copy">
+      <h2 id="startTitle">Coba sendiri, mulai dari mana saja.</h2>
+      <p>Semua halaman membaca model yang sama. Jika layanan model belum menjawab, halaman menampilkan pesan yang jelas dan tidak membuat hasil pengganti.</p>
+    </div>
+    <ul class="start-list">
+      <li>
+        <a href="predict.html" class="start-row">
+          <span class="start-text"><strong>Prediksi</strong><span>Siapkan satu hari data sensor atau putar ulang 16 hari data kompetisi, lalu proses.</span></span>
+          <svg class="start-arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h11M11 5.5 15.5 10 11 14.5"/></svg>
+        </a>
+      </li>
+      <li>
+        <a href="periksa.html" class="start-row">
+          <span class="start-text"><strong>Pemeriksaan</strong><span>Unggah bacaan sensor kelembapan dan lihat penilaian per hari beserta alasannya.</span></span>
+          <svg class="start-arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h11M11 5.5 15.5 10 11 14.5"/></svg>
+        </a>
+      </li>
+      <li>
+        <a href="dashboard.html" class="start-row">
+          <span class="start-text"><strong>Dashboard</strong><span>Jelajahi riwayat %RH dan 23 sensor lain pada rentang tanggal pilihan.</span></span>
+          <span class="start-spark" aria-hidden="true"><span id="previewChart"></span></span>
+          <svg class="start-arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h11M11 5.5 15.5 10 11 14.5"/></svg>
+        </a>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section class="home-honest" aria-labelledby="honestTitle">
+  <div class="container">
+    <h2 id="honestTitle">Yang perlu diketahui sebelum memakai</h2>
+    <ul class="honest-list">
+      <li><strong>Estimasi, bukan pengukuran.</strong> Nilai pengganti selalu ditandai <em>estimated</em> dan disimpan terpisah dari bacaan sensor.</li>
+      <li><strong>Ambang masih tahap demo.</strong> Batas Sehat, Waspada, dan Dugaan malfungsi belum dikalibrasi untuk lokasi lain.</li>
+      <li><strong>Data kompetisi dan simulasi.</strong> Demo memakai data NSC 2026 dan skenario sensor simulasi, bukan pengukuran lapangan.</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer-grid">
+      <div class="site-footer-brand">
+        <img src="assets/img/wordmark-rintik-sm.png" srcset="assets/img/wordmark-rintik-sm.png 1x, assets/img/wordmark-rintik-sm@2x.png 2x" alt="RINTIK" width="169" height="44">
+        <p>Regresi Intrahari dengan Navigasi Temporal untuk Identifikasi Kelembapan. Prediksi %RH dari 23 sensor lain untuk memeriksa dan menggantikan sementara sensor kelembapan.</p>
+      </div>
+      <nav aria-label="Navigasi footer">
+        <a href="index.html">Beranda</a>
+        <a href="predict.html">Prediksi</a>
+        <a href="hasil.html">Hasil</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="periksa.html">Pemeriksaan</a>
+        <a href="settings.html">Pengaturan</a>
+      </nav>
+    </div>
+    <div class="site-footer-bottom">
+      <span><strong>Prototipe</strong> · data kompetisi NSC 2026 + simulasi · bukan alat referensi</span>
+      <span>&copy; 2026 Tim HBD · NSC 2026</span>
     </div>
   </div>
 </footer>
 
-<script src="assets/js/app.js"></script>
+<script src="lib/rintik-config.js"></script><script src="assets/js/app.js"></script>
 </body>
 </html>

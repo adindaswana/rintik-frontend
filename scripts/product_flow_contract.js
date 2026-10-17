@@ -14,12 +14,11 @@ function assertUniqueIds(html,label){
   assert.strictEqual(new Set(ids).size,ids.length,`${label} must not contain duplicate IDs`);
 }
 
-// Re-pinned at the handoff merge with origin/main: adds the Pemeriksaan nav link (index.html)
-// and the Pemeriksaan page styles/helpers (style.css, app.js) contributed on main.
+// Re-pinned at UI upgrade (logo maskot + wordmark baru, landing redesign) approved by owner.
 const protectedHashes={
-  'index.html':'2b65ddb87f429a6518b530930db7be88805b22c2dd6289ae1775f64bfb7d96dc',
-  'assets/css/style.css':'6da7b18c8b0324479f6352421be9c778a12e226d0abca81adaad6ef01a43c287',
-  'assets/js/app.js':'db8805026fd38c82a0f7f21c4e90208b31262bf801bc22df187eebd7967bce8a'
+  'index.html':'3c28666f4ad784b56f9a506f2cd9bafa88d94ed5274bc5750163daa1463563b1',
+  'assets/css/style.css':'9601a378c3196353426be5810f3dd369e56b2fa292d231d38532c35ca06a9405',
+  'assets/js/app.js':'7e5103bbb9c94ecc5609d84b29d999b9e76ff038c25611f23aae01b79080730d'
 };
 Object.entries(protectedHashes).forEach(([file,hash])=>assert.strictEqual(sha(file),hash,`${file} changed`));
 

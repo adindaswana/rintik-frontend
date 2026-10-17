@@ -113,7 +113,7 @@
   var publicPredictionLib = window.RintikPublicPrediction;
   var publicApiClient = null;
   var apiParams = new URLSearchParams(window.location.search);
-  var publicApiBase = apiParams.get('api') || sessionStorage.getItem('rintik_api_url') || 'http://127.0.0.1:8000';
+  var publicApiBase = apiParams.get('api') || sessionStorage.getItem('rintik_api_url') || (window.RINTIK_DEFAULT_API||'http://127.0.0.1:8140');
   if(apiParams.get('api')) sessionStorage.setItem('rintik_api_url', publicApiBase);
   if(window.RintikApi && publicPredictionLib){
     publicApiClient = window.RintikApi.createClient({baseUrl: publicApiBase});
