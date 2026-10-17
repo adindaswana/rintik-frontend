@@ -224,3 +224,7 @@ svg text[fill="#718079"], svg text[fill="#65756e"]{ fill:#5F7086; }
 @media (prefers-reduced-motion: reduce){
   .skip-link, .flow-skip-link, .nav-links a{ transition:none; }
 }
+
+/* Fokus keyboard selalu terlihat, termasuk skip link dan tombol yang punya outline:none dari stylesheet lama */
+.skip-link:focus-visible, .flow-skip-link:focus-visible, .btn:focus-visible, .status-back:focus-visible,
+a:focus-visible, button:focus-visible{ outline:3px solid var(--r-blue-500) !important; outline-offset:3px !important; }

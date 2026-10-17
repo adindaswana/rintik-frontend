@@ -21,6 +21,6 @@ dan backend `../rintik-backend`.
 
 ## Bukti yang masih wajib sebelum status M4 PASS
 
-- [ ] Jalankan responsive visual QA 1440/1366/tablet/mobile dan interaksi keyboard langsung pada host yang menyediakan browser. Environment audit ini tidak memiliki browser Computer Use dan renderer lokal ditolak sandbox.
+- [x] Responsive visual QA 1440/1366/tablet 820/mobile 390 di situs produksi: tanpa scroll horizontal dan tanpa target sentuh < 24 px pada 7 halaman; navigasi Tab di setiap halaman memberi fokus yang terlihat (17 Okt 2026).
 - [ ] Uji clean-machine Windows dan rekam demo sebelum klaim siap Grand Final.
-- [ ] Tentukan deployment hanya setelah review terpisah; jangan unggah checkpoint atau melakukan deployment otomatis.
+- [x] Deployment diputuskan pemilik (17 Okt 2026): backend di Render (`rintik-backend.onrender.com`), checkpoint dan data resmi di repo Hugging Face privat dan diunduh saat start; checkpoint tetap diverifikasi SHA256. Mode `RINTIK_LOW_MEMORY=1` membuka checkpoint tanpa torch agar muat di 512 MB; isi identik dengan `torch.load`.
