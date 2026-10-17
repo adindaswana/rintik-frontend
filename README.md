@@ -84,6 +84,14 @@ append `?api=http://127.0.0.1:8136`.
 The final product pages use `lib/rintik-api.js` and the real backend contracts,
 not the legacy stub. The official and operational namespaces remain isolated.
 
+Every backend call from `lib/rintik-api.js` carries `X-Rintik-Session`: an
+anonymous random id stored once in `localStorage['rintik_session_id']`. The
+backend keeps a separate state per id, so visitors never see or reset each
+other's runs. Deploy the session-aware backend before this frontend: an older
+backend rejects the header in its CORS preflight. Hasil only opens a result
+automatically when it belongs to this browser's session (or the last day this
+browser processed); on a shared backend it asks before showing stored history.
+
 ## QA
 
 Static and integration checks:

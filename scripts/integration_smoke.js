@@ -66,7 +66,8 @@ async function main(){
   assert(recovered.recovery.values.every(function(row){ return row.raw_physical_rh === null; }));
   assert.strictEqual(JSON.stringify(recovered).toLowerCase().indexOf('rmse'), -1);
 
-  var exported = await fetch(client.exportDayUrl('2023-09-06'));
+  // Export is session-scoped like every other stateful route, so the plain URL needs the session header.
+  var exported = await fetch(client.exportDayUrl('2023-09-06'), {headers: {'X-Rintik-Session': client.sessionId()}});
   assert.strictEqual(exported.status, 200);
   assert.strictEqual(exported.headers.get('x-content-type-options'), 'nosniff');
   var csv = await exported.text();

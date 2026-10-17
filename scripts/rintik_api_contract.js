@@ -53,6 +53,21 @@ async function main(){
   assert.strictEqual(calls[7].url, 'http://127.0.0.1:8000/predict');
   assert.strictEqual(calls[8].url, 'http://127.0.0.1:8000/v1/demo/days/2023-08-29/monitor');
   assert.strictEqual(calls[10].init.headers['Idempotency-Key'], 'confirm-key');
+  // Session isolation contract: every backend call carries the same anonymous browser session id.
+  var sessionId = calls[0].init.headers['X-Rintik-Session'];
+  assert(/^[A-Za-z0-9_-]{16,64}$/.test(sessionId), 'session id must be 16-64 safe characters');
+  calls.forEach(function(call){
+    assert.strictEqual(call.init.headers['X-Rintik-Session'], sessionId, 'missing session header on ' + call.url);
+  });
+  assert.strictEqual(calls[2].init.headers['Content-Type'], 'application/json');
+  assert.strictEqual(client.sessionId(), sessionId);
+  assert.strictEqual(apiLib.SESSION_HEADER, 'X-Rintik-Session');
+  var pinned = apiLib.createClient({baseUrl: 'http://b', fetchImpl: fakeFetch, sessionId: 'qa_session_0123456789'});
+  await pinned.health();
+  assert.strictEqual(calls[calls.length - 1].init.headers['X-Rintik-Session'], 'qa_session_0123456789');
+  calls.pop();
+  assert.strictEqual(apiLib.describeError({code: 'NETWORK_ERROR'}).indexOf('tidak ada hasil pengganti') >= 0, true);
+
   assert.strictEqual(client.exportDayUrl('2023-08-29'), 'http://127.0.0.1:8000/v1/days/2023-08-29/export.csv');
 
   var serverFailure = apiLib.createClient({
@@ -144,7 +159,7 @@ async function main(){
     global.fetch = originalFetch;
   }
 
-  console.log('RINTIK_API_CONTRACT_OK calls=' + calls.length + ' failClosed=true explicitDemo=true timeout=true nonJson=true');
+  console.log('RINTIK_API_CONTRACT_OK calls=' + calls.length + ' session=header failClosed=true explicitDemo=true timeout=true nonJson=true');
 }
 
 main().catch(function(error){

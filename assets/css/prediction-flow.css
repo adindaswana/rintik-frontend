@@ -464,3 +464,26 @@ html { scrollbar-gutter: stable; }
 .live-result-card .result-empty{ min-height:300px; }
 .flow-alert > div{ display:grid; gap:2px; }
 .result-empty .btn{ margin-top:20px; }
+
+/* UX audit 2026-10: guidance, provenance, partial degradation, recovery explanation */
+.flow-alert.is-info strong{ color:#0f55b8; }
+.next-step-hint{ grid-column:1/-1; margin:0; padding:10px 12px; border-radius:12px; color:#0f3f86; background:#eef5ff; font-size:14px; line-height:1.5; }
+.next-step-hint strong{ color:#131e30; }
+.manual-filled{ margin:10px 0 0; color:var(--flow-muted); font-size:13px; }
+.result-origin{ margin-top:8px !important; display:inline-block; padding:3px 10px; border-radius:999px; background:rgba(255,255,255,.16); color:#fff !important; font-size:12.5px; font-weight:600; }
+.result-recovery-row .recovery-reason{ margin-top:6px; color:var(--flow-ink-2, #3b4a5e); line-height:1.5; }
+.result-recovery-row .btn{ margin-top:10px; max-width:100%; white-space:normal; text-align:center; height:auto; }
+.result-partial{ margin:0 0 14px; align-items:center; justify-content:space-between; }
+.result-empty-actions{ margin-top:20px; display:flex; flex-wrap:wrap; justify-content:center; gap:10px; }
+.result-empty-actions .btn{ margin-top:0; }
+.result-next p{ margin:4px 0 0; color:var(--flow-muted); font-size:14px; }
+.result-next > div:last-child{ display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
+.flow-text-link{ padding:8px 4px; color:#0f55b8; font-size:14px; font-weight:650; text-decoration:underline; text-underline-offset:3px; }
+.mode-card span{ line-height:1.45; }
+.result-recovery-row{ min-width:0; }
+@media (max-width: 1080px) and (min-width: 901px){ .result-reading-card .result-recovery-row{ grid-column:1 / -1; } }
+@media (max-width: 700px){
+  .result-partial{ flex-direction:column; align-items:flex-start; }
+  .result-empty-actions{ flex-direction:column; align-items:stretch; }
+  .result-next > div:last-child{ width:100%; display:grid; }
+}

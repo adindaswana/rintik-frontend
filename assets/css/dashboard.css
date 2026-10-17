@@ -434,3 +434,8 @@ a.button{ display:inline-flex; align-items:center; justify-content:center; text-
   .global-alert{ grid-template-columns:1fr; }
   .global-alert .text-button{ grid-column:1; grid-row:auto; justify-self:start; }
 }
+
+/* UX audit 2026-10: informational (non-error) alert and page-purpose note */
+.global-alert.is-info{ border-color:#c3d4e8; color:#0f55b8; background:#eef5ff; }
+.purpose-note{ margin:14px 0 0; padding:10px 14px; border:1px solid #c3d4e8; border-radius:12px; background:#ffffff; color:#3b4a5e; font-size:14px; line-height:1.5; }
+.purpose-note a{ color:#0f55b8; font-weight:650; }
