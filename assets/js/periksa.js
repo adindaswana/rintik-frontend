@@ -203,14 +203,11 @@
   document.querySelectorAll('[data-demo]').forEach(function(b){
     b.addEventListener('click', function(){ loadDemo(b.getAttribute('data-demo')); });
   });
-  // File contoh berisi potongan data latih lomba, jadi tidak di-host di situs publik.
-  // Tombol contoh hanya muncul bila file tersedia (salinan lokal untuk demo).
-  var isLocal = location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
-  if(isLocal){
-    fetch('assets/data/demo_sehat.csv', { method: 'HEAD' }).then(function(r){
-      if(r.ok) $('pkDemoRow').hidden = false;
-    }).catch(function(){});
-  }
+  // File contoh: input resmi periode uji (29 Agu-13 Sep) + kolom sensor kelembapan SINTETIS
+  // (sehat, atau macet/mati dari skenario simulasi tim). Bukan pengukuran; aman di-host.
+  fetch('assets/data/demo_sehat.csv', { method: 'HEAD' }).then(function(r){
+    if(r.ok) $('pkDemoRow').hidden = false;
+  }).catch(function(){});
 
   /* ---------------- run ---------------- */
   var overlay = $('pkOverlay');
@@ -287,7 +284,7 @@
   function headBadges(job, data){
     var b = '';
     if(data && data._mock) b += '<span class="badge badge-amber"><span class="badge-dot"></span>Mode uji lokal: jawaban tiruan</span>';
-    if(job.isDemo) b += '<span class="badge badge-violet"><span class="badge-dot"></span>Contoh dari data latih (in-sample)</span>';
+    if(job.isDemo) b += '<span class="badge badge-violet"><span class="badge-dot"></span>Contoh sintetis periode uji (bukan pengukuran)</span>';
     b += '<span class="badge badge-slate">' + esc(job.name) + '</span>';
     $('pkHeadBadges').innerHTML = b;
   }

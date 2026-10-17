@@ -4,6 +4,5 @@ node_modules/
 model/*.pth
 model/*.pkl
 
-# potongan data latih lomba: hanya untuk demo lokal, jangan di-host publik
-assets/data/demo_*.csv
+# demo_sehat.csv & demo_rusak.csv (periode uji + sensor sintetis) sengaja di-host untuk tombol Contoh
 assets/data/mock_monitor_response.json
