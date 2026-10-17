@@ -145,8 +145,8 @@
     document.querySelectorAll('[data-demo]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-demo') === demoKind); });
     if(demoKind){
       $('pkDemoNoteText').textContent = demoKind === 'rusak' ?
-        'Bacaan sensor sengaja dirusak: turun 20 poin mulai hari ke-8 dan macet di hari ke-12.' :
-        'Bacaan sensor asli 15 hari terakhir, tanpa diubah.';
+        'Sensor sintetis dibuat rusak: macet di 99% pada 4-5 September, mati pada 6 September, lalu pulih setelah diperbaiki.' :
+        'Sensor sintetis sehat: mengikuti pola harian dengan sedikit gangguan acak, tanpa kerusakan.';
     }
     if(err){
       current = null; runBtn.disabled = true; preview.hidden = true;
