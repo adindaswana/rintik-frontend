@@ -16,6 +16,8 @@
     "product-overhaul-browser:test": "node scripts/product_overhaul_browser_qa.js",
     "post-m5-public-flow:test": "node scripts/product_overhaul_browser_qa.js",
     "final-product-browser:test": "node scripts/final_product_browser_qa.js",
-    "runtime:smoke": "node scripts/runtime_browser_smoke.js"
+    "runtime:smoke": "node scripts/runtime_browser_smoke.js",
+    "monitor:test": "node scripts/monitor_smoke.js",
+    "monitor:assets": "python3 scripts/build_monitor_assets.py"
   }
 }

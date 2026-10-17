@@ -7,16 +7,19 @@ const path = require('path');
 
 const root = path.resolve(__dirname,'..');
 function read(file){ return fs.readFileSync(path.join(root,file),'utf8'); }
-function sha(file){ return crypto.createHash('sha256').update(fs.readFileSync(path.join(root,file))).digest('hex'); }
+// Line endings are normalized so the pin is stable across Windows (CRLF) and macOS/Linux (LF) checkouts.
+function sha(file){ return crypto.createHash('sha256').update(fs.readFileSync(path.join(root,file)).toString('utf8').replace(/\r\n/g,'\n')).digest('hex'); }
 function assertUniqueIds(html,label){
   const ids=Array.from(html.matchAll(/\bid="([^"]+)"/g),match=>match[1]);
   assert.strictEqual(new Set(ids).size,ids.length,`${label} must not contain duplicate IDs`);
 }
 
+// Re-pinned at the handoff merge with origin/main: adds the Pemeriksaan nav link (index.html)
+// and the Pemeriksaan page styles/helpers (style.css, app.js) contributed on main.
 const protectedHashes={
-  'index.html':'f538d30ea4ee70d4cccc325a80e7eb36a5e3734e88f223c9ea3fc659d9d121da',
-  'assets/css/style.css':'fc3dbbbc64beb45e8856909396270daf295b190781d28a4394ca3653210ed262',
-  'assets/js/app.js':'d4b8719613da03e12ebde800ccd648e393463789fe781ab9606770352e041bc8'
+  'index.html':'2b65ddb87f429a6518b530930db7be88805b22c2dd6289ae1775f64bfb7d96dc',
+  'assets/css/style.css':'6da7b18c8b0324479f6352421be9c778a12e226d0abca81adaad6ef01a43c287',
+  'assets/js/app.js':'db8805026fd38c82a0f7f21c4e90208b31262bf801bc22df187eebd7967bce8a'
 };
 Object.entries(protectedHashes).forEach(([file,hash])=>assert.strictEqual(sha(file),hash,`${file} changed`));
 
