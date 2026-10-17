@@ -3,3 +3,7 @@ node_modules/
 .DS_Store/
 model/*.pth
 model/*.pkl
+
+# potongan data latih lomba: hanya untuk demo lokal, jangan di-host publik
+assets/data/demo_*.csv
+assets/data/mock_monitor_response.json

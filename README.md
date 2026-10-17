@@ -12,6 +12,15 @@ sample or model-like predictions.
 - `hasil.html` explains the latest or selected daily humidity result.
 - `dashboard.html` explores humidity history and exogenous sensor features.
 - `settings.html` contains system and humidity-sensor inspections.
+- `periksa.html` (Pemeriksaan Sensor) compares an uploaded humidity-sensor
+  column with RINTIK estimates per day using the stateless `POST /monitor` of the
+  frozen backend (rules `demo-v1`, thresholds illustrative and uncalibrated).
+  Locally it calls the backend directly (`?api=` or port 8140); deployed it goes
+  through the `api/monitor.js` proxy, which never falls back to a stub. The
+  uploaded sensor column is a comparator, not ground truth, and results are not
+  archived. It is separate from the archived synthetic monitoring in Settings
+  (`/v1/demo/*`). Dates before the frozen context (29 Aug 2023 15:00) are rejected
+  by the backend; `assets/data/demo_*.csv` samples are local-only and gitignored.
 
 Prediksi has two explicitly isolated workflows:
 
