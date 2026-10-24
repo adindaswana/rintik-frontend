@@ -79,6 +79,17 @@ async function main(){
   var unknownCopy = apiLib.describeError(new apiLib.RintikApiError('SOME_NEW_CODE', 'Something went wrong in English.', 422));
   assert.strictEqual(unknownCopy, 'Server menolak permintaan ini (SOME_NEW_CODE). Periksa data lalu coba lagi.');
   assert.strictEqual(unknownCopy.indexOf('English'), -1);
+  // Audit 90 hari: English app.py codes get Indonesian copy; Indonesian audit messages keep their detail.
+  var E = function(code, message, status){ return apiLib.describeError(new apiLib.RintikApiError(code, message, status || 400)); };
+  assert.strictEqual(E('INVALID_BODY', 'Provide {"csv": "..."} and optionally "as_of": "YYYY-MM-DD".'), 'Isi permintaan tidak sesuai format yang diharapkan server. Muat ulang halaman lalu coba lagi.');
+  assert.strictEqual(E('INVALID_AS_OF', 'as_of must be a YYYY-MM-DD string.'), 'Tanggal acuan (as_of) harus berformat TTTT-BB-HH dan berada di dalam periode data.');
+  assert.strictEqual(E('INVALID_AS_OF', 'as_of berada di luar periode data.'), 'as_of berada di luar periode data.');
+  assert.strictEqual(E('UNEXPECTED_COLUMNS', 'Kolom tidak dikenal ditolak (dataset hanya boleh berisi bukti observasi): scenario'), 'Kolom tidak dikenal ditolak (dataset hanya boleh berisi bukti observasi): scenario');
+  assert.strictEqual(E('UNEXPECTED_COLUMNS', 'Unexpected columns: foo, bar'), 'Data berisi kolom yang tidak dikenal sehingga ditolak: foo, bar.');
+  assert.strictEqual(E('MISSING_COLUMNS', 'Missing required columns: co2'), 'Kolom wajib belum lengkap: co2.');
+  assert.strictEqual(E('TOO_MANY_ROWS', 'At most 2000 rows are accepted.', 413), 'Data terlalu banyak: maksimum 2000 baris per permintaan.');
+  assert.strictEqual(E('AUDIT_RULES_UNAVAILABLE', 'Audit rules or the training baseline failed integrity checks.', 503).indexOf('Aturan audit'), 0);
+  assert.strictEqual(E('DUPLICATE_TIMESTAMP', 'Each timestamp may appear only once.'), 'Ada timestamp yang muncul lebih dari sekali.');
   assert.strictEqual(apiLib.describeError(new apiLib.RintikApiError('BACKEND_ERROR', 'RINTIK backend request failed.', 503)).indexOf('Server RINTIK sedang bermasalah'), 0);
 
   assert.strictEqual(client.exportDayUrl('2023-08-29'), 'http://127.0.0.1:8000/v1/days/2023-08-29/export.csv');
