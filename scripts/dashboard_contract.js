@@ -107,8 +107,23 @@ function main(){
   assert(js.indexOf('pearson')>=0 && js.indexOf('pairs.length<24')>=0);
   assert(js.indexOf('sebab-akibat')>=0);
   assert(js.indexOf('selectedStart')>=0 && js.indexOf('selectedEnd')>=0);
+  // QA revisi 2: banner spacing, ordered range with a note, range kept in the URL, Indonesian labels
+  assert(/<\/strong> <span id="provenanceText">/.test(html),'provenance title and text need a space');
+  assert(html.indexOf('id="rangeNote"')>=0 && js.indexOf('keepRangeOrdered')>=0,'inverted range must be prevented with a note');
+  assert(js.indexOf('persistRange')>=0 && js.indexOf("params.get('from')")>=0 && js.indexOf('history.replaceState')>=0,'range must survive a reload');
+  assert.strictEqual(js.indexOf('<th>Timestamp</th>'),-1);
+  assert.strictEqual(html.indexOf('Timeline tersinkron'),-1);
+  assert(/\.button:disabled[^{]*\{[^}]*cursor: not-allowed/.test(css) && css.indexOf('transform: scale(.98)')>=0,'disabled and pressed button states');
+  assert(css.indexOf('font-variant-numeric: tabular-nums')>=0);
+  var settingsHtml = fs.readFileSync(path.join(root,'settings.html'),'utf8');
+  var settingsJs = fs.readFileSync(path.join(root,'assets','js','settings.js'),'utf8');
+  ['Threshold demonstrasi','Simpan preview','Detail engineering','Pass simulasi','Fail simulasi','sensor stuck'].forEach(function(token){ assert.strictEqual(settingsHtml.indexOf(token),-1,'settings.html still shows '+token); });
+  assert(/<h2>Verifikasi akurasi independen<\/h2>/.test(settingsHtml));
+  ["'Historical pred_internal diff'","m.audit.status+' / '","'Dugaan sensor stuck'","'Threshold preview tersimpan'","' · stuck '"].forEach(function(token){ assert.strictEqual(settingsJs.indexOf(token),-1,'settings.js still shows '+token); });
+  assert(settingsJs.indexOf("simulated_demo:'Simulasi demo'")>=0 && settingsJs.indexOf("'Belum ada tanggal'")>=0);
+  assert(settingsJs.indexOf("event.key==='ArrowRight'")>=0 && settingsJs.indexOf('item.tabIndex=active?0:-1')>=0,'Pengaturan tabs need arrow keys');
 
-  console.log('RINTIK_DASHBOARD_CONTRACT_OK gaps=true unitSafe=true provenance=true a11yStatic=true references=true tabs=true');
+  console.log('RINTIK_DASHBOARD_CONTRACT_OK gaps=true unitSafe=true provenance=true a11yStatic=true references=true tabs=true qaRevisi2=true');
 }
 
 try { main(); }
