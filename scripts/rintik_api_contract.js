@@ -67,6 +67,19 @@ async function main(){
   assert.strictEqual(calls[calls.length - 1].init.headers['X-Rintik-Session'], 'qa_session_0123456789');
   calls.pop();
   assert.strictEqual(apiLib.describeError({code: 'NETWORK_ERROR'}).indexOf('tidak ada hasil pengganti') >= 0, true);
+  // R8: backend messages are English developer text; the page always shows Indonesian copy.
+  assert.strictEqual(
+    apiLib.describeError(new apiLib.RintikApiError('DUPLICATE_OPERATIONAL_TIMESTAMP', 'This half-hour slot already exists. Use the explicit edit action to replace it.', 409)),
+    'Slot waktu ini sudah punya pembacaan. Untuk mengoreksinya, klik barisnya di tabel Pembacaan yang tersimpan, ubah nilainya, lalu Simpan koreksi.'
+  );
+  assert.strictEqual(
+    apiLib.describeError(new apiLib.RintikApiError('VALUE_OUT_OF_RANGE', 'co2 must be between 300.5 and 2000 for this simulation.', 422)),
+    'Nilai co2 harus di antara 300,5 dan 2000 (batas wajar simulasi).'
+  );
+  var unknownCopy = apiLib.describeError(new apiLib.RintikApiError('SOME_NEW_CODE', 'Something went wrong in English.', 422));
+  assert.strictEqual(unknownCopy, 'Server menolak permintaan ini (SOME_NEW_CODE). Periksa data lalu coba lagi.');
+  assert.strictEqual(unknownCopy.indexOf('English'), -1);
+  assert.strictEqual(apiLib.describeError(new apiLib.RintikApiError('BACKEND_ERROR', 'RINTIK backend request failed.', 503)).indexOf('Server RINTIK sedang bermasalah'), 0);
 
   assert.strictEqual(client.exportDayUrl('2023-08-29'), 'http://127.0.0.1:8000/v1/days/2023-08-29/export.csv');
 
