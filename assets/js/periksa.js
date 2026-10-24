@@ -53,11 +53,13 @@
   function $(id){ return document.getElementById(id); }
   function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function num(v){ if(v === null || v === undefined || String(v).trim() === '') return null; var n = Number(v); return isFinite(n) ? n : null; }
-  function signed(v, d){ if(v == null || !isFinite(v)) return '-'; var s = Math.abs(v).toFixed(d == null ? 1 : d); return (v > 0 ? '+' : (v < 0 ? '−' : '')) + s; }
+  // Desimal koma; nol yang dibulatkan (mis. -0,04 -> "0,0") tidak pernah bertanda.
+  function dec(v, d){ var s = Number(v).toFixed(d == null ? 1 : d); if(Number(s) === 0) s = (0).toFixed(d == null ? 1 : d); return s.replace('.', ','); }
+  function signed(v, d){ if(v == null || !isFinite(v)) return '-'; var s = Math.abs(v).toFixed(d == null ? 1 : d); if(Number(s) === 0) return s.replace('.', ','); return (v > 0 ? '+' : '−') + s.replace('.', ','); }
   function fmtNum(v){
     if(v == null || !isFinite(v)) return '-';
     var a = Math.abs(v);
-    return a >= 1000 ? Math.round(v).toLocaleString('id-ID') : (a >= 100 ? v.toFixed(0) : (a >= 10 ? v.toFixed(1) : v.toFixed(2)));
+    return a >= 1000 ? Math.round(v).toLocaleString('id-ID') : (a >= 100 ? dec(v, 0) : (a >= 10 ? dec(v, 1) : dec(v, 2)));
   }
   function toDate(s){ var d = new Date(String(s).replace(' ', 'T')); return isNaN(d.getTime()) ? null : d; }
   function dayLabel(dateStr){ var d = toDate(dateStr + ' 00:00:00'); return d && R.fmtDay ? R.fmtDay(d) : dateStr; }
@@ -125,18 +127,33 @@
     dzEmpty.hidden = true; dzFilled.hidden = false; root.classList.add('filled');
     fileNameEl.textContent = name; fileMetaEl.textContent = meta;
   }
+  /* Hasil dan pratinjau file sebelumnya tidak boleh tampil di bawah file baru (atau file yang ditolak). */
+  var runSeq = 0;
+  function clearResults(){
+    runSeq++; lastData = null;
+    $('pkResults').hidden = true;
+    if(tooltip) tooltip.style.opacity = 0;
+  }
+  function clearPreview(){ preview.hidden = true; preview.innerHTML = ''; }
+  function rejectFile(name, meta, msg){
+    clearResults(); clearPreview(); current = null; demoNote.hidden = true;
+    document.querySelectorAll('[data-demo]').forEach(function(b){ b.classList.remove('active'); });
+    setFile(name, meta); showAlert('error', msg); runBtn.disabled = true;
+  }
   function resetFile(){
+    clearResults();
     current = null;
     dzEmpty.hidden = false; dzFilled.hidden = true; root.classList.remove('filled');
-    showAlert('success', ''); preview.hidden = true; demoNote.hidden = true;
+    showAlert('success', ''); clearPreview(); demoNote.hidden = true;
     runBtn.disabled = true; fileInput.value = '';
     document.querySelectorAll('[data-demo]').forEach(function(b){ b.classList.remove('active'); });
   }
 
   function acceptText(name, text, sizeKb, demoKind){
+    clearResults();
     var parsed = parseCsvText(text);
     var err = validate(parsed);
-    setFile(name, (sizeKb != null ? sizeKb.toFixed(1) + ' KB, ' : '') + (err ? 'isi belum sesuai' : parsed.rows.length + ' baris siap diperiksa'));
+    setFile(name, (sizeKb != null ? dec(sizeKb, 1) + ' KB, ' : '') + (err ? 'isi belum sesuai' : parsed.rows.length + ' baris siap diperiksa'));
     demoNote.hidden = !demoKind;
     document.querySelectorAll('[data-demo]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-demo') === demoKind); });
     if(demoKind){
@@ -145,7 +162,7 @@
         'Sensor sintetis sehat: mengikuti pola harian dengan sedikit gangguan acak, tanpa kerusakan.';
     }
     if(err){
-      current = null; runBtn.disabled = true; preview.hidden = true;
+      current = null; runBtn.disabled = true; clearPreview();
       showAlert('error', err);
       return false;
     }
@@ -159,7 +176,7 @@
   function renderPreview(sample){
     var body = sample.map(function(r){
       var h = num(r.air_humidity);
-      return '<tr><td>' + esc(r.datetime) + '</td><td class="up">' + (h == null ? '<span class="muted-cell">kosong</span>' : h.toFixed(1) + '%') +
+      return '<tr><td>' + esc(r.datetime) + '</td><td class="up">' + (h == null ? '<span class="muted-cell">kosong</span>' : dec(h, 1) + '%') +
         '</td><td>' + esc(r.air_temperature || '-') + '</td><td>' + esc(r.pressure || '-') + '</td></tr>';
     }).join('');
     preview.innerHTML =
@@ -169,16 +186,18 @@
   }
 
   function handleFile(file){
-    if(!/\.csv$/i.test(file.name)){ setFile(file.name, 'File belum sesuai'); showAlert('error', 'Gunakan file berformat CSV.'); runBtn.disabled = true; return; }
-    if(file.size > 5 * 1024 * 1024){ setFile(file.name, 'Ukuran file terlalu besar'); showAlert('error', 'Ukuran file terlalu besar.'); runBtn.disabled = true; return; }
+    clearResults();
+    if(!/\.csv$/i.test(file.name)){ rejectFile(file.name, 'File belum sesuai', 'Gunakan file berformat CSV.'); return; }
+    if(file.size > 5 * 1024 * 1024){ rejectFile(file.name, 'Ukuran file terlalu besar', 'Ukuran file terlalu besar.'); return; }
     var reader = new FileReader();
     reader.onload = function(){ acceptText(file.name, reader.result, file.size / 1024, null); };
-    reader.onerror = function(){ setFile(file.name, 'File tidak bisa dibaca'); showAlert('error', 'File tidak bisa dibaca.'); };
+    reader.onerror = function(){ rejectFile(file.name, 'File tidak bisa dibaca', 'File tidak bisa dibaca.'); };
     reader.readAsText(file);
   }
 
   function loadDemo(kind){
     var name = kind === 'rusak' ? 'demo_rusak.csv' : 'demo_sehat.csv';
+    clearResults();
     return fetch('assets/data/' + name).then(function(r){
       if(!r.ok) throw new Error('demo');
       return r.text();
@@ -245,13 +264,14 @@
 
   function run(){
     if(!current) return;
-    var job = current;
+    var job = current, seq = ++runSeq;
     var stop = runOverlay();
     runBtn.disabled = true;
     var statsP = loadTrainStats().catch(function(){ return null; });
     callMonitor(job.rows).then(function(data){
       return statsP.then(function(){
         stop();
+        if(seq !== runSeq) return;
         renderResults(job, data);
         renderDrift(job.rows);
         saveRun(job, data);
@@ -261,6 +281,7 @@
     }).catch(function(err){
       return statsP.then(function(){
         stop();
+        if(seq !== runSeq) return;
         renderFailure(job, (err && err.message) || 'Terjadi kendala saat memeriksa. Coba lagi.');
         renderDrift(job.rows);
         scrollToResults();
@@ -432,8 +453,8 @@
       hm.style.display = mv == null ? 'none' : ''; if(mv != null){ hm.setAttribute('cx', xi); hm.setAttribute('cy', y(mv)); }
       var S = st(dayStatus[String(preds[i].datetime).slice(0, 10)]);
       tooltip.innerHTML = '<div class="tt-time">' + esc(preds[i].datetime).slice(0, 16) + '</div>' +
-        '<div class="tt-row"><i style="background:#15366F"></i>Bacaan sensor <b>' + (sv == null ? 'kosong' : sv.toFixed(1) + '%') + '</b></div>' +
-        '<div class="tt-row"><i style="background:#1269E2"></i>Tebakan RINTIK <b>' + (mv == null ? '-' : mv.toFixed(1) + '%') + '</b></div>' +
+        '<div class="tt-row"><i style="background:#15366F"></i>Bacaan sensor <b>' + (sv == null ? 'kosong' : dec(sv, 1) + '%') + '</b></div>' +
+        '<div class="tt-row"><i style="background:#1269E2"></i>Tebakan RINTIK <b>' + (mv == null ? '-' : dec(mv, 1) + '%') + '</b></div>' +
         '<div class="tt-row tt-diff">Selisih <b>' + (sv == null || mv == null ? '-' : signed(sv - mv) + ' poin') + '</b><span class="tt-chip" style="background:' + S.cap + '">' + S.label + '</span></div>';
       tooltip.style.opacity = 1;
       var left = xi / W * rect.width;
