@@ -102,6 +102,7 @@ function main(){
   assert(js.indexOf("width:width,height:height")>=0 && js.indexOf("'font-size':'11'")>=0);
   assert(js.indexOf("role:'slider'")>=0 && js.indexOf('aria-valuetext')>=0);
   assert(js.indexOf('start.value=state.available[0]')>=0);
+  assert(js.indexOf('RINTIK_resolveApiBase')>=0);
   assert(js.indexOf('byUnit')>=0);
   assert(js.indexOf('pearson')>=0 && js.indexOf('pairs.length<24')>=0);
   assert(js.indexOf('sebab-akibat')>=0);

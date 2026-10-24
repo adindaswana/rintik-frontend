@@ -1,7 +1,7 @@
 (function(){
   'use strict';
   var apiLib=window.RintikApi,dataLib=window.RintikDashboardData;if(!apiLib||!dataLib)return;
-  var params=new URLSearchParams(location.search),requestedApi=params.get('api'),storedApi=sessionStorage.getItem('rintik_api_url'),baseUrl=requestedApi||(!storedApi||storedApi==='http://127.0.0.1:8000'?(window.RINTIK_DEFAULT_API||'http://127.0.0.1:8140'):storedApi);sessionStorage.setItem('rintik_api_url',baseUrl);
+  var params=new URLSearchParams(location.search),baseUrl=window.RINTIK_resolveApiBase?window.RINTIK_resolveApiBase():(window.RINTIK_DEFAULT_API||'http://127.0.0.1:8140');
   var client=apiLib.createClient({baseUrl:baseUrl,timeoutMs:120000});
   var state={scope:'operational',catalog:null,available:[],dates:[],bundles:[],humidity:[],sensorPoints:[],selectedFeatures:['air_temperature','co2'],activeView:'overview'};
   var COLORS=['#146b4a','#2367a3','#a66a17','#7b55a5','#b24b59','#397d76'];
