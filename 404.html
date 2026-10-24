@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Halaman tidak ditemukan · RINTIK</title>
+<meta name="description" content="Halaman yang Anda buka tidak ada di RINTIK.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#F5FAFD">
+<link rel="icon" type="image/svg+xml" href="/assets/img/logo-rintik.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
+<link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Quicksand:wght@500;600;700&amp;display=swap">
+<link rel="stylesheet" href="/assets/css/style.css">
+<link rel="stylesheet" href="/assets/css/rintik-brand.css?v=20261017a">
+<style>
+  /* Halaman 404: semua alamat aset absolut karena halaman ini bisa tampil di jalur mana pun. */
+  .nf-main { min-height: calc(100vh - 140px); padding: 40px 0 80px; }
+  .nf-card { max-width: 680px; padding: 32px; display: grid; gap: 14px; }
+  .nf-kicker { color: var(--sky-700, #0f55b8); font-size: 12.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+  .nf-card h1 { margin: 0; font-size: clamp(28px, 4vw, 40px); }
+  .nf-card p { margin: 0; color: #3b4a5e; }
+  .nf-path { padding: 8px 12px; border-radius: 10px; background: var(--sky-50, #eef5ff); color: #3b4a5e; font-size: 13.5px; overflow-wrap: anywhere; }
+  .nf-path code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .nf-actions { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 10px; }
+  .nf-more { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; }
+  .nf-more a { color: var(--sky-700, #0f55b8); font-weight: 600; }
+  .btn:active { transform: scale(.98); }
+  @media (max-width: 560px) { .nf-card { padding: 22px 18px; } .nf-actions .btn { flex: 1 1 100%; } }
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#nfMain">Lewati ke konten utama</a>
+
+<header class="navbar">
+  <div class="container navbar-inner">
+    <a href="/" class="brand"><img src="/assets/img/logo-rintik.svg" alt="" class="brand-mark" width="37" height="42"><img src="/assets/img/wordmark-rintik-sm.png" srcset="/assets/img/wordmark-rintik-sm.png 1x, /assets/img/wordmark-rintik-sm@2x.png 2x" alt="RINTIK" class="brand-wordmark" width="115" height="30"></a>
+    <nav class="nav-links" aria-label="Navigasi utama">
+      <a href="/">Beranda</a>
+      <a href="/predict">Prediksi</a>
+      <a href="/hasil">Hasil</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/periksa">Pemeriksaan</a>
+      <a href="/settings">Pengaturan</a>
+    </nav>
+    <div class="nav-right">
+      <button class="nav-toggle" type="button" aria-label="Buka menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="mobile-menu">
+    <div class="mobile-menu-panel">
+      <a href="/">Beranda</a>
+      <a href="/predict">Prediksi</a>
+      <a href="/hasil">Hasil</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/periksa">Pemeriksaan</a>
+      <a href="/settings">Pengaturan</a>
+    </div>
+  </div>
+</header>
+
+<main id="nfMain" class="nf-main" tabindex="-1">
+  <div class="container">
+    <section class="card nf-card" aria-labelledby="nfTitle">
+      <span class="nf-kicker">Halaman tidak ditemukan · 404</span>
+      <h1 id="nfTitle">Halaman ini tidak ada di RINTIK</h1>
+      <p>Alamatnya mungkin salah ketik, atau tautan yang Anda ikuti sudah tidak berlaku. Tidak ada data yang berubah.</p>
+      <p class="nf-path" id="nfPath" hidden>Alamat yang dibuka: <code id="nfPathText"></code></p>
+      <div class="nf-actions">
+        <a class="btn btn-primary" href="/">Kembali ke Beranda</a>
+        <a class="btn btn-secondary" href="/predict">Buka Prediksi</a>
+      </div>
+      <div class="nf-more" aria-label="Halaman lain"><a href="/hasil">Hasil</a><a href="/dashboard">Dashboard</a><a href="/periksa">Pemeriksaan</a><a href="/settings">Pengaturan</a></div>
+    </section>
+  </div>
+</main>
+
+<footer class="site-foot"><div class="container"><span><img src="/assets/img/wordmark-rintik-sm.png" srcset="/assets/img/wordmark-rintik-sm.png 1x, /assets/img/wordmark-rintik-sm@2x.png 2x" alt="RINTIK" width="84" height="22">Prediksi %RH dari 23 sensor lain</span><span>Prototipe · data kompetisi NSC 2026 + simulasi · bukan alat referensi</span></div></footer>
+
+<script src="/assets/js/app.js"></script>
+<script>(function(){var p=location.pathname;if(p&&p!=='/'&&p!=='/404'&&p!=='/404.html'){document.getElementById('nfPathText').textContent=p;document.getElementById('nfPath').hidden=false;}})();</script>
+</body>
+</html>
