@@ -11,7 +11,7 @@
   <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Quicksand:wght@500;600;700&amp;display=swap">
-  <link rel="stylesheet" href="assets/css/prediction-flow.css?v=20261018a">
+  <link rel="stylesheet" href="assets/css/prediction-flow.css?v=20261024a">
 <link rel="stylesheet" href="assets/css/rintik-brand.css?v=20261017a">
 </head>
 <body class="flow-page" data-flow-page="predict">
@@ -79,15 +79,15 @@
 
     <section class="flow-card live-result-card" id="latestResultCard" aria-labelledby="latestTitle">
       <div class="result-empty" id="latestEmpty"><div class="result-empty-inner"><div class="result-empty-icon" aria-hidden="true">≈</div><h2 id="latestTitle">Belum ada hasil dari Anda</h2><p>Hasil yang Anda proses dari browser ini akan muncul di sini, lengkap dengan tanggal dan alurnya.</p></div></div>
-      <div class="live-result" id="latestContent" tabindex="-1" hidden><div class="latest-heading"><div><span class="flow-step" id="latestScope">Hasil terbaru</span><h2 id="latestDate">—</h2><p id="latestStatus">Tersimpan dalam riwayat</p></div><span class="flow-state-label" id="latestVerdict">Siap</span></div><div class="operational-banner" id="operationalBanner" hidden><strong>Recovery aktif · estimated</strong><span>Pembacaan humidity yang hilang tidak ditimpa; estimasi disimpan sebagai sumber terpisah.</span></div><div class="latest-metrics"><div class="latest-metric"><span>Estimasi RINTIK</span><strong id="latestMean">—</strong><small>rata-rata</small></div><div class="latest-metric"><span>Data operasional</span><strong id="latestOperational">—</strong><small id="latestOperationalNote">—</small></div><div class="latest-metric"><span>Observasi</span><strong id="latestRows">—</strong><small>hari ini</small></div><div class="latest-metric"><span>Sensor humidity</span><strong id="latestSensor">—</strong><small id="latestSensorNote">—</small></div></div><div class="flow-chart-head"><h3>Humidity sepanjang hari</h3><div class="flow-chart-legend" id="latestLegend"></div></div><div class="flow-chart" id="latestChart" role="img" aria-label="Grafik humidity hasil terbaru"></div><div class="result-actions"><a class="btn btn-primary" id="resultLink" href="hasil.html" data-api-link>Lihat hasil lengkap</a><a class="btn btn-secondary" href="dashboard.html" data-api-link>Eksplorasi riwayat</a></div></div>
+      <div class="live-result" id="latestContent" tabindex="-1" hidden><div class="latest-heading"><div><span class="flow-step" id="latestScope">Hasil terbaru</span><h2 id="latestDate">—</h2><p id="latestStatus">Tersimpan dalam riwayat</p></div><span class="flow-state-label" id="latestVerdict">Siap</span></div><div class="operational-banner" id="operationalBanner" hidden><strong>Recovery aktif · estimated</strong><span>Bacaan sensor humidity mentah tidak ditimpa; estimasi disimpan sebagai sumber terpisah.</span></div><div class="latest-metrics"><div class="latest-metric"><span>Estimasi RINTIK</span><strong id="latestMean">—</strong><small>rata-rata</small></div><div class="latest-metric"><span>RH terpakai</span><strong id="latestOperational">—</strong><small id="latestOperationalNote">—</small></div><div class="latest-metric"><span>Observasi</span><strong id="latestRows">—</strong><small>hari ini</small></div><div class="latest-metric"><span>Sensor humidity</span><strong id="latestSensor">—</strong><small id="latestSensorNote">—</small></div></div><div class="flow-chart-head"><h3>Humidity sepanjang hari</h3><div class="flow-chart-legend" id="latestLegend"></div></div><div class="flow-chart" id="latestChart" role="img" aria-label="Grafik humidity hasil terbaru"></div><div class="result-actions"><a class="btn btn-primary" id="resultLink" href="hasil.html" data-api-link>Lihat hasil lengkap</a><a class="btn btn-secondary" href="dashboard.html" data-api-link>Eksplorasi riwayat</a></div></div>
     </section>
   </div></main>
 
   <dialog class="reset-dialog" id="resetDialog" aria-labelledby="resetDialogTitle"><form method="dialog"><span class="dialog-icon" aria-hidden="true">↻</span><h2 id="resetDialogTitle">Mulai ulang workflow?</h2><p id="resetDialogText">Riwayat run terpilih akan dibersihkan tanpa menyentuh model atau fixture.</p><div class="dialog-actions"><button class="btn btn-secondary" value="cancel">Batal</button><button class="btn btn-danger" id="confirmResetButton" value="confirm">Ya, reset</button></div></form></dialog>
 
   <footer class="site-foot"><div class="container"><span><img src="assets/img/wordmark-rintik-sm.png" srcset="assets/img/wordmark-rintik-sm.png 1x, assets/img/wordmark-rintik-sm@2x.png 2x" alt="RINTIK" width="84" height="22">Prediksi %RH dari 23 sensor lain</span><span>Prototipe · data kompetisi NSC 2026 + simulasi · bukan alat referensi</span></div></footer>
-<script src="lib/rintik-config.js"></script><script src="lib/rintik-api.js?v=20261018a"></script>
+<script src="lib/rintik-config.js?v=20261024a"></script><script src="lib/rintik-api.js?v=20261024a"></script>
   <script src="lib/public-prediction.js?v=20261014a"></script>
-  <script src="assets/js/prediction-flow.js?v=20261018a"></script>
+  <script src="assets/js/prediction-flow.js?v=20261024a"></script>
 </body>
 </html>

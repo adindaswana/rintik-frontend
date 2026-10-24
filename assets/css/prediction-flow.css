@@ -408,7 +408,7 @@ html { scrollbar-gutter: stable; }
 .result-metric-grid article { padding: 15px 17px; border: 1px solid var(--flow-line); border-radius: 15px; background: white; }
 .result-metric-grid span,.result-metric-grid small{display:block;color:var(--flow-muted);font-size: 13px}.result-metric-grid strong{display:block;margin:4px 0;font-size:21px}
 .result-layout { display: grid; grid-template-columns: minmax(0,1.5fr) minmax(270px,.5fr); gap: 15px; align-items: stretch; }
-.result-chart-card,.result-reading-card,.insight-card { padding: 20px; }.result-chart{min-height:330px}.chart-tooltip{position:fixed;z-index:80;padding:8px 10px;border-radius:9px;color:white;background:#131e30;font-size: 13px;pointer-events:none}
+.result-chart-card,.result-reading-card,.insight-card { padding: 20px; }.result-chart{min-height:300px}.result-chart svg{height:auto}.chart-tooltip{position:fixed;z-index:80;padding:8px 10px;border-radius:9px;color:white;background:#131e30;font-size: 13px;pointer-events:none}
 .result-reading-card { display: grid; align-content: start; gap: 12px; }.result-reading-row{padding:12px 0;border-bottom:1px solid var(--flow-line)}.result-reading-row span,.result-reading-row small{display:block;color:var(--flow-muted);font-size: 13px}.result-reading-row strong{display:block;margin-top:3px;font-size:16px}.result-reading-card>p{margin:4px 0 0;color:var(--flow-muted);font-size: 13px}
 .insight-card { margin-top: 15px; display: grid; grid-template-columns: minmax(220px,.5fr) 1fr; gap: 28px; }.insight-card h2{margin:4px 0;font-size:20px}.insight-card p{margin:0;color:var(--flow-muted);font-size: 12.5px}.insight-card ul{margin:0;padding-left:20px}.insight-card li{margin:0 0 9px;font-size: 13px}
 .result-observations { margin-top:15px; overflow:hidden }.result-observations details>summary{padding:17px 20px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;list-style:none}.result-observations summary strong,.result-observations summary small{display:block}.result-observations summary small{color:var(--flow-muted);font-size: 13px}.result-observations .result-table-wrap{padding:0 20px 20px}
@@ -487,3 +487,6 @@ html { scrollbar-gutter: stable; }
   .result-empty-actions{ flex-direction:column; align-items:stretch; }
   .result-next > div:last-child{ width:100%; display:grid; }
 }
+
+/* 2026-10-24: "RH terpakai" hint under the reading label. */
+.result-reading-row .label-hint { margin-top: 2px; font-size: 12px; }

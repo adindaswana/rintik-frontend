@@ -44,6 +44,21 @@ assert(!predict.includes('assets/css/style.css')&&!result.includes('assets/css/s
 assert(flowJs.includes("var target='2023-09-06'"),'guided recovery date missing');
 assert(!flowJs.includes('predictFull('),'Product flow must not use the stateless 734 route');
 assert(flowJs.includes('window.RINTIK_resolveApiBase()')&&!flowJs.includes("params.get('api')"),'?api= must go through the allowlist in lib/rintik-config.js');
+// R1: "RH terpakai" per slot (active recovery > sensor > nothing) drives the cards, table and CSV export.
+assert(flowJs.includes('function usableRows(')&&(flowJs.match(/usableRows\(/g)||[]).length>=4,'usableRows must feed summary, table and export');
+assert(flowJs.includes('nilainya macet (hampir konstan)')&&flowJs.includes('Sensor tidak mengirim data.'),'recovery copy must follow sensor.state');
+assert(predict.includes('<span>RH terpakai</span>')&&result.includes('RH terpakai · rata-rata')&&result.includes('<th>RH terpakai</th>')&&!result.includes('Data operasional')&&!predict.includes('Data operasional'),'R11 term "RH terpakai"');
+// R2: the gate is checked before the confirm button, the button never creates an audit, and the key follows the audit.
+const recoveryFn=flowJs.slice(flowJs.indexOf('function recoveryInfo('),flowJs.indexOf('function renderNextStep('));
+assert(recoveryFn.indexOf("status:'Dibatasi'")>0&&recoveryFn.indexOf("status:'Dibatasi'")<recoveryFn.indexOf('var canConfirm'),'audit gate must be evaluated before canConfirm');
+const confirmFn=flowJs.slice(flowJs.indexOf('async function confirmRecovery('));
+assert(!confirmFn.slice(0,confirmFn.indexOf('\n')).includes('createDemoAudit'),'confirmRecovery must not create an audit');
+assert(flowJs.includes("('guided-confirm-'+incident.incident_id+'-'+auditId).slice(0,128)"),'idempotency key must include the audit id');
+// R7/R12
+assert(flowJs.includes("width:width,height:height,style:'height:'+height+'px'")&&flowCss.includes('.result-chart{min-height:300px}.result-chart svg{height:auto}'),'Hasil chart drawn 1:1');
+assert(/id="exportResultButton" type="button" disabled/.test(result),'Ekspor CSV disabled until a result is shown');
+assert(flowJs.includes('slot right after the latest manual reading'),'manual slot suggestion');
+[predict,result].forEach(html=>{assert(html.includes('lib/rintik-config.js?v=20261024a')&&html.includes('prediction-flow.js?v=20261024a'),'asset cache version');});
 assert(flowCss.includes('@media (prefers-reduced-motion: reduce)'));
 assert(flowCss.includes('@media (max-width: 700px)'));
 
