@@ -38,7 +38,7 @@ assert(!predict.includes('assets/css/style.css')&&!result.includes('assets/css/s
 
 ['resultChart','resultTableBody','resultProvenanceLabel','resultRecovery','Analisis seluruh riwayat'].forEach(token=>assert(result.includes(token),`hasil.html missing ${token}`));
 ['scopeSelect','rangeDateStart','rangeDateEnd','sensorCharts','runInsight'].forEach(token=>assert(dashboard.includes(token),`dashboard.html missing ${token}`));
-['data-inspection="model"','data-inspection="sensor"','trustScore','disagreementThreshold','thresholdAudit','Independent Accuracy Verification'].forEach(token=>assert(settings.includes(token),`settings.html missing ${token}`));
+['data-inspection="model"','data-inspection="sensor"','trustScore','disagreementThreshold','thresholdAudit','Verifikasi akurasi independen'].forEach(token=>assert(settings.includes(token),`settings.html missing ${token}`));
 
 ['createOperationalReading','updateOperationalReading','fillOperationalDay','runOperationalDay','resetOperationalSimulation','getNextOfficialDemoInput','resetDemoState'].forEach(token=>assert(flowJs.includes(token),`prediction flow missing API action ${token}`));
 assert(flowJs.includes("var target='2023-09-06'"),'guided recovery date missing');
@@ -58,7 +58,7 @@ assert(flowJs.includes("('guided-confirm-'+incident.incident_id+'-'+auditId).sli
 assert(flowJs.includes("width:width,height:height,style:'height:'+height+'px'")&&flowCss.includes('.result-chart{min-height:300px}.result-chart svg{height:auto}'),'Hasil chart drawn 1:1');
 assert(/id="exportResultButton" type="button" disabled/.test(result),'Ekspor CSV disabled until a result is shown');
 assert(flowJs.includes('slot right after the latest manual reading'),'manual slot suggestion');
-[predict,result].forEach(html=>{assert(html.includes('lib/rintik-config.js?v=20261024a')&&html.includes('prediction-flow.js?v=20261024a'),'asset cache version');});
+[predict,result].forEach(html=>{assert(html.includes('lib/rintik-config.js?v=20261024a')&&html.includes('prediction-flow.js?v=20261025a'),'asset cache version');});
 // R14: Prediksi opens Hasil after processing; Hasil lists processed dates with a simulated sensor fault.
 assert(flowJs.includes("goToResult('operational',result.date,'operational')")&&flowJs.includes("goToResult('official',latest.date,all?'demo-all':'demo-day')"),'auto navigation to Hasil');
 ['sensorEvents','sensorEventsTitle','sensorEventsLead','sensorEventsList','sensorEventsClear','sensorEventsRestore','sensorEventsKicker'].forEach(id=>assert(result.includes(`id="${id}"`),`hasil.html missing #${id}`));

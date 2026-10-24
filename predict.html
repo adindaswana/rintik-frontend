@@ -11,7 +11,7 @@
   <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Quicksand:wght@500;600;700&amp;display=swap">
-  <link rel="stylesheet" href="assets/css/prediction-flow.css?v=20261024a">
+  <link rel="stylesheet" href="assets/css/prediction-flow.css?v=20261025a">
 <link rel="stylesheet" href="assets/css/rintik-brand.css?v=20261017a">
 </head>
 <body class="flow-page" data-flow-page="predict">
@@ -22,7 +22,7 @@
       <nav class="nav-links" aria-label="Navigasi utama"><a href="index.html">Beranda</a><a href="predict.html" class="active" aria-current="page">Prediksi</a><a href="hasil.html" data-api-link>Hasil</a><a href="dashboard.html" data-api-link>Dashboard</a><a href="periksa.html" data-api-link>Pemeriksaan</a><a href="settings.html" data-api-link>Pengaturan</a></nav>
       <div class="nav-right"><span class="nav-runtime" id="navRuntime"><i></i><span>Memeriksa sistem</span></span><button class="nav-toggle" type="button" aria-label="Buka menu" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div>
     </div>
-    <div class="mobile-menu"><div class="mobile-menu-panel"><a href="index.html">Beranda</a><a class="active" href="predict.html">Prediksi</a><a href="hasil.html" data-api-link>Hasil</a><a href="dashboard.html" data-api-link>Dashboard</a><a href="periksa.html" data-api-link>Pemeriksaan</a><a href="settings.html" data-api-link>Pengaturan</a></div></div>
+    <div class="mobile-menu"><div class="mobile-menu-panel"><a href="index.html">Beranda</a><a class="active" href="predict.html" aria-current="page">Prediksi</a><a href="hasil.html" data-api-link>Hasil</a><a href="dashboard.html" data-api-link>Dashboard</a><a href="periksa.html" data-api-link>Pemeriksaan</a><a href="settings.html" data-api-link>Pengaturan</a></div></div>
   </header>
 
   <main id="mainContent" class="flow-main" tabindex="-1"><div class="container">
@@ -39,7 +39,7 @@
       </div>
     </section>
 
-    <div class="flow-alert" id="flowAlert" role="alert" tabindex="-1" hidden><div><strong id="flowAlertTitle"></strong><span id="flowAlertMessage"></span></div></div>
+    <div class="flow-alert" id="flowAlert" role="alert" tabindex="-1" hidden><div><strong id="flowAlertTitle"></strong><span id="flowAlertMessage"></span></div><button class="btn btn-secondary btn-sm" id="flowAlertRetry" type="button" hidden>Coba lagi</button></div>
     <div class="processing-panel" id="processingPanel" role="status" aria-live="polite" hidden><header><span class="processing-spinner" aria-hidden="true"></span><div><strong id="processingTitle">Memproses</strong><span id="processingDetail">Mohon tunggu…</span></div></header><progress id="processProgress" max="1" value="0">0%</progress></div>
 
     <section id="operationalPanel" class="workflow-panel" role="tabpanel" aria-labelledby="modeOperational">
@@ -58,7 +58,7 @@
         <article class="flow-card prepare-card" aria-labelledby="prepareTitle">
           <div class="flow-card-head"><div><span class="flow-step">3 · Lengkapi dan proses</span><h2 id="prepareTitle">Batch harian</h2><p id="readinessText">Belum ada pembacaan. Tambahkan manual atau lengkapi slot dengan data sintetis.</p></div></div>
           <button class="btn btn-secondary btn-block" id="fillMissingButton" type="button"><span>Lengkapi slot yang kosong</span><small>Isi dengan data sintetis · baris manual tetap</small></button>
-          <label class="scenario-select" for="operationalScenario"><span>Kondisi sensor humidity saat hari diproses</span><select id="operationalScenario"><option value="normal">Normal · simulasi</option><option value="stuck">Stuck · hampir konstan</option><option value="deviating">Menyimpang · bias simulasi</option><option value="missing">Hilang · gunakan recovery estimated</option><option value="repaired">Pulih setelah pemeriksaan</option></select><small>Sensor humidity ini hanya pembanding; tidak masuk ke input model.</small></label>
+          <label class="scenario-select" for="operationalScenario"><span>Kondisi sensor humidity saat hari diproses</span><select id="operationalScenario"><option value="normal">Normal · simulasi</option><option value="stuck">Macet · hampir konstan</option><option value="deviating">Menyimpang · bias simulasi</option><option value="missing">Hilang · gunakan recovery estimated</option><option value="repaired">Pulih setelah pemeriksaan</option></select><small>Sensor humidity ini hanya pembanding; tidak masuk ke input model.</small></label>
           <button class="btn btn-primary btn-block process-day-button" id="processOperationalButton" type="button" disabled><strong>Data belum lengkap</strong><span>0 / 48 pembacaan</span></button>
           <div class="boundary-note"><strong>Konteks bertambah per hari.</strong><span>Periode ini hanya 12 hari, sehingga belum mencapai rolling 15 hari.</span></div>
         </article>
@@ -86,8 +86,8 @@
   <dialog class="reset-dialog" id="resetDialog" aria-labelledby="resetDialogTitle"><form method="dialog"><span class="dialog-icon" aria-hidden="true">↻</span><h2 id="resetDialogTitle">Mulai ulang workflow?</h2><p id="resetDialogText">Riwayat run terpilih akan dibersihkan tanpa menyentuh model atau fixture.</p><div class="dialog-actions"><button class="btn btn-secondary" value="cancel">Batal</button><button class="btn btn-danger" id="confirmResetButton" value="confirm">Ya, reset</button></div></form></dialog>
 
   <footer class="site-foot"><div class="container"><span><img src="assets/img/wordmark-rintik-sm.png" srcset="assets/img/wordmark-rintik-sm.png 1x, assets/img/wordmark-rintik-sm@2x.png 2x" alt="RINTIK" width="84" height="22">Prediksi %RH dari 23 sensor lain</span><span>Prototipe · data kompetisi NSC 2026 + simulasi · bukan alat referensi</span></div></footer>
-<script src="lib/rintik-config.js?v=20261024a"></script><script src="lib/rintik-api.js?v=20261024a"></script>
+<script src="lib/rintik-config.js?v=20261024a"></script><script src="lib/rintik-api.js?v=20261025a"></script>
   <script src="lib/public-prediction.js?v=20261014a"></script>
-  <script src="assets/js/prediction-flow.js?v=20261024a"></script>
+  <script src="assets/js/prediction-flow.js?v=20261025a"></script>
 </body>
 </html>
