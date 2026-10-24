@@ -70,7 +70,7 @@ function main(){
   var html = fs.readFileSync(path.join(root,'dashboard.html'),'utf8');
   var css = fs.readFileSync(path.join(root,'assets','css','dashboard.css'),'utf8');
   var js = fs.readFileSync(path.join(root,'assets','js','dashboard.js'),'utf8');
-  ['role="tablist"','role="tabpanel"','aria-live="polite"','dashboardDrawer','dashboardMenuButton','Tampilkan tabel','Sensor Explorer','Temporal Insights','settings.html'].forEach(function(token){
+  ['role="tablist"','role="tabpanel"','aria-live="polite"','id="dashboardTabs"','aria-controls="panelSensors"','Tampilkan tabel','Sensor Explorer','Temporal Insights','settings.html'].forEach(function(token){
     assert(html.indexOf(token)>=0,'missing dashboard accessibility token '+token);
   });
   var ids = Array.from(html.matchAll(/\bid="([^"]+)"/g),function(match){ return match[1]; });
@@ -91,15 +91,23 @@ function main(){
   assert(css.indexOf('@media (prefers-reduced-motion: reduce)')>=0);
   assert.strictEqual(css.indexOf('@keyframes panel-in'),-1);
   assert.strictEqual(js.indexOf('generateSampleSeries'),-1);
-  assert(js.indexOf('setDrawer')>=0);
-  assert(js.indexOf("event.key==='Escape'")>=0);
-  assert(js.indexOf("event.key==='Tab'")>=0);
+  assert(js.indexOf('setupTabs')>=0);
+  assert(js.indexOf("event.key==='ArrowRight'")>=0);
+  assert(js.indexOf("event.key==='Home'")>=0);
+  assert(js.indexOf("event.key==='End'")>=0);
+  assert(js.indexOf('tab.tabIndex=active?0:-1')>=0);
+  assert.strictEqual(js.indexOf('setDrawer'),-1,'the hidden drawer must stay removed');
+  assert.strictEqual(html.indexOf('dashboardMenuButton'),-1,'the drawer menu button must stay removed');
+  // charts are drawn 1:1 with readable labels, a tooltip slider, and the full range by default
+  assert(js.indexOf("width:width,height:height")>=0 && js.indexOf("'font-size':'11'")>=0);
+  assert(js.indexOf("role:'slider'")>=0 && js.indexOf('aria-valuetext')>=0);
+  assert(js.indexOf('start.value=state.available[0]')>=0);
   assert(js.indexOf('byUnit')>=0);
   assert(js.indexOf('pearson')>=0 && js.indexOf('pairs.length<24')>=0);
   assert(js.indexOf('sebab-akibat')>=0);
   assert(js.indexOf('selectedStart')>=0 && js.indexOf('selectedEnd')>=0);
 
-  console.log('RINTIK_DASHBOARD_CONTRACT_OK gaps=true unitSafe=true provenance=true a11yStatic=true references=true');
+  console.log('RINTIK_DASHBOARD_CONTRACT_OK gaps=true unitSafe=true provenance=true a11yStatic=true references=true tabs=true');
 }
 
 try { main(); }

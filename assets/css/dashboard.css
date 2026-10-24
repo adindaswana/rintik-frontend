@@ -439,3 +439,22 @@ a.button{ display:inline-flex; align-items:center; justify-content:center; text-
 .global-alert.is-info{ border-color:#c3d4e8; color:#0f55b8; background:#eef5ff; }
 .purpose-note{ margin:14px 0 0; padding:10px 14px; border:1px solid #c3d4e8; border-radius:12px; background:#ffffff; color:#3b4a5e; font-size:14px; line-height:1.5; }
 .purpose-note a{ color:#0f55b8; font-weight:650; }
+
+/* 2026-10-24: dashboard sections as visible tabs (replaces the hidden drawer); charts sized by JS. */
+.dashboard-tabs { width: max-content; max-width: 100%; margin: 0 0 22px; padding: 5px; display: flex; gap: 4px; overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: #fff; box-shadow: 0 1px 2px rgba(19,30,48,.05); }
+.dashboard-tabs[hidden] { display: none; }
+.dashboard-tabs .nav-tab { width: auto; min-width: max-content; min-height: 42px; padding: 9px 16px; justify-content: center; }
+.dashboard-tabs .nav-tab:hover:not(.is-active) { color: var(--ink); background: #eef5ff; }
+.dashboard-tabs .nav-tab:focus-visible { outline: 3px solid #2f7de1; outline-offset: 2px; }
+.history-chart svg, .sensor-chart svg { min-width: 0; }
+.sensor-chart-card .chart-legend { margin-top: 8px; }
+.legend-swatch { width: 14px; height: 4px; display: inline-block; border-radius: 2px; }
+.humidity-reference { min-height: 170px; }
+@media (max-width: 640px) {
+  .dashboard-tabs { width: 100%; }
+  .dashboard-tabs .nav-tab { flex: 1 1 auto; min-width: max-content; padding-inline: 8px; font-size: 13px; white-space: nowrap; }
+  .dashboard-tabs .nav-tab span { display: none; }
+}
+
+/* Charts set their own pixel height (inline style); the frame grows with them instead of clipping on mobile. */
+.chart-frame { height: auto; }
