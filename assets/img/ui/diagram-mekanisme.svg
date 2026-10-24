@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 404 92" width="404" height="92" role="img" aria-label="23 sensor lain masuk ke RINTIK menghasilkan estimasi %RH; sensor humidity tidak masuk model dan hanya dibandingkan dengan estimasi" fill="none" font-family="Inter,system-ui,sans-serif">
+<defs><marker id="dm-a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 8 4 0 8Z" fill="#0F55B8"/></marker><marker id="dm-b" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 8 4 0 8Z" fill="#6B7C92"/></marker></defs>
+<rect x="1" y="8" width="92" height="30" rx="8" stroke="#0F55B8" stroke-width="1.5" fill="#fff"/>
+<text x="47" y="27" text-anchor="middle" font-size="12" font-weight="600" fill="#131E30">23 sensor lain</text>
+<path d="M94 23h38" stroke="#0F55B8" stroke-width="1.5" marker-end="url(#dm-a)"/>
+<text x="113" y="16" text-anchor="middle" font-size="10.5" fill="#5A6B80">masuk</text>
+<rect x="136" y="8" width="92" height="30" rx="8" fill="#1269E2"/>
+<text x="182" y="27" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">RINTIK</text>
+<path d="M229 23h45" stroke="#0F55B8" stroke-width="1.5" marker-end="url(#dm-a)"/>
+<text x="251" y="16" text-anchor="middle" font-size="10.5" fill="#5A6B80">estimasi</text>
+<rect x="278" y="8" width="124" height="30" rx="8" fill="#EEF5FF" stroke="#0F55B8" stroke-width="1.5"/>
+<text x="340" y="27" text-anchor="middle" font-size="12" font-weight="600" fill="#131E30">%RH per 30 menit</text>
+<rect x="1" y="56" width="128" height="30" rx="8" stroke="#6B7C92" stroke-width="1.5" stroke-dasharray="4 3" fill="#fff"/>
+<text x="65" y="75" text-anchor="middle" font-size="12" font-weight="600" fill="#3B4A5E">Sensor humidity</text>
+<path d="M130 71h210V41" stroke="#6B7C92" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#dm-b)"/>
+<text x="236" y="65" text-anchor="middle" font-size="10.5" fill="#5A6B80">dibandingkan, tidak masuk model</text>
+</svg>

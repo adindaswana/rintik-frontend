@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 64" width="220" height="64" fill="none">
+<path d="M18 52V18h10" stroke="#BD284D" stroke-width="1.2"/>
+<path d="M18 46.5 23.5 52 18 57.5 12.5 52Z" fill="#D8547A" stroke="#fff" stroke-width="1.5"/>
+<text x="32" y="22" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="600" fill="#BD284D">Sensor macet</text>
+<text x="32" y="37" font-family="Inter,system-ui,sans-serif" font-size="11" fill="#5A6B80">4–5 Sep · 99,0 %</text>
+</svg>
