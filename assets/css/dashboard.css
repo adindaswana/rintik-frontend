@@ -456,5 +456,13 @@ a.button{ display:inline-flex; align-items:center; justify-content:center; text-
   .dashboard-tabs .nav-tab span { display: none; }
 }
 
+/* 2026-10-24: Pengaturan comparison card padding and a single empty state instead of empty cards. */
+.sensor-compare-card { padding: 20px; }
+.settings-empty-state { margin: 6px 0 18px; padding: 24px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.settings-empty-state[hidden] { display: none; }
+.settings-empty-state h2 { margin: 4px 0 6px; }
+.settings-empty-state p { max-width: 760px; margin: 0; color: var(--muted); }
+.settings-empty .inspection-switch, .settings-empty .inspection-panel, .settings-empty .accuracy-section, .settings-empty .advanced-details { display: none; }
+@media (max-width: 640px) { .settings-empty-state { align-items: stretch; flex-direction: column; } }
 /* Charts set their own pixel height (inline style); the frame grows with them instead of clipping on mobile. */
 .chart-frame { height: auto; }
