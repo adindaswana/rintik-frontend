@@ -490,3 +490,33 @@ html { scrollbar-gutter: stable; }
 
 /* 2026-10-24: "RH terpakai" hint under the reading label. */
 .result-reading-row .label-hint { margin-top: 2px; font-size: 12px; }
+
+/* 2026-10-24: Hasil — sensor event notification (which dates had a simulated sensor fault). */
+.sensor-events { margin-bottom: 16px; padding: 20px; border-left: 4px solid #e89a2c; }
+.sensor-events-head h2 { margin: 4px 0 4px; font-size: 19px; }
+.sensor-events-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.sensor-events-actions { display: flex; flex: none; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px; }
+.sensor-events.is-compact .sensor-events-list, .sensor-events.is-compact .sensor-events-note { display: none; }
+@media (max-width: 640px) { .sensor-events-top { flex-direction: column; } .sensor-events-actions { justify-content: flex-start; } }
+.sensor-events-head p { margin: 0; color: var(--flow-muted); font-size: 14px; }
+.sensor-events-list { margin: 14px 0 0; padding: 0; display: grid; gap: 8px; list-style: none; }
+.sensor-event { padding: 10px 12px; display: grid; grid-template-columns: 112px auto minmax(0,1fr) auto; align-items: center; gap: 12px; border: 1px solid var(--flow-line); border-radius: 12px; background: var(--flow-soft); }
+.sensor-event.is-current { border-color: var(--flow-green); background: var(--flow-green-soft); }
+.sensor-event-date { font-weight: 700; font-size: 14px; }
+.sensor-event-badge { padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.sensor-event-badge.stuck, .sensor-event-badge.deviating { color: #8a4b00; background: #fdf0d9; }
+.sensor-event-badge.missing { color: #9b1d43; background: #fde4ec; }
+.sensor-event-badge.handled { color: #0f6670; background: #dff3f5; }
+.sensor-event.is-handled { background: #fff; }
+.sensor-event.is-handled .sensor-event-date, .sensor-event.is-handled .sensor-event-text strong { color: var(--flow-muted); }
+.sensor-event-text strong { display: block; font-size: 14px; }
+.sensor-event-text small { display: block; color: var(--flow-muted); font-size: 13px; }
+.sensor-events-note { margin: 12px 0 0; color: var(--flow-muted); font-size: 13px; }
+.sensor-events.is-clear { border-left-color: #2f9aa6; }
+.flow-text-button { padding: 8px 4px; border: 0; color: #0f55b8; background: none; cursor: pointer; font: inherit; font-size: 14px; font-weight: 650; text-decoration: underline; text-underline-offset: 3px; }
+.flow-text-button:focus-visible { outline: 3px solid #2f7de1; outline-offset: 2px; border-radius: 6px; }
+@media (max-width: 640px) {
+  .sensor-event { grid-template-columns: 1fr auto; }
+  .sensor-event-text { grid-column: 1 / -1; }
+  .sensor-event .btn { grid-column: 1 / -1; width: 100%; }
+}

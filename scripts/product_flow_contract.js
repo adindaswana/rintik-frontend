@@ -59,7 +59,16 @@ assert(flowJs.includes("width:width,height:height,style:'height:'+height+'px'")&
 assert(/id="exportResultButton" type="button" disabled/.test(result),'Ekspor CSV disabled until a result is shown');
 assert(flowJs.includes('slot right after the latest manual reading'),'manual slot suggestion');
 [predict,result].forEach(html=>{assert(html.includes('lib/rintik-config.js?v=20261024a')&&html.includes('prediction-flow.js?v=20261024a'),'asset cache version');});
+// R14: Prediksi opens Hasil after processing; Hasil lists processed dates with a simulated sensor fault.
+assert(flowJs.includes("goToResult('operational',result.date,'operational')")&&flowJs.includes("goToResult('official',latest.date,all?'demo-all':'demo-day')"),'auto navigation to Hasil');
+['sensorEvents','sensorEventsTitle','sensorEventsLead','sensorEventsList','sensorEventsClear','sensorEventsRestore','sensorEventsKicker'].forEach(id=>assert(result.includes(`id="${id}"`),`hasil.html missing #${id}`));
+assert(result.indexOf('id="sensorEvents"')>result.indexOf('id="resultContent"'),'sensor events panel lives inside #resultContent');
+assert(flowJs.includes("'rintik_dismissed_events:'+client.sessionId()")&&flowJs.includes('forgetDismissed(state.resetTarget)'),'dismissed list per session, cleared on reset');
+assert(flowJs.includes("url.searchParams.delete('from')")&&flowJs.includes('history.replaceState'),'arrival marker removed after one message');
+const eventsFn=flowJs.slice(flowJs.indexOf('function renderSensorEvents('),flowJs.indexOf('var eventRequest=0'));
+assert(!/item\.innerHTML|text\.innerHTML|detail\.innerHTML/.test(eventsFn),'event rows rendered with textContent');
+assert(flowCss.includes('.sensor-event-badge.handled'),'sensor event styles');
 assert(flowCss.includes('@media (prefers-reduced-motion: reduce)'));
 assert(flowCss.includes('@media (max-width: 700px)'));
 
-console.log('RINTIK_PRODUCT_FLOW_OK home=byte-identical workflows=isolated manual=persistent explicit-fill=true demo=16-day settings=standalone');
+console.log('RINTIK_PRODUCT_FLOW_OK home=byte-identical workflows=isolated manual=persistent explicit-fill=true demo=16-day settings=standalone rhUsed=true gateFirst=true autoResult=true sensorEvents=true');
