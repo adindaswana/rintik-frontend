@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Quicksand:wght@500;600;700&amp;display=swap">
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="stylesheet" href="assets/css/rintik-brand.css?v=20261017a">
-<link rel="stylesheet" href="assets/css/pengawasan.css?v=20261025b">
+<link rel="stylesheet" href="assets/css/pengawasan.css?v=20261025c">
 </head>
 <body>
 
@@ -59,8 +59,8 @@
 
 <div class="container">
   <nav class="sub-tabs" aria-label="Bagian Pemeriksaan">
-    <a href="periksa.html" class="active" aria-current="page" data-api-link>Pemeriksaan Sensor</a>
-    <a href="pengawasan.html" data-api-link>Pengawasan 90 Hari</a>
+    <a href="periksa.html" class="active st-periksa" aria-current="page" data-api-link>Pemeriksaan Sensor</a>
+    <a href="pengawasan.html" class="st-pengawasan" data-api-link>Pengawasan 90 Hari</a>
   </nav>
 </div>
 
@@ -75,7 +75,7 @@
           <div class="dropzone" id="pkDropzone">
             <div id="pkDzEmpty">
               <div class="dropzone-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M12 4l-4.5 4.5M12 4l4.5 4.5"/><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+                <span class="rk-ic ic-unggah" aria-hidden="true"></span>
               </div>
               <h4>Seret file ke sini</h4>
               <p class="muted">atau <span class="link">pilih file</span> dari perangkat Anda</p>
@@ -84,7 +84,7 @@
             <div id="pkDzFilled" hidden>
               <div class="file-chip">
                 <span class="fic">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5"/></svg>
+                  <span class="rk-ic ic-file-csv" aria-hidden="true"></span>
                 </span>
                 <span class="finfo">
                   <strong id="pkFileName">data-sensor.csv</strong>
@@ -252,6 +252,7 @@
 
 <section class="section pk-log-section">
   <div class="container">
+    <div class="rk-rintik" aria-hidden="true"></div>
     <div class="card result-table-card pk-log-card">
       <div class="result-table-top">
         <div>

@@ -123,7 +123,16 @@ function main(){
   assert(settingsJs.indexOf("simulated_demo:'Simulasi demo'")>=0 && settingsJs.indexOf("'Belum ada tanggal'")>=0);
   assert(settingsJs.indexOf("event.key==='ArrowRight'")>=0 && settingsJs.indexOf('item.tabIndex=active?0:-1')>=0,'Pengaturan tabs need arrow keys');
 
-  console.log('RINTIK_DASHBOARD_CONTRACT_OK gaps=true unitSafe=true provenance=true a11yStatic=true references=true tabs=true qaRevisi2=true');
+  // Elemen SVG iterasi 2: ikon tab via mask, ilustrasi state, penanda rentang tanpa arsiran di area plot, menu ponsel tertutup dengan Escape
+  ['#tabOverview','#tabSensors','#tabInsights'].forEach(function(id){ assert(css.indexOf(id+' { --rk-ic:')>=0,'tab icon for '+id); });
+  assert(/\.dashboard-tabs \.nav-tab::before \{[^}]*mask:/.test(css),'tab icons use mask-image');
+  assert(html.indexOf('ilus-belum-ada-hasil.svg')>=0 && html.indexOf('ilus-koneksi-putus.svg')>=0 && html.indexOf('id="errorState"')>=0,'illustrated empty and error states');
+  assert(js.indexOf('incidentBands')>=0 && js.indexOf('drawBands')>=0,'incident ranges are marked on the history chart');
+  assert(js.indexOf("'pattern'")<0 && css.indexOf('pola-insiden')<0 && css.indexOf('pola-audit')<0,'no hatch pattern behind the plot');
+  [js,settingsJs].forEach(function(source){ assert(source.indexOf("event.key==='Escape'")>=0 && source.indexOf("setAttribute('aria-current','page')")>=0,'mobile menu closes with Escape and marks the current page'); });
+  assert(/mobile-menu-panel[\s\S]*?class="active" aria-current="page"/.test(html) && /mobile-menu-panel[\s\S]*?class="active" aria-current="page"/.test(settingsHtml),'mobile menu current link');
+  assert(settingsHtml.indexOf('ilus-belum-ada-hasil.svg')>=0 && settingsHtml.indexOf('id="auditStatusRow"')>=0 && settingsJs.indexOf('statusOf')>=0,'settings empty illustration and status markers');
+  console.log('RINTIK_DASHBOARD_CONTRACT_OK gaps=true unitSafe=true provenance=true a11yStatic=true references=true tabs=true qaRevisi2=true svgIterasi2=true');
 }
 
 try { main(); }

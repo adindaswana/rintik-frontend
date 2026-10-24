@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Quicksand:wght@500;600;700&amp;display=swap">
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="stylesheet" href="assets/css/rintik-brand.css?v=20261017a">
-<link rel="stylesheet" href="assets/css/pengawasan.css?v=20261025b">
+<link rel="stylesheet" href="assets/css/pengawasan.css?v=20261025c">
 </head>
 <body>
 
@@ -58,8 +58,8 @@
 
 <div class="container">
   <nav class="sub-tabs" aria-label="Bagian Pemeriksaan">
-    <a href="periksa.html" data-api-link>Pemeriksaan Sensor</a>
-    <a href="pengawasan.html" class="active" aria-current="page">Pengawasan 90 Hari</a>
+    <a href="periksa.html" class="st-periksa" data-api-link>Pemeriksaan Sensor</a>
+    <a href="pengawasan.html" class="active st-pengawasan" aria-current="page">Pengawasan 90 Hari</a>
   </nav>
 </div>
 
@@ -73,6 +73,7 @@
     </div>
 
     <div class="card panel-card pw-upload" aria-labelledby="pwUploadTitle">
+      <div class="pw-upload-ill" aria-hidden="true"><img src="assets/img/ui/ilus-audit-90.svg" alt="" width="320" height="200"></div>
       <div class="pw-upload-head">
         <div>
           <h3 id="pwUploadTitle">Unggah dataset 90 hari</h3>
@@ -83,14 +84,14 @@
       <div class="pw-samples">
         <span>Belum punya file? Coba dataset contoh (nama netral, isi sintetis):</span>
         <div class="pw-sample-buttons">
-          <button type="button" class="btn btn-secondary btn-sm" data-sample="rintik_demo_001.csv">rintik_demo_001.csv</button>
-          <button type="button" class="btn btn-secondary btn-sm" data-sample="rintik_demo_002.csv">rintik_demo_002.csv</button>
-          <button type="button" class="btn btn-secondary btn-sm" data-sample="rintik_demo_003.csv">rintik_demo_003.csv</button>
+          <button type="button" class="btn btn-secondary btn-sm" data-sample="rintik_demo_001.csv"><span class="rk-ic ic-file-csv" aria-hidden="true"></span>rintik_demo_001.csv</button>
+          <button type="button" class="btn btn-secondary btn-sm" data-sample="rintik_demo_002.csv"><span class="rk-ic ic-file-csv" aria-hidden="true"></span>rintik_demo_002.csv</button>
+          <button type="button" class="btn btn-secondary btn-sm" data-sample="rintik_demo_003.csv"><span class="rk-ic ic-file-csv" aria-hidden="true"></span>rintik_demo_003.csv</button>
         </div>
       </div>
       <label class="pw-drop" id="pwDrop" for="pwFile">
         <input type="file" id="pwFile" accept=".csv,text/csv">
-        <strong>Pilih file CSV</strong> <span>atau seret ke sini · maksimum 5 MB, 5.000 baris</span>
+        <span class="rk-ic ic-unggah" aria-hidden="true"></span><strong>Pilih file CSV</strong> <span>atau seret ke sini · maksimum 5 MB, 5.000 baris</span>
       </label>
       <div class="pw-preview" id="pwPreview" hidden>
         <dl class="pw-preview-stats" id="pwPreviewStats"></dl>
@@ -149,6 +150,8 @@
         <div id="pwAudit"></div>
       </section>
 
+      <div class="rk-rintik" aria-hidden="true"></div>
+
       <section class="card pw-section pw-decision" id="pwDecision" aria-labelledby="pwDecisionTitle">
         <header class="pw-section-head"><div><span class="pw-kicker">Kesimpulan akhir · keputusan backend</span><h2 id="pwDecisionTitle">—</h2></div></header>
         <div id="pwDecisionBody"></div>
@@ -171,6 +174,6 @@
 <footer class="site-foot"><div class="container"><span><img src="assets/img/wordmark-rintik-sm.png" srcset="assets/img/wordmark-rintik-sm.png 1x, assets/img/wordmark-rintik-sm@2x.png 2x" alt="RINTIK" width="84" height="22">Prediksi %RH dari 23 sensor lain</span><span>Prototipe · demo sintetis · bukan log deployment</span></div></footer>
 
 <script src="lib/rintik-config.js?v=20261024a"></script><script src="lib/rintik-api.js?v=20261025a"></script><script src="assets/js/app.js"></script>
-<script src="assets/js/pengawasan.js?v=20261025b"></script>
+<script src="assets/js/pengawasan.js?v=20261025c"></script>
 </body>
 </html>

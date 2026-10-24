@@ -478,3 +478,101 @@ a.button{ display:inline-flex; align-items:center; justify-content:center; text-
 @media (max-width: 640px) {
   .settings-heading .section-kicker { display: block; padding-right: 64px; }
 }
+
+/* 2026-10-25 · elemen SVG RINTIK (iterasi 2): ikon garis, penanda status, ilustrasi state, penanda rentang grafik.
+   Ikon memakai mask agar mengikuti currentColor; latar di belakang teks dan area plot tetap polos. */
+.rk-ic { width: 20px; height: 20px; flex: none; display: inline-block; vertical-align: middle; font-style: normal; background-color: currentColor; -webkit-mask: var(--rk-ic) center / contain no-repeat; mask: var(--rk-ic) center / contain no-repeat; }
+.ic-tab-ringkasan { --rk-ic: url('../img/ui/ic-tab-ringkasan.svg'); }
+.ic-tab-sensor { --rk-ic: url('../img/ui/ic-tab-sensor.svg'); }
+.ic-tab-temporal { --rk-ic: url('../img/ui/ic-tab-temporal.svg'); }
+.ic-suhu-udara { --rk-ic: url('../img/ui/ic-suhu-udara.svg'); }
+.ic-suhu-tanah { --rk-ic: url('../img/ui/ic-suhu-tanah.svg'); }
+.ic-co2 { --rk-ic: url('../img/ui/ic-co2.svg'); }
+.ic-tekanan { --rk-ic: url('../img/ui/ic-tekanan.svg'); }
+.ic-baterai { --rk-ic: url('../img/ui/ic-baterai.svg'); }
+.ic-konduktivitas { --rk-ic: url('../img/ui/ic-konduktivitas.svg'); }
+.ic-kelembapan-tanah { --rk-ic: url('../img/ui/ic-kelembapan-tanah.svg'); }
+.ic-kelembapan-udara { --rk-ic: url('../img/ui/ic-kelembapan-udara.svg'); }
+.ic-volume-air { --rk-ic: url('../img/ui/ic-volume-air.svg'); }
+.ic-akumulasi-panas { --rk-ic: url('../img/ui/ic-akumulasi-panas.svg'); }
+.ic-ulang { --rk-ic: url('../img/ui/ic-ulang.svg'); }
+
+/* Penanda status: selalu berdampingan dengan teks status. */
+.rk-st { display: inline-flex; align-items: center; gap: 7px; }
+.rk-st::before { content: ""; width: 12px; height: 12px; flex: none; background: center / contain no-repeat; }
+.rk-st.ok::before { background-image: url('../img/ui/status-sehat.svg'); }
+.rk-st.warn::before { background-image: url('../img/ui/status-waspada.svg'); }
+.rk-st.bad::before { background-image: url('../img/ui/status-masalah.svg'); }
+.rk-st.na::before { background-image: url('../img/ui/status-kosong.svg'); }
+.rk-st.done::before { background-image: url('../img/ui/status-ditangani.svg'); }
+.verdict-badge.rk-st { gap: 6px; padding-inline: 10px 11px; letter-spacing: .02em; }
+.verdict-ok { color: var(--teal); background: var(--teal-soft); }
+
+/* Tab Dashboard berikon (18 px, abu saat tidak aktif, biru saat aktif). */
+.dashboard-tabs .nav-tab { gap: 8px; }
+.dashboard-tabs .nav-tab::before { content: ""; width: 18px; height: 18px; flex: none; background-color: var(--subtle); -webkit-mask: var(--rk-ic) center / contain no-repeat; mask: var(--rk-ic) center / contain no-repeat; transition: background-color 150ms ease; }
+.dashboard-tabs .nav-tab.is-active::before { background-color: var(--green); }
+#tabOverview { --rk-ic: url('../img/ui/ic-tab-ringkasan.svg'); }
+#tabSensors { --rk-ic: url('../img/ui/ic-tab-sensor.svg'); }
+#tabInsights { --rk-ic: url('../img/ui/ic-tab-temporal.svg'); }
+@media (hover:hover) and (pointer:fine) { .dashboard-tabs .nav-tab:hover:not(.is-active)::before { background-color: var(--slate); } }
+@media (max-width: 640px) { .dashboard-tabs .nav-tab { gap: 6px; } .dashboard-tabs .nav-tab::before { width: 16px; height: 16px; } }
+@media (max-width: 480px) { .dashboard-tabs .nav-tab::before { display: none; } }
+
+/* Ikon sensor pada judul panel Sensor Explorer dan kelompok pemilih. */
+.sensor-chart-card h2 { display: flex; align-items: center; gap: 9px; }
+.sensor-chart-card h2 .rk-ic { color: var(--green-dark); }
+.feature-group-button > span:first-child { display: inline-flex; align-items: center; gap: 9px; }
+.feature-group-button .rk-ic { width: 18px; height: 18px; color: var(--green-dark); }
+
+/* Legenda rentang hari sensor bermasalah: penanda bar 3 px, sama dengan bar di sumbu bawah grafik. */
+.legend-bar { width: 14px; height: 4px; display: inline-block; border-radius: 2px; }
+.legend-bar.is-bad { background: #d8547a; }
+.legend-bar.is-off { background: #8395aa; }
+
+/* Ilustrasi garis + maskot resmi untuk state kosong dan gagal. */
+.rk-ill { position: relative; width: 100%; max-width: 320px; aspect-ratio: 320 / 200; flex: none; }
+.rk-ill > img.scene { display: block; width: 100%; height: 100%; border-radius: 0 0 16px 16px; }
+.rk-ill > img.m { position: absolute; width: 23%; left: 6%; bottom: 4%; height: auto; filter: drop-shadow(0 6px 10px rgba(15,85,184,.12)); }
+.rk-ill.m-right > img.m { left: auto; right: 4%; }
+.rk-ill > img.m-worried { left: 40%; bottom: 3%; width: 20%; }
+.empty-state .rk-ill { width: 320px; }
+.empty-state > div:last-child { max-width: 540px; }
+.empty-actions { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px; }
+.empty-actions .button { margin-top: 0; display: inline-flex; align-items: center; gap: 8px; }
+.empty-actions .rk-ic { width: 16px; height: 16px; }
+.error-state { border-style: solid; border-color: #f2c9d6; }
+.error-state .section-kicker { color: #9b1f40; }
+@media (max-width: 900px) { .empty-state .rk-ill { width: 260px; } }
+@media (max-width: 640px) {
+  .empty-state { align-items: stretch; gap: 18px; }
+  .empty-state .rk-ill { width: 100%; max-width: 280px; align-self: center; }
+}
+
+/* Pengaturan: state kosong berilustrasi, status komponen, status audit, pembatas rintik. */
+.settings-empty-state { display: grid; grid-template-columns: 220px minmax(0,1fr) auto; align-items: center; gap: 28px; padding: 24px 28px; }
+.settings-empty-state .rk-ill { width: 220px; }
+.settings-empty .rk-rintik { display: none; }
+.health-row { grid-template-columns: 160px minmax(0,1fr) 34px 112px; }
+.health-row strong { text-align: right; }
+.health-row .rk-st { color: var(--muted); font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.health-row.is-ok .rk-st { color: var(--teal); }
+.health-row.is-warn .rk-st { color: #8a4b00; }
+.health-row.is-bad .rk-st { color: #9b1f40; }
+.health-row.is-warn .health-fill { background: #e89a2c; }
+.health-row.is-bad .health-fill { background: #d8547a; }
+.health-score-card .trust-band { width: max-content; max-width: 100%; margin: 2px 0 10px; padding: 4px 11px 4px 9px; display: inline-flex !important; border-radius: 999px; color: #131e30 !important; background: #fff; font-size: 12.5px !important; font-weight: 650; }
+.audit-status-row { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px 22px; }
+.audit-status-row[hidden] { display: none; }
+.audit-status-item { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.audit-status-item strong { color: var(--ink); font-weight: 650; }
+.rk-rintik { height: 12px; margin: 26px 0 18px; background: url('../img/ui/motif-rintik.svg') left center / 240px 12px repeat-x; opacity: .85; }
+@media (max-width: 900px) { .settings-empty-state { grid-template-columns: 180px minmax(0,1fr); } .settings-empty-state .rk-ill { width: 180px; } .settings-empty-state > .button { grid-column: 2; justify-self: start; } }
+@media (max-width: 640px) {
+  .settings-empty-state { grid-template-columns: 1fr; gap: 16px; padding: 20px; }
+  .settings-empty-state .rk-ill { width: 100%; max-width: 260px; justify-self: center; }
+  .settings-empty-state > .button { grid-column: auto; justify-self: stretch; }
+  .health-row { grid-template-columns: minmax(0,1fr) 34px 96px; row-gap: 6px; }
+  .health-row > span:first-child { grid-column: 1 / -1; }
+  .health-row .health-track { grid-column: 1; }
+}

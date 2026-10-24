@@ -17,7 +17,13 @@
 <style>
   /* Halaman 404: semua alamat aset absolut karena halaman ini bisa tampil di jalur mana pun. */
   .nf-main { min-height: calc(100vh - 140px); padding: 40px 0 80px; }
-  .nf-card { max-width: 680px; padding: 32px; display: grid; gap: 14px; }
+  .nf-card { max-width: 980px; padding: 32px 36px; display: grid; grid-template-columns: 300px minmax(0, 1fr); align-items: center; gap: 36px; }
+  .nf-copy { display: grid; gap: 14px; min-width: 0; }
+  /* Ilustrasi garis "tautan putus" + pose maskot cemas resmi (dekoratif). */
+  .nf-ill { position: relative; width: 100%; aspect-ratio: 320 / 200; }
+  .nf-ill img { display: block; }
+  .nf-ill .scene { width: 100%; height: 100%; }
+  .nf-ill .m { position: absolute; left: 40%; bottom: 3%; width: 20%; height: auto; filter: drop-shadow(0 6px 10px rgba(15,85,184,.12)); }
   .nf-kicker { color: var(--sky-700, #0f55b8); font-size: 12.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
   .nf-card h1 { margin: 0; font-size: clamp(28px, 4vw, 40px); }
   .nf-card p { margin: 0; color: #3b4a5e; }
@@ -27,6 +33,10 @@
   .nf-more { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; }
   .nf-more a { color: var(--sky-700, #0f55b8); font-weight: 600; }
   .btn:active { transform: scale(.98); }
+  /* Kartu lebar penuh di layar sempit: turun di bawah stiker termometer pita langit. */
+  @media (max-width: 1100px) { .nf-main { padding-top: 136px; } }
+  @media (max-width: 640px) { .nf-main { padding-top: 78px; } }
+  @media (max-width: 820px) { .nf-card { grid-template-columns: 1fr; gap: 18px; max-width: 680px; } .nf-ill { width: min(100%, 300px); justify-self: center; } }
   @media (max-width: 560px) { .nf-card { padding: 22px 18px; } .nf-actions .btn { flex: 1 1 100%; } }
 </style>
 </head>
@@ -66,6 +76,8 @@
 <main id="nfMain" class="nf-main" tabindex="-1">
   <div class="container">
     <section class="card nf-card" aria-labelledby="nfTitle">
+      <div class="nf-ill" aria-hidden="true"><img class="scene" src="/assets/img/ui/ilus-koneksi-putus.svg" alt="" width="320" height="200"><img class="m" src="/assets/img/mascot/rintik_worried.svg" alt=""></div>
+      <div class="nf-copy">
       <span class="nf-kicker">Halaman tidak ditemukan · 404</span>
       <h1 id="nfTitle">Halaman ini tidak ada di RINTIK</h1>
       <p>Alamatnya mungkin salah ketik, atau tautan yang Anda ikuti sudah tidak berlaku. Tidak ada data yang berubah.</p>
@@ -75,6 +87,7 @@
         <a class="btn btn-secondary" href="/predict">Buka Prediksi</a>
       </div>
       <div class="nf-more" aria-label="Halaman lain"><a href="/hasil">Hasil</a><a href="/dashboard">Dashboard</a><a href="/periksa">Pemeriksaan</a><a href="/settings">Pengaturan</a></div>
+      </div>
     </section>
   </div>
 </main>

@@ -42,6 +42,7 @@
   var MONTHS = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
   function dshort(iso){ var p = String(iso).split('-'); return Number(p[2]) + ' ' + (MONTHS[Number(p[1]) - 1] || '?'); }
   function dlong(iso){ var p = String(iso).split('-'); return Number(p[2]) + ' ' + (MONTHS[Number(p[1]) - 1] || '?') + ' ' + p[0]; }
+  function spanLabel(from, to){ var a = dshort(from), b = dshort(to); return from === to ? a : (a.split(' ')[1] === b.split(' ')[1] ? a.split(' ')[0] : a) + '–' + b; }
   function smooth(){ return matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'; }
 
   /* Navigation keeps ?api= (QA on localhost) like the other product pages. */
@@ -49,7 +50,9 @@
 
   /* ---------------- load + preview ---------------- */
   function showError(msg){ var box = $('pwError'); box.textContent = msg || ''; box.hidden = !msg; }
-  function hidePreview(){ $('pwPreview').hidden = true; $('pwPreviewStats').textContent = ''; $('pwPreviewTable').textContent = ''; }
+  /* Ilustrasi "sebelum unggah" hanya tampil selama belum ada file yang dipratinjau. */
+  function setLoaded(on){ var card = $('pwDrop').closest('.pw-upload'); if(card) card.classList.toggle('is-loaded', Boolean(on)); }
+  function hidePreview(){ $('pwPreview').hidden = true; $('pwPreviewStats').textContent = ''; $('pwPreviewTable').textContent = ''; setLoaded(false); }
   /* Isi biner (gambar, PDF, file .png yang diganti nama .csv) ditolak di sini: tidak dipratinjau, tidak dikirim. */
   function looksBinary(text){ var head = text.slice(0, 4096), bad = 0; if(/\u0000/.test(head)) return true; for(var i = 0; i < head.length; i++){ var c = head.charCodeAt(i); if(c === 0xFFFD || (c < 32 && c !== 9 && c !== 10 && c !== 13)) bad++; } return head.length > 0 && bad / head.length > 0.02; }
   function preview(text, name){
@@ -66,7 +69,7 @@
       el('thead', null, [el('tr', null, show.map(function(c){ return el('th', {text:c}); }))]),
       el('tbody', null, rows.slice(0, 4).map(function(r){ var cells = r.split(','); return el('tr', null, idx.map(function(i){ return el('td', {text: i >= 0 && cells[i] !== undefined ? cells[i] : '—'}); })); }))
     ]);
-    $('pwPreview').hidden = false;
+    $('pwPreview').hidden = false; setLoaded(true);
   }
   /* Indonesian copy from lib/rintik-api.js describeError (shared with the other pages); never raw English backend text. */
   function describe(response, body){
@@ -165,18 +168,25 @@
     var box = $('pwChart'); box.textContent = '';
     var days = state.result.days, n = days.length;
     if(!n){ box.textContent = 'Tidak ada hari untuk digambar.'; return; }
-    var width = Math.max(box.clientWidth || 800, 280), height = width < 560 ? 250 : 300, pad = {l:40, r:12, t:state.result.audit.window ? 26 : 12, b:46};
+    var width = Math.max(box.clientWidth || 800, 280), height = width < 560 ? 250 : 300, pad = {l:40, r:12, t:42, b:46}, narrow = width < 560;
     var x = function(i){ return pad.l + (n > 1 ? i / (n - 1) : 0) * (width - pad.l - pad.r); };
     var y = function(v){ return pad.t + (1 - clamp(v) / 100) * (height - pad.t - pad.b); };
     var root = svg('svg', {viewBox:'0 0 ' + width + ' ' + height, width:width, height:height, style:'height:' + height + 'px', role:'img', 'aria-label':'Grafik Trust Score harian ' + n + ' hari'});
-    root.appendChild(svg('rect', {x:pad.l, y:y(100), width:width - pad.l - pad.r, height:y(85) - y(100), fill:'rgba(47,154,166,.07)'}));
-    root.appendChild(svg('rect', {x:pad.l, y:y(85), width:width - pad.l - pad.r, height:y(70) - y(85), fill:'rgba(251,199,96,.10)'}));
-    root.appendChild(svg('rect', {x:pad.l, y:y(70), width:width - pad.l - pad.r, height:y(0) - y(70), fill:'rgba(216,84,122,.05)'}));
-    var win = state.result.audit.window;
+    /* Jendela audit: garis tepi tipis, bar 3 px di sumbu bawah, anotasi di atas plot. Area plot tetap polos. */
+    var win = state.result.audit.window, notes = [];
     if(win){
       var wi = days.findIndex(function(d){ return d.date === win.start; });
-      if(wi >= 0){ root.appendChild(svg('rect', {x:x(wi) - 3, y:pad.t, width:x(n - 1) - x(wi) + 6, height:height - pad.t - pad.b, fill:'rgba(18,105,226,.08)', stroke:'rgba(18,105,226,.35)', 'stroke-dasharray':'3 3'})); root.appendChild(svg('text', {x:width - pad.r, y:pad.t - 9, 'text-anchor':'end', 'font-size':'11', fill:'#0f55b8'}, 'Jendela audit')); }
+      if(wi >= 0){
+        var wx = Math.max(pad.l, x(wi) - 3), wr = Math.min(width - pad.r, x(n - 1) + 3);
+        root.appendChild(svg('line', {x1:wx, x2:wx, y1:pad.t, y2:height - pad.b, stroke:'#1269E2', 'stroke-opacity':'.55', 'stroke-dasharray':'3 3'}));
+        root.appendChild(svg('rect', {x:wx, y:height - pad.b + 3, width:wr - wx, height:3, rx:1.5, fill:'#7CB2FF'}));
+        notes.push({x:wx, end:true, title:'Jendela audit', sub:spanLabel(win.start, win.end), ink:'#0F55B8'});
+      }
     }
+    /* Rentang hari kritis berturut-turut (minimal 2 hari) diberi anotasi singkat bila muat. */
+    var runs = [];
+    days.forEach(function(d, i){ var last = runs[runs.length - 1]; if(d.status !== 'kritis') return; var kind = d.critical_input_failure ? 'Gerbang input kritis' : d.batch_failed ? 'Pipeline gagal' : 'Hari kritis'; if(last && last.end === i - 1 && last.title === kind) last.end = i; else runs.push({start:i, end:i, title:kind}); });
+    runs.filter(function(r){ return r.end > r.start; }).forEach(function(r){ notes.push({x:x(r.start), title:r.title, sub:spanLabel(days[r.start].date, days[r.end].date), ink:'#BD284D'}); });
     [0, 25, 50, 70, 85, 100].forEach(function(v){
       root.appendChild(svg('line', {x1:pad.l, x2:width - pad.r, y1:y(v), y2:y(v), stroke: v === 70 || v === 85 ? '#9aaec4' : '#e3ebf3', 'stroke-dasharray': v === 70 || v === 85 ? '4 4' : ''}));
       root.appendChild(svg('text', {x:pad.l - 6, y:y(v) + 4, 'text-anchor':'end', 'font-size':'11', fill:'#5a6b80'}, String(v)));
@@ -192,12 +202,14 @@
       days.forEach(function(d, i){ var v = num(key === 'trust' ? d.trust : d.scores[key]); if(v == null){ drawing = false; return; } path += (drawing ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1) + ' '; drawing = true; });
       if(path) root.appendChild(svg('path', {d:path, fill:'none', stroke:COLORS[key], 'stroke-width': key === 'trust' ? 2.6 : 1.6, 'stroke-linejoin':'round', 'stroke-linecap':'round', opacity: key === 'trust' ? 1 : .85}));
     });
-    days.forEach(function(d, i){ if(num(d.trust) != null && d.status === 'kritis') root.appendChild(svg('circle', {cx:x(i), cy:y(d.trust), r:3.6, fill:'#d8547a', stroke:'#fff', 'stroke-width':1.2})); });
+    var dk = narrow ? 3.2 : 4.4;
+    days.forEach(function(d, i){ if(num(d.trust) != null && d.status === 'kritis') root.appendChild(svg('path', {d:'M' + x(i).toFixed(1) + ' ' + (y(d.trust) - dk).toFixed(1) + 'l' + dk + ' ' + dk + ' ' + (-dk) + ' ' + dk + ' ' + (-dk) + ' ' + (-dk) + 'Z', fill:'#D8547A', stroke:'#fff', 'stroke-width':1.2})); });
+    drawNotes(root, notes, width, pad);
     days.forEach(function(d, i){
       if(num(d.trust) == null && d.status === 'kritis') root.appendChild(svg('line', {x1:x(i), x2:x(i), y1:pad.t, y2:height - pad.b, stroke:'rgba(216,84,122,.35)', 'stroke-width':2}));
       var my = height - pad.b + 30;
       if(d.critical_input_failure) root.appendChild(svg('path', {d:'M' + x(i) + ' ' + (my - 5) + ' l4 7 h-8 z', fill:'#d8547a'}));
-      else if(d.batch_failed) root.appendChild(svg('rect', {x:x(i) - 3.5, y:my - 4, width:7, height:7, fill:'#3b4a5e', transform:'rotate(45 ' + x(i) + ' ' + (my - .5) + ')'}));
+      else if(d.batch_failed) root.appendChild(svg('rect', {x:x(i) - 3.5, y:my - 3.5, width:7, height:7, rx:1.5, fill:'#3b4a5e'}));
       else if((d.issues || []).indexOf('anomali_input') >= 0) root.appendChild(svg('circle', {cx:x(i), cy:my, r:3, fill:'#e89a2c'}));
     });
     var focus = svg('line', {x1:pad.l, x2:pad.l, y1:pad.t, y2:height - pad.b, stroke:'#5a6b80', 'stroke-width':1, visibility:'hidden'});
@@ -227,6 +239,19 @@
       else if(ev.key === 'Enter'){ ev.preventDefault(); openDay(days[Math.max(0, cur)].date); }
     });
     root.appendChild(focus); root.appendChild(hit); box.appendChild(root);
+  }
+  /* Anotasi di atas plot: garis 1 px dari titik kejadian, teks 12/11 px. Label yang bertabrakan tidak digambar. */
+  function drawNotes(root, notes, width, pad){
+    var taken = [];
+    notes.sort(function(a, b){ return (b.end ? 1 : 0) - (a.end ? 1 : 0) || a.x - b.x; }).forEach(function(note){
+      var w = Math.max(note.title.length * 6.9, note.sub.length * 6.2), tx = note.end ? note.x - 10 : note.x + 10, left = note.end ? tx - w : tx, right = note.end ? tx : tx + w;
+      if(!note.end && right > width - pad.r){ return; }
+      if(left < pad.l - 30 || taken.some(function(t){ return left < t[1] + 12 && right > t[0] - 12; })) return;
+      taken.push([left, right]);
+      root.appendChild(svg('path', {d:'M' + note.x.toFixed(1) + ' ' + pad.t + 'V9H' + (note.end ? tx + 4 : tx - 4).toFixed(1), fill:'none', stroke:note.ink, 'stroke-width':1, 'stroke-opacity':.75}));
+      root.appendChild(svg('text', {x:tx, y:13, 'text-anchor':note.end ? 'end' : 'start', 'font-size':'12', 'font-weight':'600', fill:note.ink}, note.title));
+      root.appendChild(svg('text', {x:tx, y:27, 'text-anchor':note.end ? 'end' : 'start', 'font-size':'11', fill:'#5a6b80'}, note.sub));
+    });
   }
   function topReason(d){
     var reasons = d.reasons || {};
