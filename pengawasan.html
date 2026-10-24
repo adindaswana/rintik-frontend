@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Quicksand:wght@500;600;700&amp;display=swap">
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="stylesheet" href="assets/css/rintik-brand.css?v=20261017a">
-<link rel="stylesheet" href="assets/css/pengawasan.css?v=20261024a">
+<link rel="stylesheet" href="assets/css/pengawasan.css?v=20261025b">
 </head>
 <body>
 
@@ -95,6 +95,7 @@
       <div class="pw-preview" id="pwPreview" hidden>
         <dl class="pw-preview-stats" id="pwPreviewStats"></dl>
         <div class="table-scroll"><table class="data-table pw-preview-table" id="pwPreviewTable"></table></div>
+        <p class="pw-scroll-hint">Geser tabel ke samping untuk melihat kolom lain.</p>
       </div>
       <div class="pw-error" id="pwError" role="alert" hidden></div>
     </div>
@@ -138,12 +139,13 @@
           <thead><tr><th>Tanggal</th><th>Status</th><th>Trust</th><th>Q</th><th>D</th><th>P</th><th>O</th><th>Masalah</th><th>Prediksi terbit</th></tr></thead>
           <tbody id="pwDayRows"></tbody>
         </table></div>
+        <p class="pw-scroll-hint">Geser tabel ke samping untuk melihat semua kolom.</p>
         <div class="pw-pager"><button type="button" class="btn btn-secondary btn-sm" id="pgPrev">‹ Sebelumnya</button><span id="pgInfo" aria-live="polite"></span><button type="button" class="btn btn-secondary btn-sm" id="pgNext">Berikutnya ›</button></div>
         <div class="pw-detail" id="pwDetail" tabindex="-1" hidden></div>
       </section>
 
       <section class="card pw-section" aria-labelledby="pwAuditTitle">
-        <header class="pw-section-head"><div><span class="pw-kicker">Periodic Accuracy Verification</span><h2 id="pwAuditTitle">Hasil audit tiga bulan</h2><p id="pwAuditLead"></p></div><span class="pw-demo-label">AMBANG DEMO — BELUM DIKALIBRASI</span></header>
+        <header class="pw-section-head"><div><span class="pw-kicker">Verifikasi akurasi berkala</span><h2 id="pwAuditTitle">Hasil audit tiga bulan</h2><p id="pwAuditLead"></p></div><span class="pw-demo-label" id="pwRulesLabel">AMBANG DEMO · BELUM DIKALIBRASI</span></header>
         <div id="pwAudit"></div>
       </section>
 
@@ -169,6 +171,6 @@
 <footer class="site-foot"><div class="container"><span><img src="assets/img/wordmark-rintik-sm.png" srcset="assets/img/wordmark-rintik-sm.png 1x, assets/img/wordmark-rintik-sm@2x.png 2x" alt="RINTIK" width="84" height="22">Prediksi %RH dari 23 sensor lain</span><span>Prototipe · demo sintetis · bukan log deployment</span></div></footer>
 
 <script src="lib/rintik-config.js?v=20261024a"></script><script src="lib/rintik-api.js?v=20261024a"></script><script src="assets/js/app.js"></script>
-<script src="assets/js/pengawasan.js?v=20261024a"></script>
+<script src="assets/js/pengawasan.js?v=20261025b"></script>
 </body>
 </html>

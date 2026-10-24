@@ -157,3 +157,19 @@
 .pw-mini { overflow-x: auto; }
 .pw-mini .data-table { min-width: 0; width: 100%; }
 .pw-mark.pw-mk-dot { width: 9px; height: 9px; border-radius: 50%; background: #d8547a; }
+
+/* 2026-10-25 · perbaikan QA revisi 2 (berlaku di Pemeriksaan dan Pengawasan). */
+.btn[disabled], .btn:disabled { background: #e9eff6; border-color: transparent; color: #6f8198; box-shadow: none; opacity: 1; cursor: not-allowed; transform: none; }
+.btn:active:not(:disabled) { transform: scale(.98); }
+.pw-kpi strong, .pw-answer strong, .pw-metric strong, .pw-components strong, .pw-factors dd, .pw-days, .pw-mini table, .pw-preview-table, .pw-preview-stats dd, .pw-tooltip, .pw-pager, .pw-spots span,
+#pkResults .pk-day-diff strong, #pkResults .kpi-info strong, .pk-tooltip, .drift-row .dr-num, .drift-row .dr-z, #pkPreview .data-table, .pk-log-card { font-variant-numeric: tabular-nums; }
+.pw-preview-table td:first-child { white-space: nowrap; }
+.pw-mini .data-table th, .pw-mini .data-table td { padding: 9px 12px; }
+.pw-mini .data-table td:not(:first-child) { white-space: nowrap; }
+.pw-mini .data-table td:first-child { min-width: 4.6em; }
+.pw-scroll-hint { display: none; margin: 6px 0 0; color: var(--slate-500); font-size: 12px; }
+@media (max-width: 560px) {
+  .pw-scroll-hint { display: block; }
+  .pw-mini .data-table th, .pw-mini .data-table td { padding: 8px 8px; }
+  .pw-preview-table th, .pw-preview-table td { padding: 8px 10px; }
+}

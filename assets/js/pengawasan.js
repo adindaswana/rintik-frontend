@@ -34,7 +34,9 @@
   function list(tag, cls, items){ return el(tag, {class:cls}, (items || []).map(function(t){ return el('li', {text:t}); })); }
   function num(v){ return v == null || v === '' || !isFinite(v) ? null : Number(v); }
   function clamp(v){ v = num(v); return v == null ? 0 : Math.max(0, Math.min(100, v)); }
-  function fmt(v, d){ v = num(v); return v == null ? '—' : v.toFixed(d == null ? 1 : d).replace('.', ','); }
+  function fmt(v, d){ v = num(v); if(v == null) return '—'; var s = v.toFixed(d == null ? 1 : d); if(Number(s) === 0) s = (0).toFixed(d == null ? 1 : d); return s.replace('.', ','); }
+  /* Label ambang dari backend memakai em dash; tampilan memakai titik tengah. */
+  function plainLabel(t){ return String(t || '').replace(/\s*[—–]\s*/g, ' · ').trim(); }
   function pct(v){ return num(v) == null ? '—' : fmt(v * 100, 0) + '%'; }
   function int(v){ v = num(v); return v == null ? '—' : Math.round(v).toLocaleString('id-ID'); }
   var MONTHS = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
@@ -47,6 +49,9 @@
 
   /* ---------------- load + preview ---------------- */
   function showError(msg){ var box = $('pwError'); box.textContent = msg || ''; box.hidden = !msg; }
+  function hidePreview(){ $('pwPreview').hidden = true; $('pwPreviewStats').textContent = ''; $('pwPreviewTable').textContent = ''; }
+  /* Isi biner (gambar, PDF, file .png yang diganti nama .csv) ditolak di sini: tidak dipratinjau, tidak dikirim. */
+  function looksBinary(text){ var head = text.slice(0, 4096), bad = 0; if(/\u0000/.test(head)) return true; for(var i = 0; i < head.length; i++){ var c = head.charCodeAt(i); if(c === 0xFFFD || (c < 32 && c !== 9 && c !== 10 && c !== 13)) bad++; } return head.length > 0 && bad / head.length > 0.02; }
   function preview(text, name){
     var lines = text.replace(/^﻿/, '').split(/\r?\n/).filter(function(l){ return l.length; });
     var header = (lines[0] || '').split(',');
@@ -77,7 +82,9 @@
     var token = ++runToken;
     showError('');
     $('pwResults').hidden = true;  // never show the previous file's result while the new one is computed
+    hidePreview();
     if(text.length > MAX_BYTES){ showError('File melebihi 5 MB.'); return; }
+    if(looksBinary(text)){ showError('File "' + name + '" bukan CSV teks (isinya biner, mis. gambar atau PDF). Pilih file .csv berisi teks yang dipisah koma. File tidak dikirim ke server.'); return; }
     preview(text, name);
     $('pwOverlay').hidden = false;
     try {
@@ -103,7 +110,7 @@
   document.querySelectorAll('[data-sample]').forEach(function(btn){
     btn.addEventListener('click', async function(){
       var name = btn.getAttribute('data-sample');
-      $('pwResults').hidden = true; showError('');
+      $('pwResults').hidden = true; hidePreview(); showError('');
       var text;
       try { var r = await fetch('assets/data/audit90/' + encodeURIComponent(name)); if(!r.ok) throw new Error(); text = await r.text(); }
       catch(e){ showError('File contoh tidak dapat dimuat.'); return; }
@@ -116,7 +123,7 @@
   ['dragleave','drop'].forEach(function(ev){ drop.addEventListener(ev, function(){ drop.classList.remove('is-over'); }); });
   drop.addEventListener('drop', function(e){ e.preventDefault(); var f = e.dataTransfer.files[0]; if(f) readFile(f); });
   function readFile(file){
-    $('pwResults').hidden = true;
+    runToken++; $('pwResults').hidden = true; hidePreview(); showError('');
     if(file.size > MAX_BYTES){ showError('File melebihi 5 MB.'); return; }
     var reader = new FileReader(); reader.onload = function(){ run(String(reader.result), file.name); }; reader.onerror = function(){ showError('File tidak dapat dibaca.'); }; reader.readAsText(file);
   }
@@ -125,7 +132,8 @@
   function render(){
     var r = state.result, s = r.summary, a = r.audit, d = r.decision, ds = r.dataset || {};
     $('pwPeriod').textContent = dlong(ds.period_start) + ' – ' + dlong(ds.period_end) + ' · ' + s.days_evaluated + ' hari · ' + int(ds.rows) + ' baris · lokasi ' + ds.site_id;
-    $('pwRuleVersion').textContent = r.rule_version || '';
+    $('pwRuleVersion').textContent = r.rule_version ? 'Aturan ' + r.rule_version : '';
+    $('pwRulesLabel').textContent = plainLabel(r.rules_label || (r.audit && r.audit.label) || 'AMBANG DEMO · BELUM DIKALIBRASI');
     var c = s.status_counts;
     $('ansHealth').textContent = 'Trust rata-rata ' + fmt(s.mean_trust);
     $('ansHealthNote').textContent = c.sehat + ' sehat · ' + c.waspada + ' waspada · ' + c.kritis + ' kritis' + (c.tidak_dapat_dinilai ? ' · ' + c.tidak_dapat_dinilai + ' tak dinilai' : '');
@@ -157,7 +165,7 @@
     var box = $('pwChart'); box.textContent = '';
     var days = state.result.days, n = days.length;
     if(!n){ box.textContent = 'Tidak ada hari untuk digambar.'; return; }
-    var width = Math.max(box.clientWidth || 800, 280), height = width < 560 ? 250 : 300, pad = {l:40, r:12, t:12, b:46};
+    var width = Math.max(box.clientWidth || 800, 280), height = width < 560 ? 250 : 300, pad = {l:40, r:12, t:state.result.audit.window ? 26 : 12, b:46};
     var x = function(i){ return pad.l + (n > 1 ? i / (n - 1) : 0) * (width - pad.l - pad.r); };
     var y = function(v){ return pad.t + (1 - clamp(v) / 100) * (height - pad.t - pad.b); };
     var root = svg('svg', {viewBox:'0 0 ' + width + ' ' + height, width:width, height:height, style:'height:' + height + 'px', role:'img', 'aria-label':'Grafik Trust Score harian ' + n + ' hari'});
@@ -167,7 +175,7 @@
     var win = state.result.audit.window;
     if(win){
       var wi = days.findIndex(function(d){ return d.date === win.start; });
-      if(wi >= 0){ root.appendChild(svg('rect', {x:x(wi) - 3, y:pad.t, width:x(n - 1) - x(wi) + 6, height:height - pad.t - pad.b, fill:'rgba(18,105,226,.08)', stroke:'rgba(18,105,226,.35)', 'stroke-dasharray':'3 3'})); root.appendChild(svg('text', {x:x(n - 1), y:pad.t + 12, 'text-anchor':'end', 'font-size':'11', fill:'#0f55b8'}, 'Jendela audit')); }
+      if(wi >= 0){ root.appendChild(svg('rect', {x:x(wi) - 3, y:pad.t, width:x(n - 1) - x(wi) + 6, height:height - pad.t - pad.b, fill:'rgba(18,105,226,.08)', stroke:'rgba(18,105,226,.35)', 'stroke-dasharray':'3 3'})); root.appendChild(svg('text', {x:width - pad.r, y:pad.t - 9, 'text-anchor':'end', 'font-size':'11', fill:'#0f55b8'}, 'Jendela audit')); }
     }
     [0, 25, 50, 70, 85, 100].forEach(function(v){
       root.appendChild(svg('line', {x1:pad.l, x2:width - pad.r, y1:y(v), y2:y(v), stroke: v === 70 || v === 85 ? '#9aaec4' : '#e3ebf3', 'stroke-dasharray': v === 70 || v === 85 ? '4 4' : ''}));
@@ -200,7 +208,7 @@
       focus.setAttribute('x1', x(i)); focus.setAttribute('x2', x(i)); focus.setAttribute('visibility', 'visible'); hit.setAttribute('aria-valuenow', String(i + 1));
       var s = d.scores, reason = topReason(d), st = STATUS[d.status] || STATUS.tidak_dapat_dinilai;
       var scores = 'Trust ' + fmt(d.trust) + ' · Q ' + fmt(s.Q) + ' · D ' + fmt(s.D) + ' · P ' + fmt(s.P) + ' · O ' + fmt(s.O);
-      hit.setAttribute('aria-valuetext', dlong(d.date) + ' · ' + st.label + ' · ' + scores + (reason ? ' — ' + reason : ''));
+      hit.setAttribute('aria-valuetext', dlong(d.date) + ' · ' + st.label + ' · ' + scores + (reason ? ' · ' + reason : ''));
       fill(tip, [el('strong', {text: dlong(d.date) + ' · ' + st.label}), el('span', {text: scores}), reason ? el('em', {text: reason}) : null]);
       tip.hidden = false;
       var rect = root.getBoundingClientRect(), left = ev ? ev.clientX : rect.left + x(i), top = ev ? ev.clientY : rect.top + pad.t;
@@ -296,6 +304,8 @@
   function metricTile(label, value, rule, ok, note){
     return el('div', {class:'pw-metric' + (ok == null ? '' : ok ? ' ok' : ' bad')}, [el('span', {text:label}), el('strong', {text:value}), el('small', {text: rule + (note ? ' · ' + note : '')})]);
   }
+  /* Arah bias hanya disebut bila melewati ambang audit; di bawahnya bias dianggap dalam batas. */
+  function biasNote(bias, limit){ bias = num(bias); limit = num(limit); if(bias == null || limit == null) return ''; if(Math.abs(bias) <= limit) return 'Bias dalam batas'; return bias > 0 ? 'P3 terlalu tinggi' : 'P3 terlalu rendah'; }
   function miniTable(title, rows){
     return el('div', {class:'pw-mini'}, [el('h4', {text:title}), el('table', {class:'data-table'}, [
       el('thead', null, [el('tr', null, ['', 'Pasangan', 'RMSE', 'Bias'].map(function(h){ return el('th', {text:h}); }))]),
@@ -311,7 +321,7 @@
       el('div', {class:'pw-audit-status ' + auditCls(a)}, [el('strong', {text:a.status_label}), el('span', {text:(a.reason || '') + ' Jendela ' + dlong(a.window.start) + ' – ' + dlong(a.window.end) + ' (' + a.window.slots + ' slot).'})]),
       el('div', {class:'pw-metrics'}, [
         metricTile('RMSE', fmt(m.rmse, 2) + ' poin RH', 'batas ≤ ' + fmt(t.rmse_max, 1), enough && num(m.rmse) != null ? m.rmse <= t.rmse_max : null),
-        metricTile('Bias (P3 − referensi)', fmt(m.bias, 2) + ' poin RH', 'batas |bias| ≤ ' + fmt(t.abs_bias_max, 1), enough && num(m.bias) != null ? Math.abs(m.bias) <= t.abs_bias_max : null, m.bias > 0 ? 'P3 terlalu tinggi' : m.bias < 0 ? 'P3 terlalu rendah' : ''),
+        metricTile('Bias (P3 − referensi)', fmt(m.bias, 2) + ' poin RH', 'batas |bias| ≤ ' + fmt(t.abs_bias_max, 1), enough && num(m.bias) != null ? Math.abs(m.bias) <= t.abs_bias_max : null, biasNote(m.bias, t.abs_bias_max)),
         metricTile('MAE', fmt(m.mae, 2) + ' poin RH', 'dicatat, tanpa batas', null),
         metricTile('Pasangan valid', String(m.n), 'minimum ' + minPairs + ' dari ' + slots, enough),
         metricTile('Cakupan referensi', pct(a.reference_coverage), 'referensi terverifikasi di jendela', null),
