@@ -76,6 +76,15 @@ async function main(){
     apiLib.describeError(new apiLib.RintikApiError('VALUE_OUT_OF_RANGE', 'co2 must be between 300.5 and 2000 for this simulation.', 422)),
     'Nilai co2 harus di antara 300,5 dan 2000 (batas wajar simulasi).'
   );
+  // QA B03: with the feature catalog the message names the field label (and unit), never the raw column key.
+  assert.strictEqual(
+    apiLib.describeError(new apiLib.RintikApiError('VALUE_OUT_OF_RANGE', 'air_temperature must be between -30 and 70 for this simulation.', 422), {air_temperature: {label: 'Suhu udara', unit: '°C'}}),
+    'Nilai Suhu udara harus di antara -30 dan 70 °C (batas wajar simulasi).'
+  );
+  assert.strictEqual(
+    apiLib.describeError(new apiLib.RintikApiError('VALUE_OUT_OF_RANGE', 'co2 must be between 300.5 and 2000 for this simulation.', 422), {co2: 'CO₂'}),
+    'Nilai CO₂ harus di antara 300,5 dan 2000 (batas wajar simulasi).'
+  );
   var unknownCopy = apiLib.describeError(new apiLib.RintikApiError('SOME_NEW_CODE', 'Something went wrong in English.', 422));
   assert.strictEqual(unknownCopy, 'Server menolak permintaan ini (SOME_NEW_CODE). Periksa data lalu coba lagi.');
   assert.strictEqual(unknownCopy.indexOf('English'), -1);
