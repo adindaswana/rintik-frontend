@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pengawasan 90 hari · RINTIK</title>
+<meta name="description" content="Demo sintetis: kesehatan model RINTIK selama 90 hari (Trust Score Q/D/P/O) dan audit akurasi tiga bulanan.">
+<meta name="theme-color" content="#F5FAFD">
+<link rel="icon" type="image/svg+xml" href="assets/img/logo-rintik.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Quicksand:wght@500;600;700&amp;display=swap">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/rintik-brand.css?v=20261017a">
+<link rel="stylesheet" href="assets/css/pengawasan.css?v=20261024a">
+</head>
+<body>
+
+<a class="skip-link" href="#pwMain">Lewati ke konten utama</a>
+
+<header class="navbar">
+  <div class="container navbar-inner">
+    <a href="index.html" class="brand"><img src="assets/img/logo-rintik.svg" alt="" class="brand-mark" width="37" height="42"><img src="assets/img/wordmark-rintik-sm.png" srcset="assets/img/wordmark-rintik-sm.png 1x, assets/img/wordmark-rintik-sm@2x.png 2x" alt="RINTIK" class="brand-wordmark" width="115" height="30"></a>
+    <nav class="nav-links" aria-label="Navigasi utama">
+      <a href="index.html">Beranda</a>
+      <a href="predict.html" data-api-link>Prediksi</a>
+      <a href="hasil.html" data-api-link>Hasil</a>
+      <a href="dashboard.html" data-api-link>Dashboard</a>
+      <a href="periksa.html" class="active" aria-current="page" data-api-link>Pemeriksaan</a>
+      <a href="settings.html" data-api-link>Pengaturan</a>
+    </nav>
+    <div class="nav-right">
+      <button class="nav-toggle" type="button" aria-label="Buka menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="mobile-menu">
+    <div class="mobile-menu-panel">
+      <a href="index.html">Beranda</a>
+      <a href="predict.html" data-api-link>Prediksi</a>
+      <a href="hasil.html" data-api-link>Hasil</a>
+      <a href="dashboard.html" data-api-link>Dashboard</a>
+      <a href="periksa.html" class="active" aria-current="page" data-api-link>Pemeriksaan</a>
+      <a href="settings.html" data-api-link>Pengaturan</a>
+    </div>
+  </div>
+</header>
+
+<section class="page-hero-sm">
+  <div class="container">
+    <span class="step-pill">Pengawasan model · DEMO / DATA SINTETIS</span>
+    <h1>Apakah RINTIK sendiri masih layak dipercaya?</h1>
+    <p>Kalau RINTIK memeriksa sensor, RINTIK juga harus diperiksa. Unggah satu CSV 90 hari: sistem menilai kesehatan harian (Trust Score), mengaudit akurasi terhadap kelembapan referensi, lalu memberi rekomendasi beserta alasannya.</p>
+  </div>
+</section>
+
+<div class="container">
+  <nav class="sub-tabs" aria-label="Bagian Pemeriksaan">
+    <a href="periksa.html" data-api-link>Pemeriksaan Sensor</a>
+    <a href="pengawasan.html" class="active" aria-current="page">Pengawasan 90 Hari</a>
+  </nav>
+</div>
+
+<main id="pwMain" tabindex="-1">
+<section class="predict-body pw-body">
+  <div class="container">
+    <div class="pw-concept card">
+      <div><strong>Trust Score</strong><span>Kesehatan operasional harian: kualitas input (Q), pergeseran input (D), pipeline (P), kewajaran output (O). <b>Bukan akurasi.</b></span></div>
+      <div><strong>Audit akurasi</strong><span>P3 yang diterbitkan dibandingkan dengan kelembapan referensi terverifikasi. <b>Hanya audit yang menilai akurasi.</b></span></div>
+      <div><strong>Keputusan</strong><span>Dihitung backend dari angka-angka itu. Melatih ulang model tidak pernah dijalankan otomatis.</span></div>
+    </div>
+
+    <div class="card panel-card pw-upload" aria-labelledby="pwUploadTitle">
+      <div class="pw-upload-head">
+        <div>
+          <h3 id="pwUploadTitle">Unggah dataset 90 hari</h3>
+          <p>CSV berisi waktu, 24 kolom sensor lingkungan, nilai P3 RINTIK per 30 menit, catatan teknis pipeline, dan RH referensi beserta status verifikasinya. Kolom di luar skema (mis. label atau skor jadi) ditolak. File tidak disimpan.</p>
+        </div>
+        <span class="badge badge-amber">DEMO · DATA SINTETIS</span>
+      </div>
+      <div class="pw-samples">
+        <span>Belum punya file? Coba dataset contoh (nama netral, isi sintetis):</span>
+        <div class="pw-sample-buttons">
+          <button type="button" class="btn btn-secondary btn-sm" data-sample="rintik_demo_001.csv">rintik_demo_001.csv</button>
+          <button type="button" class="btn btn-secondary btn-sm" data-sample="rintik_demo_002.csv">rintik_demo_002.csv</button>
+          <button type="button" class="btn btn-secondary btn-sm" data-sample="rintik_demo_003.csv">rintik_demo_003.csv</button>
+        </div>
+      </div>
+      <label class="pw-drop" id="pwDrop" for="pwFile">
+        <input type="file" id="pwFile" accept=".csv,text/csv">
+        <strong>Pilih file CSV</strong> <span>atau seret ke sini · maksimum 5 MB, 5.000 baris</span>
+      </label>
+      <div class="pw-preview" id="pwPreview" hidden>
+        <dl class="pw-preview-stats" id="pwPreviewStats"></dl>
+        <div class="table-scroll"><table class="data-table pw-preview-table" id="pwPreviewTable"></table></div>
+      </div>
+      <div class="pw-error" id="pwError" role="alert" hidden></div>
+    </div>
+
+    <div id="pwResults" hidden>
+      <section class="pw-answers" aria-label="Jawaban singkat">
+        <a class="pw-answer" href="#pwSummaryTitle"><span>1 · Kondisi 90 hari</span><strong id="ansHealth">—</strong><small id="ansHealthNote"></small></a>
+        <a class="pw-answer" href="#pwAuditTitle"><span>2 · Masih akurat? (audit)</span><strong id="ansAudit">—</strong><small id="ansAuditNote"></small></a>
+        <a class="pw-answer" href="#pwDecisionTitle"><span>3 · Keputusan</span><strong id="ansDecision">—</strong><small id="ansDecisionNote"></small></a>
+      </section>
+
+      <section class="card pw-section" aria-labelledby="pwSummaryTitle">
+        <header class="pw-section-head"><div><span class="pw-kicker">Ringkasan periode</span><h2 id="pwSummaryTitle">Kesehatan operasional RINTIK</h2><p id="pwPeriod"></p></div><span class="badge badge-slate" id="pwRuleVersion"></span></header>
+        <div class="pw-kpis" id="pwKpis"></div>
+      </section>
+
+      <section class="card pw-section" aria-labelledby="pwChartTitle">
+        <header class="pw-section-head"><div><span class="pw-kicker">Grafik historis</span><h2 id="pwChartTitle">Trust Score harian</h2><p>Arahkan kursor (atau fokus lalu tekan panah) untuk melihat skor dan alasan. Klik untuk membuka rincian hari.</p></div></header>
+        <div class="pw-chart-controls" role="group" aria-label="Tampilkan komponen">
+          <label class="pw-chip trust"><input type="checkbox" data-series="trust" checked disabled> Trust</label>
+          <label class="pw-chip q"><input type="checkbox" data-series="Q"> Q · input</label>
+          <label class="pw-chip d"><input type="checkbox" data-series="D"> D · drift</label>
+          <label class="pw-chip p"><input type="checkbox" data-series="P"> P · pipeline</label>
+          <label class="pw-chip o"><input type="checkbox" data-series="O"> O · output</label>
+        </div>
+        <div class="pw-chart" id="pwChart"></div>
+        <div class="pw-chart-legend"><span><i class="pw-mark pw-mk-dot"></i>Hari kritis (ditahan oleh gerbang, walau Trust bisa ≥ 70)</span><span><i class="pw-mark pw-mk-crit"></i>Input kritis gagal</span><span><i class="pw-mark pw-mk-pipe"></i>Pipeline gagal</span><span><i class="pw-mark pw-mk-anom"></i>Anomali input</span><span><i class="pw-band"></i>Jendela audit (7 hari terakhir)</span><span>Garis putus: batas 85 (sehat) dan 70 (waspada)</span></div>
+        <div class="pw-tooltip" id="pwTooltip" role="status" hidden></div>
+      </section>
+
+      <section class="card pw-section" aria-labelledby="pwHistoryTitle">
+        <header class="pw-section-head"><div><span class="pw-kicker">Riwayat harian</span><h2 id="pwHistoryTitle">90 hari, 10 per halaman</h2></div></header>
+        <div class="pw-filters">
+          <label>Dari<input type="date" id="fFrom"></label>
+          <label>Sampai<input type="date" id="fTo"></label>
+          <label>Status<select id="fStatus"><option value="">Semua</option><option value="sehat">Sehat</option><option value="waspada">Waspada</option><option value="kritis">Kritis</option><option value="tidak_dapat_dinilai">Tidak dapat dinilai</option></select></label>
+          <label>Jenis masalah<select id="fIssue"><option value="">Semua</option><option value="input_kritis">Input kritis gagal</option><option value="anomali_input">Anomali input</option><option value="data_hilang">Data hilang</option><option value="drift">Drift input</option><option value="pipeline">Pipeline</option><option value="output">Output tidak wajar</option><option value="ditahan">Prediksi ditahan</option></select></label>
+          <button type="button" class="btn btn-ghost btn-sm" id="fReset">Hapus filter</button>
+        </div>
+        <div class="table-scroll"><table class="data-table pw-days">
+          <thead><tr><th>Tanggal</th><th>Status</th><th>Trust</th><th>Q</th><th>D</th><th>P</th><th>O</th><th>Masalah</th><th>Prediksi terbit</th></tr></thead>
+          <tbody id="pwDayRows"></tbody>
+        </table></div>
+        <div class="pw-pager"><button type="button" class="btn btn-secondary btn-sm" id="pgPrev">‹ Sebelumnya</button><span id="pgInfo" aria-live="polite"></span><button type="button" class="btn btn-secondary btn-sm" id="pgNext">Berikutnya ›</button></div>
+        <div class="pw-detail" id="pwDetail" tabindex="-1" hidden></div>
+      </section>
+
+      <section class="card pw-section" aria-labelledby="pwAuditTitle">
+        <header class="pw-section-head"><div><span class="pw-kicker">Periodic Accuracy Verification</span><h2 id="pwAuditTitle">Hasil audit tiga bulan</h2><p id="pwAuditLead"></p></div><span class="pw-demo-label">AMBANG DEMO — BELUM DIKALIBRASI</span></header>
+        <div id="pwAudit"></div>
+      </section>
+
+      <section class="card pw-section pw-decision" id="pwDecision" aria-labelledby="pwDecisionTitle">
+        <header class="pw-section-head"><div><span class="pw-kicker">Kesimpulan akhir · keputusan backend</span><h2 id="pwDecisionTitle">—</h2></div></header>
+        <div id="pwDecisionBody"></div>
+      </section>
+
+      <ul class="pw-disclaimer" id="pwDisclaimer"></ul>
+    </div>
+  </div>
+</section>
+</main>
+
+<div class="loading-overlay" id="pwOverlay" hidden>
+  <div class="loading-card">
+    <div class="loading-spinner"></div>
+    <h4>Menghitung pengawasan 90 hari…</h4>
+    <p class="loading-hint">Validasi data, skor Q/D/P/O per hari, audit akurasi, lalu keputusan.</p>
+  </div>
+</div>
+
+<footer class="site-foot"><div class="container"><span><img src="assets/img/wordmark-rintik-sm.png" srcset="assets/img/wordmark-rintik-sm.png 1x, assets/img/wordmark-rintik-sm@2x.png 2x" alt="RINTIK" width="84" height="22">Prediksi %RH dari 23 sensor lain</span><span>Prototipe · demo sintetis · bukan log deployment</span></div></footer>
+
+<script src="lib/rintik-config.js?v=20261024a"></script><script src="lib/rintik-api.js?v=20261024a"></script><script src="assets/js/app.js"></script>
+<script src="assets/js/pengawasan.js?v=20261024a"></script>
+</body>
+</html>

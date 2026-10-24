@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Quicksand:wght@500;600;700&amp;display=swap">
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="stylesheet" href="assets/css/rintik-brand.css?v=20261017a">
+<link rel="stylesheet" href="assets/css/pengawasan.css?v=20261024a">
 </head>
 <body>
 
@@ -23,11 +24,11 @@
     <a href="index.html" class="brand"><img src="assets/img/logo-rintik.svg" alt="" class="brand-mark" width="37" height="42"><img src="assets/img/wordmark-rintik-sm.png" srcset="assets/img/wordmark-rintik-sm.png 1x, assets/img/wordmark-rintik-sm@2x.png 2x" alt="RINTIK" class="brand-wordmark" width="115" height="30"></a>
     <nav class="nav-links" aria-label="Navigasi utama">
       <a href="index.html">Beranda</a>
-      <a href="predict.html">Prediksi</a>
-      <a href="hasil.html">Hasil</a>
-      <a href="dashboard.html">Dashboard</a>
-      <a href="periksa.html" class="active" aria-current="page">Pemeriksaan</a>
-      <a href="settings.html">Pengaturan</a>
+      <a href="predict.html" data-api-link>Prediksi</a>
+      <a href="hasil.html" data-api-link>Hasil</a>
+      <a href="dashboard.html" data-api-link>Dashboard</a>
+      <a href="periksa.html" class="active" aria-current="page" data-api-link>Pemeriksaan</a>
+      <a href="settings.html" data-api-link>Pengaturan</a>
     </nav>
     <div class="nav-right">
       <button class="nav-toggle" type="button" aria-label="Buka menu" aria-expanded="false">
@@ -38,11 +39,11 @@
   <div class="mobile-menu">
     <div class="mobile-menu-panel">
       <a href="index.html">Beranda</a>
-      <a href="predict.html">Prediksi</a>
-      <a href="hasil.html">Hasil</a>
-      <a href="dashboard.html">Dashboard</a>
-      <a href="periksa.html" class="active" aria-current="page">Pemeriksaan</a>
-      <a href="settings.html">Pengaturan</a>
+      <a href="predict.html" data-api-link>Prediksi</a>
+      <a href="hasil.html" data-api-link>Hasil</a>
+      <a href="dashboard.html" data-api-link>Dashboard</a>
+      <a href="periksa.html" class="active" aria-current="page" data-api-link>Pemeriksaan</a>
+      <a href="settings.html" data-api-link>Pengaturan</a>
     </div>
   </div>
 </header>
@@ -55,6 +56,13 @@
     <p>Unggah bacaan sensor kelembapan Anda. RINTIK menebak kelembapan dari sensor lain, lalu membandingkannya hari demi hari. Hari dengan selisih besar atau bacaan yang macet akan ditandai.</p>
   </div>
 </section>
+
+<div class="container">
+  <nav class="sub-tabs" aria-label="Bagian Pemeriksaan">
+    <a href="periksa.html" class="active" aria-current="page" data-api-link>Pemeriksaan Sensor</a>
+    <a href="pengawasan.html" data-api-link>Pengawasan 90 Hari</a>
+  </nav>
+</div>
 
 <section class="predict-body" id="topPeriksa">
   <div class="container">
@@ -286,7 +294,8 @@
 
 <footer class="site-foot"><div class="container"><span><img src="assets/img/wordmark-rintik-sm.png" srcset="assets/img/wordmark-rintik-sm.png 1x, assets/img/wordmark-rintik-sm@2x.png 2x" alt="RINTIK" width="84" height="22">Prediksi %RH dari 23 sensor lain</span><span>Prototipe · data kompetisi NSC 2026 + simulasi · bukan alat referensi</span></div></footer>
 
-<script src="lib/rintik-config.js"></script><script src="assets/js/app.js"></script>
-<script src="assets/js/periksa.js"></script>
+<script src="lib/rintik-config.js?v=20261024a"></script><script src="assets/js/app.js"></script>
+<script src="assets/js/periksa.js?v=20261024a"></script>
+<script>/* Lokal: tautan halaman produk meneruskan ?api= agar QA tetap memakai backend yang sama. */(function(){if(!window.RINTIK_resolveApiBase||window.RINTIK_DEFAULT_API===window.RINTIK_PUBLIC_API)return;var base=window.RINTIK_resolveApiBase();document.querySelectorAll('[data-api-link]').forEach(function(link){var url=new URL(link.getAttribute('href'),location.href);url.searchParams.set('api',base);link.href=url.pathname.split('/').pop()+'?'+url.searchParams.toString();});})();</script>
 </body>
 </html>

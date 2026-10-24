@@ -1,0 +1,5 @@
+# hashed / downloadable demo data must keep LF on every checkout
+assets/data/*.json text eol=lf
+assets/data/*.csv text eol=lf
+assets/data/audit90/*.csv text eol=lf
+assets/data/audit90/*.json text eol=lf
