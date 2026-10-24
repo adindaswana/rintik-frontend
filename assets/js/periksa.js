@@ -15,17 +15,13 @@
   var QS = new URLSearchParams(window.location.search);
   var MOCK = QS.get('mock') === '1';
   // Lokal (server statis tanpa /api): panggil backend RINTIK langsung, sama seperti halaman lain
-  // (?api=... atau sessionStorage rintik_api_url; port lama 8000 dipetakan ke 8140). Di situs
-  // terdeploy tetap lewat proxy /api/monitor.
+  // (alamat dari window.RINTIK_resolveApiBase() di lib/rintik-config.js). Di situs terdeploy
+  // tetap lewat proxy /api/monitor.
   function resolveMonitorUrl(){
     if(window.RINTIK_MONITOR_URL) return window.RINTIK_MONITOR_URL;
     var local = location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
     if(!local) return '/api/monitor';
-    var stored = null;
-    try { stored = sessionStorage.getItem('rintik_api_url'); } catch(e) {}
-    var base = QS.get('api') || (!stored || stored === 'http://127.0.0.1:8000' ? 'http://127.0.0.1:8140' : stored);
-    try { sessionStorage.setItem('rintik_api_url', base); } catch(e) {}
-    return base.replace(/\/$/, '') + '/monitor';
+    return (window.RINTIK_resolveApiBase ? window.RINTIK_resolveApiBase() : 'http://127.0.0.1:8140') + '/monitor';
   }
   var MONITOR_URL = resolveMonitorUrl();
   var LOG_KEY = 'rintik_runs';

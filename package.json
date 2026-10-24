@@ -9,6 +9,7 @@
     "public-flow:test": "node scripts/public_prediction_contract.js",
     "product-flow:test": "node scripts/product_flow_contract.js",
     "dashboard:test": "node scripts/dashboard_contract.js",
+    "api-config:test": "node scripts/api_config_contract.js",
     "integration:test": "node scripts/integration_smoke.js",
     "browser:test": "node scripts/m4_browser_qa.js",
     "rehearsal:test": "node scripts/product_overhaul_browser_qa.js",

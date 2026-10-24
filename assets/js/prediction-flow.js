@@ -6,10 +6,8 @@
   if(!apiLib || !predictionLib) return;
 
   var params = new URLSearchParams(window.location.search);
-  var requestedApi = params.get('api');
-  var storedApi = sessionStorage.getItem('rintik_api_url');
-  var baseUrl = requestedApi || (!storedApi || storedApi === 'http://127.0.0.1:8000' ? (window.RINTIK_DEFAULT_API||'http://127.0.0.1:8140') : storedApi);
-  sessionStorage.setItem('rintik_api_url',baseUrl);
+  /* R13: ?api= only passes the allowlist in lib/rintik-config.js (any http(s) host on localhost, the official backend on the public site). */
+  var baseUrl = window.RINTIK_resolveApiBase ? window.RINTIK_resolveApiBase() : (window.RINTIK_DEFAULT_API||'http://127.0.0.1:8140');
   var client = apiLib.createClient({baseUrl:baseUrl,timeoutMs:120000});
   var pageKind = document.body.getAttribute('data-flow-page');
   var state = {

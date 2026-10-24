@@ -43,6 +43,7 @@ assert(!predict.includes('assets/css/style.css')&&!result.includes('assets/css/s
 ['createOperationalReading','updateOperationalReading','fillOperationalDay','runOperationalDay','resetOperationalSimulation','getNextOfficialDemoInput','resetDemoState'].forEach(token=>assert(flowJs.includes(token),`prediction flow missing API action ${token}`));
 assert(flowJs.includes("var target='2023-09-06'"),'guided recovery date missing');
 assert(!flowJs.includes('predictFull('),'Product flow must not use the stateless 734 route');
+assert(flowJs.includes('window.RINTIK_resolveApiBase()')&&!flowJs.includes("params.get('api')"),'?api= must go through the allowlist in lib/rintik-config.js');
 assert(flowCss.includes('@media (prefers-reduced-motion: reduce)'));
 assert(flowCss.includes('@media (max-width: 700px)'));
 
