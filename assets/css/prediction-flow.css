@@ -594,14 +594,10 @@ html { scrollbar-gutter: stable; }
   .sensor-event .btn{ grid-column:2 / -1; grid-row:3; }
 }
 
-/* Grafik: arsiran 45 derajat pada slot sensor bermasalah, anotasi berlatar polos, penanda min/maks, pita 48 slot. */
-.chart-hatch-bg.bad{ fill:#fef7f9; }
-.chart-hatch-line.bad{ stroke:#d8547a; stroke-opacity:.2; stroke-width:1.4; }
-.chart-hatch-bg.off{ fill:#f7f9fc; }
-.chart-hatch-line.off{ stroke:#8395aa; stroke-opacity:.22; stroke-width:1.4; }
-.chart-hatch-edge{ stroke-width:3; }
-.chart-hatch-edge.bad{ stroke:#e7a3b8; }
-.chart-hatch-edge.off{ stroke:#c3d0de; }
+/* Grafik: area plot polos. Periode sensor bermasalah = bar tipis di sumbu 0 %, nama kejadian di pita atas, penanda min/maks, pita 48 slot. */
+.chart-period{ stroke-width:3; }
+.chart-period.bad{ stroke:#e7a3b8; }
+.chart-period.off{ stroke:#c3d0de; }
 .chart-chip{ fill:#fff; }
 .chart-annot{ fill:#bd284d; font-size:11.5px; font-weight:600; }
 .chart-annot.off{ fill:#5a6b80; }
@@ -612,8 +608,8 @@ html { scrollbar-gutter: stable; }
 .chart-slot.sensor{ fill:#a9b8ca; }
 .chart-slot.empty{ fill:#fff; stroke:#c3d4e8; stroke-width:1; }
 .chart-slots-label{ fill:#5a6b80; font-size:10.5px; }
-.flow-hatch-key{ width:14px; height:10px; flex:none; border-top:2px solid #e7a3b8; border-radius:1px; background:repeating-linear-gradient(-45deg, rgba(216,84,122,.42) 0 1.3px, #fdf2f6 1.3px 4.6px); }
-.flow-hatch-key.off{ border-top-color:#c3d0de; background:repeating-linear-gradient(-45deg, rgba(131,149,170,.42) 0 1.3px, #f4f7fb 1.3px 4.6px); }
+.flow-period-key{ width:16px; height:3px; flex:none; border-radius:2px; background:#e7a3b8; }
+.flow-period-key.off{ background:#c3d0de; }
 .flow-chart-legend .flow-slot-legend{ gap:8px; }
 .flow-slot-key{ width:7px; height:11px; flex:none; border-radius:2px; background:#2f9aa6; }
 .flow-slot-key.sensor{ background:#a9b8ca; }
