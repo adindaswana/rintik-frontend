@@ -551,3 +551,107 @@ html { scrollbar-gutter: stable; }
   .sensor-event .btn{ justify-self:stretch; margin-top:6px; }
   .sensor-event.is-current .btn:disabled{ justify-content:flex-start; }
 }
+
+/* ---------- SVG RINTIK: ikon, penanda status, ilustrasi, anotasi grafik (assets/img/ui) ---------- */
+/* Ikon tombol: mask + currentColor agar ikut warna tombol. 16 px, satu ikon per tombol. */
+.btn-ic-unduh::before, .btn-ic-ulang::before, .btn-ic-lanjut::after, .manual-group-icon, .sensor-event-icon::before{ content:""; flex:none; background:currentColor; -webkit-mask-position:center; mask-position:center; -webkit-mask-size:contain; mask-size:contain; -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; }
+.btn-ic-unduh::before, .btn-ic-ulang::before, .btn-ic-lanjut::after{ width:16px; height:16px; }
+.btn-ic-unduh::before{ -webkit-mask-image:url(../img/ui/ic-unduh.svg); mask-image:url(../img/ui/ic-unduh.svg); }
+.btn-ic-ulang::before{ -webkit-mask-image:url(../img/ui/ic-ulang.svg); mask-image:url(../img/ui/ic-ulang.svg); }
+.btn-ic-lanjut::after{ -webkit-mask-image:url(../img/ui/ic-panah-kanan.svg); mask-image:url(../img/ui/ic-panah-kanan.svg); }
+.btn-sm.btn-ic-unduh, .btn-sm.btn-ic-ulang{ gap:6px; padding-left:12px; }
+.btn-ic-lanjut{ gap:7px; }
+
+/* Penanda status 12 px: bentuk + warna, selalu bersama teks status. */
+[data-mark]::before{ content:""; display:inline-block; width:12px; height:12px; margin-right:7px; vertical-align:-1px; background:center/contain no-repeat; }
+[data-mark="sehat"]::before{ background-image:url(../img/ui/status-sehat.svg); }
+[data-mark="waspada"]::before{ background-image:url(../img/ui/status-waspada.svg); }
+[data-mark="masalah"]::before{ background-image:url(../img/ui/status-masalah.svg); }
+[data-mark="kosong"]::before{ background-image:url(../img/ui/status-kosong.svg); }
+[data-mark="ditangani"]::before{ background-image:url(../img/ui/status-ditangani.svg); }
+.latest-metric strong[data-mark]::before{ vertical-align:1px; }
+.status-mark{ width:12px; height:12px; flex:none; overflow:hidden; color:transparent; font-size:0; line-height:0; }
+.status-mark::before{ display:block; margin:0; }
+
+/* Catatan sensor: ikon kejadian 22 px dalam ubin 36 px; penanda SVG menggantikan bentuk CSS. */
+.sensor-event{ grid-template-columns:36px 104px 128px minmax(0,1fr) auto; }
+.sensor-event-icon{ width:36px; height:36px; display:grid; place-items:center; border-radius:10px; color:#bd284d; background:#fbeaf0; }
+.sensor-event-icon::before{ width:22px; height:22px; }
+.sensor-event-icon.is-macet::before{ -webkit-mask-image:url(../img/ui/ic-sensor-macet.svg); mask-image:url(../img/ui/ic-sensor-macet.svg); }
+.sensor-event-icon.is-menyimpang::before{ -webkit-mask-image:url(../img/ui/ic-sensor-menyimpang.svg); mask-image:url(../img/ui/ic-sensor-menyimpang.svg); }
+.sensor-event-icon.is-mati{ color:#5a6b80; background:#eef3f9; }
+.sensor-event-icon.is-mati::before{ -webkit-mask-image:url(../img/ui/ic-sensor-mati.svg); mask-image:url(../img/ui/ic-sensor-mati.svg); }
+.sensor-event-icon.is-pulih{ color:#1b6f77; background:#e3f5f7; }
+.sensor-event-icon.is-pulih::before{ -webkit-mask-image:url(../img/ui/ic-sensor-pulih.svg); mask-image:url(../img/ui/ic-sensor-pulih.svg); }
+.sensor-event-badge.stuck::before, .sensor-event-badge.deviating::before, .sensor-event-badge.missing::before{ content:none; }
+.sensor-event-badge{ gap:6px; }
+@media (max-width: 640px){
+  .sensor-event{ grid-template-columns:36px minmax(0,1fr) auto; gap:4px 12px; }
+  .sensor-event-icon{ grid-column:1; grid-row:1 / span 2; align-self:start; }
+  .sensor-event-date{ grid-column:2; grid-row:1; align-self:center; }
+  .sensor-event-badge{ grid-column:3; grid-row:1; justify-self:end; }
+  .sensor-event-text{ grid-column:2 / -1; grid-row:2; }
+  .sensor-event .btn{ grid-column:2 / -1; grid-row:3; }
+}
+
+/* Grafik: arsiran 45 derajat pada slot sensor bermasalah, anotasi berlatar polos, penanda min/maks, pita 48 slot. */
+.chart-hatch-bg.bad{ fill:#fef7f9; }
+.chart-hatch-line.bad{ stroke:#d8547a; stroke-opacity:.2; stroke-width:1.4; }
+.chart-hatch-bg.off{ fill:#f7f9fc; }
+.chart-hatch-line.off{ stroke:#8395aa; stroke-opacity:.22; stroke-width:1.4; }
+.chart-hatch-edge{ stroke-width:3; }
+.chart-hatch-edge.bad{ stroke:#e7a3b8; }
+.chart-hatch-edge.off{ stroke:#c3d0de; }
+.chart-chip{ fill:#fff; }
+.chart-annot{ fill:#bd284d; font-size:11.5px; font-weight:600; }
+.chart-annot.off{ fill:#5a6b80; }
+.chart-annot-mark{ fill:#d8547a; stroke:#fff; stroke-width:1.5; }
+.chart-extreme{ fill:#fff; stroke:var(--flow-green); stroke-width:2; }
+.chart-extreme-label{ fill:#3b4a5e; font-size:11px; font-weight:600; font-variant-numeric:tabular-nums; }
+.chart-slot.recovery{ fill:#2f9aa6; }
+.chart-slot.sensor{ fill:#a9b8ca; }
+.chart-slot.empty{ fill:#fff; stroke:#c3d4e8; stroke-width:1; }
+.chart-slots-label{ fill:#5a6b80; font-size:10.5px; }
+.flow-hatch-key{ width:14px; height:10px; flex:none; border-top:2px solid #e7a3b8; border-radius:1px; background:repeating-linear-gradient(-45deg, rgba(216,84,122,.42) 0 1.3px, #fdf2f6 1.3px 4.6px); }
+.flow-hatch-key.off{ border-top-color:#c3d0de; background:repeating-linear-gradient(-45deg, rgba(131,149,170,.42) 0 1.3px, #f4f7fb 1.3px 4.6px); }
+.flow-chart-legend .flow-slot-legend{ gap:8px; }
+.flow-slot-key{ width:7px; height:11px; flex:none; border-radius:2px; background:#2f9aa6; }
+.flow-slot-key.sensor{ background:#a9b8ca; }
+.flow-slot-key.empty{ border:1px solid #c3d4e8; background:#fff; }
+
+/* Ilustrasi garis + maskot resmi: belum ada hasil (melambai) dan koneksi putus (cemas). */
+.empty-art{ position:relative; width:min(100%, 320px); aspect-ratio:320 / 200; margin:0 auto 14px; }
+.empty-art-scene{ width:100%; height:100%; border-radius:16px; }
+.empty-art-mascot{ position:absolute; right:6%; bottom:4%; width:23%; }
+.empty-art.is-offline .empty-art-mascot, .flow-alert-art .empty-art-mascot{ right:auto; left:40.5%; bottom:2%; width:19%; }
+.live-result-card .empty-art{ width:240px; }
+.flow-alert > .flow-alert-art{ display:none; }
+.flow-alert.has-art{ align-items:center; gap:18px; padding:12px 18px 12px 12px; border-color:#f2c9d6; background:#fff; }
+.flow-alert.has-art > .flow-alert-art{ position:relative; display:block; flex:none; width:144px; aspect-ratio:320 / 200; }
+.flow-alert-art .empty-art-scene{ border-radius:10px; }
+@media (max-width: 700px){
+  .empty-art{ width:260px; }
+  .live-result-card .empty-art{ width:200px; }
+}
+
+/* Prediksi: diagram mekanisme di samping judul. */
+/* Kolom kanan rata bawah dengan judul. Jarak atas 78 px menjaga stiker kepala halaman tetap terlihat; kalau isinya lebih tinggi, judul memanjang ke bawah, bukan menutupi stiker. */
+.flow-heading-side{ flex:none; width:min(100%, 420px); align-self:stretch; padding-top:78px; display:flex; flex-direction:column; justify-content:flex-end; gap:8px; }
+.flow-heading-side .flow-system-status{ min-width:0; width:auto; margin:0; padding:11px 14px; row-gap:2px; }
+.mechanism-card{ margin:0; padding:10px 12px; border:1px solid var(--flow-line); border-radius:16px; background:#fff; }
+.mechanism-card img{ width:100%; max-width:372px; height:auto; margin:0 auto; }
+@media (max-width: 980px){
+  .flow-heading-side{ width:100%; padding-top:0; }
+}
+
+/* Input sensor: ikon kelompok 20 px. */
+.manual-group summary .manual-group-icon{ display:inline-block; width:20px; height:20px; margin:0 8px 0 0; vertical-align:-5px; color:var(--flow-green-dark); }
+.manual-group-icon.ic-suhu-udara{ -webkit-mask-image:url(../img/ui/ic-suhu-udara.svg); mask-image:url(../img/ui/ic-suhu-udara.svg); }
+.manual-group-icon.ic-kelembapan-tanah{ -webkit-mask-image:url(../img/ui/ic-kelembapan-tanah.svg); mask-image:url(../img/ui/ic-kelembapan-tanah.svg); }
+.manual-group-icon.ic-volume-air{ -webkit-mask-image:url(../img/ui/ic-volume-air.svg); mask-image:url(../img/ui/ic-volume-air.svg); }
+.manual-group-icon.ic-akumulasi-panas{ -webkit-mask-image:url(../img/ui/ic-akumulasi-panas.svg); mask-image:url(../img/ui/ic-akumulasi-panas.svg); }
+.manual-group-icon.ic-tab-sensor{ -webkit-mask-image:url(../img/ui/ic-tab-sensor.svg); mask-image:url(../img/ui/ic-tab-sensor.svg); }
+
+/* Pembatas "rintik": sekali, sebelum Langkah berikutnya. */
+.rintik-divider{ height:12px; margin:30px 2px 16px; background:url(../img/ui/motif-rintik.svg) left center / 240px 12px repeat-x; opacity:.6; }
+.rintik-divider + .result-next{ margin-top:0; }

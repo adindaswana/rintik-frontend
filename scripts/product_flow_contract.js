@@ -58,7 +58,7 @@ assert(flowJs.includes("('guided-confirm-'+incident.incident_id+'-'+auditId).sli
 assert(flowJs.includes("width:width,height:height,style:'height:'+height+'px'")&&flowCss.includes('.result-chart{min-height:300px}.result-chart svg{height:auto}'),'Hasil chart drawn 1:1');
 assert(/id="exportResultButton" type="button" disabled/.test(result),'Ekspor CSV disabled until a result is shown');
 assert(flowJs.includes('slot right after the latest manual reading'),'manual slot suggestion');
-[predict,result].forEach(html=>{assert(html.includes('lib/rintik-config.js?v=20261024a')&&html.includes('prediction-flow.js?v=20261025a'),'asset cache version');});
+[predict,result].forEach(html=>{assert(html.includes('lib/rintik-config.js?v=20261024a')&&html.includes('prediction-flow.js?v=20261025c')&&html.includes('prediction-flow.css?v=20261025c'),'asset cache version');});
 // R14: Prediksi opens Hasil after processing; Hasil lists processed dates with a simulated sensor fault.
 assert(flowJs.includes("goToResult('operational',result.date,'operational')")&&flowJs.includes("goToResult('official',latest.date,all?'demo-all':'demo-day')"),'auto navigation to Hasil');
 ['sensorEvents','sensorEventsTitle','sensorEventsLead','sensorEventsList','sensorEventsClear','sensorEventsRestore','sensorEventsKicker'].forEach(id=>assert(result.includes(`id="${id}"`),`hasil.html missing #${id}`));
@@ -68,6 +68,14 @@ assert(flowJs.includes("url.searchParams.delete('from')")&&flowJs.includes('hist
 const eventsFn=flowJs.slice(flowJs.indexOf('function renderSensorEvents('),flowJs.indexOf('var eventRequest=0'));
 assert(!/item\.innerHTML|text\.innerHTML|detail\.innerHTML/.test(eventsFn),'event rows rendered with textContent');
 assert(flowCss.includes('.sensor-event-badge.handled'),'sensor event styles');
+// SVG RINTIK (owner-approved set): icons, status marks, illustrations, chart hatch + annotation, 48-slot band, rintik divider. No contour/isoline texture.
+['ic-sensor-macet.svg','ic-sensor-mati.svg','ic-sensor-menyimpang.svg','ic-sensor-pulih.svg','status-ditangani.svg','status-masalah.svg','status-kosong.svg','status-sehat.svg','status-waspada.svg','ic-unduh.svg','ic-panah-kanan.svg','ic-ulang.svg','motif-rintik.svg'].forEach(file=>{assert(flowCss.includes('../img/ui/'+file),`prediction-flow.css missing ${file}`);assert(fs.existsSync(path.join(root,'assets/img/ui',file)),`asset ${file}`);});
+assert(!/isoline|kontur/i.test(flowCss+predict+result),'no contour/isoline motif behind text');
+assert(result.includes('ilus-belum-ada-hasil.svg')&&result.includes('id="resultEmptyArt"')&&flowJs.includes('ilus-koneksi-putus.svg')&&predict.includes('ilus-koneksi-putus.svg'),'empty and offline illustrations');
+assert(predict.includes('assets/img/ui/diagram-mekanisme.svg')&&/diagram-mekanisme\.svg"[^>]*alt="[^"]+"/.test(predict),'mechanism diagram with alt text');
+assert(flowJs.includes("patternTransform:'rotate(45)'")&&flowJs.includes("'Sensor macet di '")&&flowJs.includes('function slotSources(')&&flowJs.includes("role:'img','aria-label':'Sumber RH terpakai per slot 30 menit: '"),'chart hatch, stuck annotation and 48-slot band');
+assert(result.indexOf('class="rintik-divider"')>0&&result.indexOf('class="rintik-divider"')<result.indexOf('class="result-next"')&&(result.match(/rintik-divider/g)||[]).length===1,'one rintik divider, above Langkah berikutnya');
+assert(result.includes('btn-ic-unduh" id="exportResultButton"')&&result.includes('btn-ic-lanjut" id="resultNextAction"'),'button icons');
 assert(flowCss.includes('@media (prefers-reduced-motion: reduce)'));
 assert(flowCss.includes('@media (max-width: 700px)'));
 
