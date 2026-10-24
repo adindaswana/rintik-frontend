@@ -520,3 +520,34 @@ html { scrollbar-gutter: stable; }
   .sensor-event-text { grid-column: 1 / -1; }
   .sensor-event .btn { grid-column: 1 / -1; width: 100%; }
 }
+
+/* 2026-10-25: QA revisi 2. Button states, tabular figures, Catatan sensor as a ruled list, Hasil chart card height, retry in the alert. */
+.flow-page .btn:active:not(:disabled), .flow-page .mode-card:active:not(:disabled), .flow-page .flow-icon-button:active:not(:disabled){ transform:scale(.98); }
+.flow-page .btn:disabled, .flow-page .btn:disabled:hover, .flow-page .btn:disabled:active{ color:#5a6b80; background:#e9eff6; border-color:transparent; box-shadow:none; opacity:1; cursor:not-allowed; transform:none; }
+.hero-reading strong, .latest-metric strong, .result-metric-grid strong, .result-metric-grid small, .result-reading-row strong, .reading-table, .result-table, .chart-tooltip, .flow-progress-count, .day-progress-main strong, .source-counts b, .sensor-event-date{ font-variant-numeric:tabular-nums; }
+.result-layout{ align-items:start; }
+.flow-alert > .btn{ margin-left:auto; align-self:center; flex:none; }
+@media (max-width: 640px){ .flow-alert:has(> .btn:not([hidden])){ flex-direction:column; align-items:flex-start; } .flow-alert > .btn{ margin-left:0; } }
+
+.sensor-events-list{ gap:0; border-top:1px solid var(--flow-line); }
+.sensor-event{ grid-template-columns:120px 124px minmax(0,1fr) auto; gap:6px 18px; padding:13px 12px; border:0; border-bottom:1px solid var(--flow-line); border-radius:0; background:transparent; }
+.sensor-event-date{ font-weight:600; color:var(--flow-ink); }
+.sensor-event-badge{ justify-self:start; display:inline-flex; align-items:center; gap:7px; padding:3px 9px 3px 8px; border-radius:7px; font-size:12.5px; font-weight:600; }
+.sensor-event-badge.stuck, .sensor-event-badge.deviating{ color:#bd284d; background:#fbeaf0; }
+.sensor-event-badge.missing{ color:#5a6b80; background:#eef3f9; }
+.sensor-event-badge.handled{ color:#1b6f77; background:#e3f5f7; }
+.sensor-event-badge.stuck::before, .sensor-event-badge.deviating::before{ content:""; width:9px; height:9px; flex:none; background:#d8547a; clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%); }
+.sensor-event-badge.missing::before{ content:""; width:9px; height:9px; flex:none; border:2px solid #8395aa; border-radius:50%; }
+.sensor-event-text strong{ font-weight:600; color:var(--flow-ink); }
+.sensor-event .btn{ justify-self:end; }
+.sensor-event.is-handled{ background:linear-gradient(90deg, rgba(227,245,247,.55), rgba(227,245,247,0)); }
+.sensor-event.is-handled .sensor-event-date, .sensor-event.is-handled .sensor-event-text strong, .sensor-event.is-handled .sensor-event-text small{ color:var(--flow-muted); }
+.sensor-event.is-current{ box-shadow:inset 3px 0 0 #1269e2; }
+.sensor-event.is-current .btn:disabled{ min-height:0; padding:4px 0; gap:6px; border:0; color:#0f55b8; background:none; font-weight:600; cursor:default; }
+.sensor-event.is-current .btn:disabled::before{ content:""; width:6px; height:6px; border-radius:50%; background:#1269e2; }
+@media (max-width: 640px){
+  .sensor-event{ grid-template-columns:minmax(0,1fr) auto; gap:4px 12px; }
+  .sensor-event-badge{ grid-column:2; grid-row:1; justify-self:end; }
+  .sensor-event .btn{ justify-self:stretch; margin-top:6px; }
+  .sensor-event.is-current .btn:disabled{ justify-content:flex-start; }
+}
